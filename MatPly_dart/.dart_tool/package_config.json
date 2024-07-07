@@ -1,0 +1,27 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "ffi",
+      "rootUri": "file:///C:/Users/20281/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/ffi-2.1.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "path",
+      "rootUri": "file:///C:/Users/20281/AppData/Local/Pub/Cache/hosted/pub.flutter-io.cn/path-1.9.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
+      "name": "MatPly",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "3.4"
+    }
+  ],
+  "generated": "2024-07-07T16:03:02.576041Z",
+  "generator": "pub",
+  "generatorVersion": "3.4.4",
+  "pubCache": "file:///C:/Users/20281/AppData/Local/Pub/Cache"
+}

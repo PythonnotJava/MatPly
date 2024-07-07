@@ -1,0 +1,2 @@
+a:
+	gcc -shared -o matbox.dll matbox.c

@@ -1,0 +1,10 @@
+name: MatPly
+description: "Dart Matrix realized by C Dll"
+version: 1.0.0+1
+environment:
+  sdk: '^3.4.3'
+
+dependencies:
+  ffi:
+  path:
+

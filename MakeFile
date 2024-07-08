@@ -1,2 +1,2 @@
 a:
-	gcc -shared -o matbox.dll matbox.c
+	gcc -shared -o matply.dll matply.c

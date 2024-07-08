@@ -9,6 +9,6 @@ add_executable(MatPly
         Auxiliary.c
         Auxiliary.h
         main.c
-        MatBox.c
-        MatBox.h
+        matply.c
+        matply.h
 )

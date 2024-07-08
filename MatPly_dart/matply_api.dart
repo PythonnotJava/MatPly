@@ -3,7 +3,7 @@ import 'dart:io' show Directory;
 import 'package:ffi/ffi.dart';
 import 'package:path/path.dart' as path;
 
-final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matbox.dll'));
+final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
 
 // 定义与SpecialAttributes结构体对应的Dart结构体
 final class SpecialAttributes extends Struct {
@@ -14,7 +14,7 @@ final class SpecialAttributes extends Struct {
   external bool principalDiagonalMatrix;
 
   @Bool()
-  external bool subdiagonalMatrix;
+  external bool subDiagonalMatrix;
 
   @Bool()
   external bool upperTriangularMatrix;
@@ -73,6 +73,96 @@ typedef column__base = Pointer<Double> Function(int column, Pointer<Matrix> matr
 typedef at__base__ffi = Double Function(Int32 row, Int32 column, Pointer<Matrix> matrix);
 typedef at__base = double Function(int row, int column, Pointer<Matrix> matrix);
 
+typedef transpose__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef transpose__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+
+typedef exchangeR__base__ffi = Void Function(Int32 row1, Int32 row2, Pointer<Matrix> matrix);
+typedef exchangeR__base = void Function(int row1, int row2, Pointer<Matrix> matrix);
+
+typedef multiplyR__base__ffi = Void Function(Int32 row, Double size, Pointer<Matrix> matrix);
+typedef multiplyR__base = void Function(int row, double size, Pointer<Matrix> matrix);
+
+typedef addR__base__ffi = Void Function(Int32 row1, Int32 row2, Double size, Pointer<Matrix> matrix);
+typedef addR__base = void Function(int row1, int row2, double size, Pointer<Matrix> matrix);
+
+typedef exchangeC__base__ffi = Void Function(Int32 column1, Int32 column2, Pointer<Matrix> matrix);
+typedef exchangeC__base = void Function(int column1, int column2, Pointer<Matrix> matrix);
+
+typedef multiplyC__base__ffi = Void Function(Int32 column, Double size, Pointer<Matrix> matrix);
+typedef multiplyC__base = void Function(int column, double size, Pointer<Matrix> matrix);
+
+typedef addC__base__ffi = Void Function(Int32 column1, Int32 column2, Double size, Pointer<Matrix> matrix);
+typedef addC__base = void Function(int column1, int column2, double size, Pointer<Matrix> matrix);
+
+typedef addNumber__base__ffi = Pointer<Matrix> Function(Double number, Pointer<Matrix> matrix);
+typedef addNumber__base = Pointer<Matrix> Function(double number, Pointer<Matrix> matrix);
+
+typedef addNumberNoReturned__base__ffi = Void Function(Double number, Pointer<Matrix> matrix);
+typedef addNumberNoReturned__base = void Function(double number, Pointer<Matrix> matrix);
+
+typedef addMatrix__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef addMatrix__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef addMatrixNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef addMatrixNoReturned__base = void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef minusMatrix__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef minusMatrix__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef minusMatrixNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef minusMatrixNoReturned__base = void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef matmul__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef matmul__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef multiplyMatrixNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef multiplyMatrixNoReturned__base = void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef multiplyMatrix__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef multiplyMatrix__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef multiplyNumberNoReturned__base__ffi = Void Function(Double number, Pointer<Matrix> matrix);
+typedef multiplyNumberNoReturned__base = void Function(double number, Pointer<Matrix> matrix);
+
+typedef multiplyNumber__base__ffi = Pointer<Matrix> Function(Double number, Pointer<Matrix> matrix);
+typedef multiplyNumber__base = Pointer<Matrix> Function(double number, Pointer<Matrix> matrix);
+
+typedef kronecker__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef kronecker__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef divide__base__ffi = Pointer<Matrix> Function(Double number, Pointer<Matrix> matrix);
+typedef divide__base = Pointer<Matrix> Function(double number, Pointer<Matrix> matrix);
+
+typedef divideNoReturned__base__ffi = Void Function(Double number, Pointer<Matrix> matrix);
+typedef divideNoReturned__base = void Function(double number, Pointer<Matrix> matrix);
+
+typedef arrange__base__ffi = Pointer<Matrix> Function(Double start, Int32 row, Int32 column);
+typedef arrange__base = Pointer<Matrix> Function(double start, int row, int column);
+
+typedef linspace__base__ffi = Pointer<Matrix> Function(Double start, Double end, Int32 row, Int32 column, Bool keep);
+typedef linspace__base = Pointer<Matrix> Function(double start, double end, int row, int column, bool keep);
+
+typedef trace__base__ffi = Double Function(Pointer<Matrix> matrix);
+typedef trace__base = double Function(Pointer<Matrix> matrix);
+
+typedef det__base__ffi = Double Function(Pointer<Matrix> matrix);
+typedef det__base = double Function(Pointer<Matrix> matrix);
+
+typedef E__base__ffi = Pointer<Matrix> Function(Int32 n);
+typedef E__base = Pointer<Matrix> Function(int n);
+
+typedef cofactor__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column, Pointer<Matrix> matrix);
+typedef cofactor__base = Pointer<Matrix> Function(int row, int column, Pointer<Matrix> matrix);
+
+typedef inverse__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Double det);
+typedef inverse__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, double det);
+
+typedef adjugate__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef adjugate__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+
+typedef deepcopy__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef deepcopy__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+
 final __new__base matply__new__ = dylib.lookup<NativeFunction<__new__base__ffi>>('__new__').asFunction<__new__base>();
 final __init__base matply__init__ = dylib.lookup<NativeFunction<__init__base__ffi>>('__init__').asFunction<__init__base>();
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookup<NativeFunction<VisibleMatrix__base__ffi>>('VisibleMatrix').asFunction<VisibleMatrix__base>();
@@ -84,6 +174,36 @@ final VisibleMatrixSpc__base matply__VisibleMatrixSpc = dylib.lookup<NativeFunct
 final row__base matply__row_ = dylib.lookup<NativeFunction<row__base__ffi>>('row_').asFunction<row__base>();
 final column__base matply__column_ = dylib.lookup<NativeFunction<column__base__ffi>>('column_').asFunction<column__base>();
 final at__base matply__at = dylib.lookup<NativeFunction<at__base__ffi>>('at').asFunction<at__base>();
+final transpose__base matply__transpose = dylib.lookup<NativeFunction<transpose__base__ffi>>('transpose').asFunction<transpose__base>();
+final exchangeR__base matply__exchangeR = dylib.lookup<NativeFunction<exchangeR__base__ffi>>('exchangeR').asFunction<exchangeR__base>();
+final multiplyR__base matply__multiplyR = dylib.lookup<NativeFunction<multiplyR__base__ffi>>('multiplyR').asFunction<multiplyR__base>();
+final addR__base matply__addR = dylib.lookup<NativeFunction<addR__base__ffi>>('addR').asFunction<addR__base>();
+final addC__base matply__addC = dylib.lookup<NativeFunction<addC__base__ffi>>('addC').asFunction<addC__base>();
+final exchangeC__base matply__exchangeC = dylib.lookup<NativeFunction<exchangeC__base__ffi>>('exchangeC').asFunction<exchangeC__base>();
+final multiplyC__base matply__multiplyC = dylib.lookup<NativeFunction<multiplyC__base__ffi>>('multiplyC').asFunction<multiplyC__base>();
+final addNumber__base matply__addNumber = dylib.lookup<NativeFunction<addNumber__base__ffi>>('addNumber').asFunction<addNumber__base>();
+final addNumberNoReturned__base matply__addNumberNoReturned = dylib.lookup<NativeFunction<addNumberNoReturned__base__ffi>>('addNumberNoReturned').asFunction<addNumberNoReturned__base>();
+final addMatrix__base matply__addMatrix = dylib.lookup<NativeFunction<addMatrix__base__ffi>>('addMatrix').asFunction<addMatrix__base>();
+final addMatrixNoReturned__base matply__addMatrixNoReturned = dylib.lookup<NativeFunction<addMatrixNoReturned__base__ffi>>('addMatrixNoReturned').asFunction<addMatrixNoReturned__base>();
+final minusMatrix__base matply__minusMatrix = dylib.lookup<NativeFunction<minusMatrix__base__ffi>>('minusMatrix').asFunction<minusMatrix__base>();
+final minusMatrixNoReturned__base matply__minusMatrixNoReturned = dylib.lookup<NativeFunction<minusMatrixNoReturned__base__ffi>>('minusMatrixNoReturned').asFunction<minusMatrixNoReturned__base>();
+final matmul__base matply__matmul = dylib.lookup<NativeFunction<matmul__base__ffi>>('matmul').asFunction<matmul__base>();
+final multiplyMatrixNoReturned__base matply__multiplyMatrixNoReturned = dylib.lookup<NativeFunction<multiplyMatrixNoReturned__base__ffi>>('multiplyMatrixNoReturned').asFunction<multiplyMatrixNoReturned__base>();
+final multiplyMatrix__base matply__multiplyMatrix = dylib.lookup<NativeFunction<multiplyMatrix__base__ffi>>('multiplyMatrix').asFunction<multiplyMatrix__base>();
+final multiplyNumberNoReturned__base matply__multiplyNumberNoReturned = dylib.lookup<NativeFunction<multiplyNumberNoReturned__base__ffi>>('multiplyNumberNoReturned').asFunction<multiplyNumberNoReturned__base>();
+final multiplyNumber__base matply__multiplyNumber = dylib.lookup<NativeFunction<multiplyNumber__base__ffi>>('multiplyNumber').asFunction<multiplyNumber__base>();
+final kronecker__base matply__kronecker = dylib.lookup<NativeFunction<kronecker__base__ffi>>('kronecker').asFunction<kronecker__base>();
+final divide__base matply__divide = dylib.lookup<NativeFunction<divide__base__ffi>>('divide').asFunction<divide__base>();
+final divideNoReturned__base matply__divideNoReturned = dylib.lookup<NativeFunction<divideNoReturned__base__ffi>>('divideNoReturned').asFunction<divideNoReturned__base>();
+final arrange__base matply__arrange = dylib.lookup<NativeFunction<arrange__base__ffi>>('arrange').asFunction<arrange__base>();
+final linspace__base matply__linspace = dylib.lookup<NativeFunction<linspace__base__ffi>>('linspace').asFunction<linspace__base>();
+final trace__base matply__trace = dylib.lookup<NativeFunction<trace__base__ffi>>('trace').asFunction<trace__base>();
+final det__base matply__det = dylib.lookup<NativeFunction<det__base__ffi>>('det').asFunction<det__base>();
+final E__base matply__E = dylib.lookup<NativeFunction<E__base__ffi>>('E').asFunction<E__base>();
+final cofactor__base matply__cofacto = dylib.lookup<NativeFunction<cofactor__base__ffi>>('cofactor').asFunction<cofactor__base>();
+final inverse__base matply__inverse = dylib.lookup<NativeFunction<inverse__base__ffi>>('inverse').asFunction<inverse__base>();
+final adjugate__base matply__adjugate = dylib.lookup<NativeFunction<adjugate__base__ffi>>('adjugate').asFunction<adjugate__base>();
+final deepcopy__base matply__deepcopy = dylib.lookup<NativeFunction<deepcopy__base__ffi>>('deepcopy').asFunction<deepcopy__base>();
 
 dynamic debug_matply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {

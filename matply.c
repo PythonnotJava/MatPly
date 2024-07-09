@@ -4,6 +4,12 @@
 
 #include "matply.h"
 
+const char * ROUND = "%.5lf\t";  // 输出精度
+
+void set_round(const char* new_round) {
+    ROUND = new_round;
+}
+
 Matrix * __new__(const int row, const int column){
     Matrix * new = (Matrix *) malloc(sizeof (Matrix));
     new->column = column;
@@ -50,15 +56,24 @@ void VisibleMatrix(const Matrix *matrix) {
     printf("\n]\n");
 }
 
-void __delete__(Matrix * matrix){
-    if (matrix->data){
-        for (int r = 0;r < matrix->row;r++)
-            free(matrix->data[r]);
-        free(matrix->data);
+void __delete__data__(double ** data, const int row)
+{
+    if(data)
+    {
+        for (int r=0;r < row;r++)
+            free(data[r]);
+        free(data);
     }
-    if (matrix->spc)
-        free(matrix->spc);
-    free(matrix);
+}
+
+void __delete__(Matrix * matrix){
+    if(matrix)
+    {
+        __delete__data__(matrix->data, matrix->row);
+        if (matrix->spc)
+            free(matrix->spc);
+        free(matrix);
+    }
 }
 
 Matrix * filled(const int row, const int column, const double number)
@@ -503,3 +518,513 @@ Matrix * deepcopy(const Matrix * matrix)
 
     return new;
 }
+
+bool ** compare(const Matrix *matrix1, const Matrix *matrix2, const int mode)
+{
+
+    #define COMPARE_OP(op, m1, m2, n) {\
+        for (int r = 0;r < m1->row;r++)\
+        {\
+            new[r] = (bool *)malloc(sizeof(bool) * m1->column);\
+            for(int c=0;c < m1->column;c ++)\
+            {\
+                n[r][c] = (m1->data[r][c] op m2->data[r][c]) ? true : false;\
+            }\
+        }\
+    }\
+
+    bool **new = (bool **)malloc(sizeof(bool *) * matrix1->row);
+
+    switch (mode) {
+    case 1:
+        COMPARE_OP(>, matrix1, matrix2, new);
+        break;
+    case 2:
+        COMPARE_OP(<, matrix1, matrix2, new);
+        break;
+    case 3:
+        COMPARE_OP(<=, matrix1, matrix2, new);
+        break;
+    case 4:
+        COMPARE_OP(>=, matrix1, matrix2, new);
+        break;
+    default:
+        COMPARE_OP(==, matrix1, matrix2, new);
+        break;
+    }
+    #undef COMPARE_OP
+    return new;
+}
+
+double *sum(const Matrix *matrix, const int dim) {
+    double *number = NULL;
+    switch (dim) {
+    case 0:
+        {
+            number = (double *)calloc(matrix->row, sizeof(double));
+            for (int r = 0; r < matrix->row; r++) {
+                for (int c = 0; c < matrix->column; c++) {
+                    number[r] += matrix->data[r][c];
+                }
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double *)calloc(matrix->column, sizeof(double));
+            for (int c = 0; c < matrix->column; c++) {
+                for (int r = 0; r < matrix->row; r++) {
+                    number[c] += matrix->data[r][c];
+                }
+            }
+            break;
+        }
+    default:
+        {
+            number = (double *)malloc(sizeof(double));
+            *number = 0.0;
+            for (int r = 0; r < matrix->row; r++) {
+                for (int c = 0; c < matrix->column; c++) {
+                    *number += matrix->data[r][c];
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+
+double * mean(const Matrix * matrix, const int dim)
+{
+    double *number = NULL;
+    switch (dim)
+    {
+    case 0:
+        {
+            number = sum(matrix, 0);
+            for (int r=0;r < matrix->row;r++)
+                number[r] /= matrix->column;
+            break;
+        }
+    case 1:
+        {
+            number = sum(matrix, 1);
+            for (int c = 0;c < matrix->column;c ++)
+                number[c] /= matrix->row;
+            break;
+        }
+    default:
+        {
+            double *sumResult = sum(matrix, -1);
+            number = (double *)malloc(sizeof(double));
+            *number = *sumResult / (matrix->row * matrix->column);
+            free(sumResult);
+            break;
+        }
+    }
+    return number;
+}
+
+double * min(const Matrix * matrix, const int dim)
+{
+    double * number = NULL;
+    switch (dim)
+    {
+    case 0:
+        {
+            number = (double *)malloc(sizeof(double) * matrix->row);
+            for (int r = 0; r < matrix->row; r++) {
+                number[r] = getMin(matrix->data[r], matrix->column);
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double *)malloc(sizeof(double) * matrix->column);
+            for (int c = 0; c < matrix->column; c++) {
+                double min = matrix->data[0][c];
+                for (int r = 1; r < matrix->row; r++) {
+                    if (matrix->data[r][c] < min) {
+                        min = matrix->data[r][c];
+                    }
+                }
+                number[c] = min;
+            }
+            break;
+        }
+    default:
+        {
+            number = (double *)malloc(sizeof(double));
+            *number = matrix->data[0][0];
+            for (int r = 0; r < matrix->row; r++) {
+                for (int c = 0; c < matrix->column; c++) {
+                    if (matrix->data[r][c] < *number) {
+                        *number = matrix->data[r][c];
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+bool data_isSame(const double ** data1, const double ** data2, const int row, const int column)
+{
+    for (int r = 0;r < row;r ++)
+    {
+        for (int c=0;c < column;c ++)
+        {
+            if (data1[r][c] != data2[r][c])
+                return false;
+        }
+    }
+    return true;
+}
+
+bool spc_isSame(const Spc * spc1, const Spc * spc2)
+{
+    return (
+        spc1->identityMatrix == spc2->identityMatrix &&
+        spc1->singularMatrix == spc2->singularMatrix &&
+        spc1->principalDiagonalMatrix == spc2->principalDiagonalMatrix &&
+        spc1->upperTriangularMatrix == spc2->upperTriangularMatrix &&
+        spc1->lowerTriangularMatrix == spc2->lowerTriangularMatrix &&
+        spc1->subDiagonalMatrix == spc2->subDiagonalMatrix
+    );
+}
+
+double * max(const Matrix * matrix, const int dim)
+{
+    double * number = NULL;
+    switch (dim)
+    {
+    case 0:
+        {
+            number = (double*)malloc(sizeof(double) * matrix->row);
+            for (int r=0;r < matrix->row;r ++)
+            {
+                number[r] = getMax(matrix->data[r], matrix->column);
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double*)malloc(sizeof(double) * matrix->column);
+            for (int c = 0; c < matrix->column; c++) {
+                double max = matrix->data[0][c];
+                for (int r = 1; r < matrix->row; r++) {
+                    if (matrix->data[r][c] > max) {
+                        max = matrix->data[r][c];
+                    }
+                }
+                number[c] = max;
+            }
+            break;
+        }
+    default:
+        {
+            number = (double *)malloc(sizeof(double));
+            *number = matrix->data[0][0];
+            for(int r=0;r < matrix->row;r++)
+            {
+                for (int c = 0;c < matrix->column;c ++)
+                {
+                    if(matrix->data[r][c] > *number)
+                        *number = matrix->data[r][c];
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+Matrix * cut(const Matrix * matrix, const int row, const int column, const int width, const int height)
+{
+    Matrix * new = __new__(width, height);
+    int _row = row;
+    for(int r = 0;r < width;r++)
+    {
+        _row += r;
+        for (int c=0;c < height;c ++)
+        {
+            new->data[r][c] = matrix->data[_row][column + c];
+        }
+    }
+    return new;
+}
+
+Matrix * cutfree(const Matrix * matrix, const int row, const int column, const int width, const int height, const double number)
+{
+    Matrix * new = __new__(width, height);
+    // 有效部分
+    const int valid_rows = (row + height <= matrix->row) ? height : matrix->row - row;
+    const int valid_cols = (column + width <= matrix->column) ? width : matrix->column - column;
+
+    for (int r = 0; r < valid_rows; r++) {
+        for (int c = 0; c < valid_cols; c++) {
+            new->data[r][c] = matrix->data[row + r][column + c];
+        }
+    }
+    // 越界部分
+    if (valid_cols < width) {
+        for (int r = 0; r < valid_rows; r++) {
+            for (int c = valid_cols; c < width; c++) {
+                new->data[r][c] = number;
+            }
+        }
+    }
+    // 填补下边越界部分
+    if (valid_rows < height) {
+        for (int r = valid_rows; r < height; r++) {
+            for (int c = 0; c < width; c++) {
+                new->data[r][c] = number;
+            }
+        }
+    }
+    return new;
+}
+
+Matrix * concatR(const Matrix * matrix1, const Matrix * matrix2)
+{
+    Matrix * new = __new__(matrix1->row, matrix1->column + matrix2->column);
+    for (int r = 0;r < matrix1->row;r++)
+    {
+        for (int c = 0;c < matrix1->column;c ++)
+        {
+            new->data[r][c] = matrix1->data[r][c];
+        }
+        for (int c = 0;c < matrix2->column;c ++)
+        {
+            new->data[r][c + matrix1->column] = matrix2->data[r][c];
+        }
+    }
+    return new;
+}
+
+Matrix * concatC(const Matrix * matrix1, const Matrix * matrix2)
+{
+    Matrix * new = __new__(matrix1->row + matrix2->row, matrix1->column);
+    for (int r = 0; r < matrix1->row; r++) {
+        for (int c = 0; c < matrix1->column; c++) {
+            new->data[r][c] = matrix1->data[r][c];
+        }
+    }
+    for (int r = 0; r < matrix2->row; r++) {
+        for (int c = 0; c < matrix2->column; c++) {
+            new->data[r + matrix1->row][c] = matrix2->data[r][c];
+        }
+    }
+    return new;
+}
+
+Matrix * resizeR(const Matrix * matrix, const int row, const int column, const double number)
+{
+    const int origin_size = matrix->column * matrix->row;
+    const int new_size = row * column;
+    Matrix * new = __new__(row, column);
+    int counter = 0;
+    if (origin_size >= new_size)
+    {
+        for (int r = row;r < row;r++)
+        {
+            for (int c = 0;c < column;c ++)
+            {
+                new->data[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+                counter++;
+            }
+        }
+    }else
+    {
+        for (int r = 0;r < matrix->row;r++)
+        {
+            for (int c = 0;c < matrix->column;c ++)
+            {
+                new->data[counter / matrix->column][counter % matrix->column] = matrix->data[r][c];
+            }
+        }
+        while (counter < new_size) {
+            new->data[counter / column][counter % column] = number;
+            counter++;
+        }
+    }
+    return new;
+}
+
+Matrix * resizeC(const Matrix * matrix, const int row, const int column, const double number)
+{
+    const int origin_size = matrix->column * matrix->row;
+    const int new_size = row * column;
+    Matrix * new = __new__(row, column);
+    int counter = 0;
+    if (origin_size >= new_size)
+    {
+        for (int c = 0;c < column;c ++)
+        {
+            for (int r = 0;r < row; r++)
+            {
+                new->data[c][r] = matrix->data[counter % matrix->column][counter / matrix->column];
+                counter++;
+            }
+        }
+    }else
+    {
+        for (int c = 0;c < matrix->column;c ++)
+        {
+            for (int r=0;r < matrix->row;r ++)
+            {
+                new->data[counter % matrix->column][counter / matrix->column] = matrix->data[c][r];
+                counter++;
+            }
+        }
+        while (counter < new_size)
+        {
+            new->data[counter % column][counter / column] = number;
+            counter++;
+        }
+    }
+    return new;
+}
+
+void resizeRNoReturned(Matrix * matrix, const int row, const int column, const double number)
+{
+    double **newdata = (double**)malloc(sizeof(double*) * row);
+    for (int r=0;r< column;r ++)
+        newdata[r] = (double *)malloc(sizeof(double) * column);
+    const int origin_size = matrix->column * matrix->row;
+    const int new_size = row * column;
+    const int origin_row = matrix->row;
+    int counter = 0;
+    if (origin_size >= new_size)
+    {
+        for (int r = row;r < row;r++)
+        {
+            for (int c = 0;c < column;c ++)
+            {
+                newdata[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+                counter++;
+            }
+        }
+    }else
+    {
+        for (int r = 0;r < matrix->row;r++)
+        {
+            for (int c = 0;c < matrix->column;c ++)
+            {
+                newdata[counter / matrix->column][counter % matrix->column] = matrix->data[r][c];
+            }
+        }
+        while (counter < new_size) {
+            newdata[counter / column][counter % column] = number;
+            counter++;
+        }
+    }
+    __delete__data__(matrix->data, origin_row);
+    matrix->data = newdata;
+}
+
+void resizeCNoReturned(Matrix * matrix, const int row, const int column, const double number)
+{
+    double **newdata = (double**)malloc(sizeof(double*) * row);
+    for (int r=0;r< column;r ++)
+        newdata[r] = (double *)malloc(sizeof(double) * column);
+    const int origin_size = matrix->column * matrix->row;
+    const int new_size = row * column;
+    const int origin_row = matrix->row;
+    int counter = 0;
+    if (origin_size >= new_size)
+    {
+        for (int c = 0;c < column;c ++)
+        {
+            for (int r = 0;r < row; r++)
+            {
+                newdata[c][r] = matrix->data[counter % matrix->column][counter / matrix->column];
+                counter++;
+            }
+        }
+    }else
+    {
+        for (int c = 0;c < matrix->column;c ++)
+        {
+            for (int r=0;r < matrix->row;r ++)
+            {
+                newdata[counter % matrix->column][counter / matrix->column] = matrix->data[c][r];
+                counter++;
+            }
+        }
+        while (counter < new_size)
+        {
+            newdata[counter % column][counter / column] = number;
+            counter++;
+        }
+    }
+    __delete__data__(matrix->data, origin_row);
+    matrix->data = newdata;
+}
+
+void reshapeNoReturned(Matrix * matrix, const int row, const int column)
+{
+    double **newdata = (double**)malloc(sizeof(double *) * row);
+    int counter = 0;
+    const int origin_row = matrix->row;
+    for (int r=0;r < row;r ++)
+    {
+        newdata[r] = (double*)malloc(sizeof(double) * column);
+        for(int c = 0;c <column;c ++)
+        {
+            newdata[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+            counter++;
+        }
+    }
+    __delete__data__(matrix->data, origin_row);
+    matrix->data = newdata;
+}
+
+Matrix * reshape(const Matrix * matrix, const int row, const int column)
+{
+    Matrix * new = __new__(row, column);
+    int counter = 0;
+    for (int r=0;r < row;r ++)
+    {
+        for(int c = 0;c <column;c ++)
+        {
+            new->data[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+            counter++;
+        }
+    }
+    return new;
+}
+
+Matrix * power_(const void * matrix_array, const double p, const bool array, const int row, const int column)
+{
+    double ** data = array ? (double**)matrix_array : ((Matrix *)matrix_array)->data;
+    Matrix * new = __new__(row, column);
+    for (int r =0;r <row;r++)
+    {
+        for (int c=0;c < column;c ++)
+        {
+            new->data[r][c] = pow(data[r][c], p);
+        }
+    }
+    return new;
+}
+
+Matrix * exp_(const void * matrix_array, const bool array, const int row, const int column)
+{
+    double ** data = array ? (double**)matrix_array : ((Matrix *)matrix_array)->data;
+    Matrix * new = __new__(row, column);
+    for (int r =0;r <row;r++)
+    {
+        for (int c=0;c < column;c ++)
+        {
+            new->data[r][c] = exp(data[r][c]);
+        }
+    }
+    return new;
+}
+
+Matrix * log_(const void * matrix_array, const bool array, const int row, const int column);
+
+Matrix * log10_(const void * matrix_array, const bool array, const int row, const int column);

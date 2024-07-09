@@ -5,6 +5,11 @@ import 'package:path/path.dart' as path;
 
 final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
 
+typedef set__round__base__ffi = Void Function(Pointer<Utf8> new_round);
+typedef set__round__base = void Function(Pointer<Utf8> new_round);
+
+final set__round__base matply__set__round = dylib.lookupFunction<set__round__base__ffi, set__round__base>('set_round');
+
 // 定义与SpecialAttributes结构体对应的Dart结构体
 final class SpecialAttributes extends Struct {
   @Bool()
@@ -163,6 +168,57 @@ typedef adjugate__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
 typedef deepcopy__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
 typedef deepcopy__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
 
+typedef compare__base__ffi = Pointer<Pointer<Bool>> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2, Int32 mode);
+typedef compare__base = Pointer<Pointer<Bool>> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2, int mode);
+
+typedef sum__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
+typedef sum__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+
+typedef mean__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
+typedef mean__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+
+typedef min__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
+typedef min__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+
+typedef max__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
+typedef max__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+
+typedef data_isSame__base__ffi = Bool Function(Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2, Int32 row, Int32 column);
+typedef data_isSame__base = bool Function(Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2, int row, int column);
+
+typedef spc__isSame__base__ffi = Bool Function(Pointer<SpecialAttributes> spc1, Pointer<SpecialAttributes> spc2);
+typedef spc__isSame__base = bool Function(Pointer<SpecialAttributes> spc1, Pointer<SpecialAttributes> spc2);
+
+typedef cut__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Int32 width, Int32 height);
+typedef cut__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, int width, int height);
+
+typedef cutfree__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Int32 width, Int32 height, Double number);
+typedef cutfree__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, int width, int height, double number);
+
+typedef concatR__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef concatR__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef concatC__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef concatC__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+
+typedef resizeR__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
+typedef resizeR__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, double number);
+
+typedef resizeC__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
+typedef resizeC__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, double number);
+
+typedef reshape__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column);
+typedef reshape__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column);
+
+typedef resizeRNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
+typedef resizeRNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column, double number);
+
+typedef resizeCNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
+typedef resizeCNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column, double number);
+
+typedef reshapeNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column);
+typedef reshapeNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column);
+
 final __new__base matply__new__ = dylib.lookup<NativeFunction<__new__base__ffi>>('__new__').asFunction<__new__base>();
 final __init__base matply__init__ = dylib.lookup<NativeFunction<__init__base__ffi>>('__init__').asFunction<__init__base>();
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookup<NativeFunction<VisibleMatrix__base__ffi>>('VisibleMatrix').asFunction<VisibleMatrix__base>();
@@ -204,6 +260,23 @@ final cofactor__base matply__cofacto = dylib.lookup<NativeFunction<cofactor__bas
 final inverse__base matply__inverse = dylib.lookup<NativeFunction<inverse__base__ffi>>('inverse').asFunction<inverse__base>();
 final adjugate__base matply__adjugate = dylib.lookup<NativeFunction<adjugate__base__ffi>>('adjugate').asFunction<adjugate__base>();
 final deepcopy__base matply__deepcopy = dylib.lookup<NativeFunction<deepcopy__base__ffi>>('deepcopy').asFunction<deepcopy__base>();
+final compare__base matply__compare = dylib.lookup<NativeFunction<compare__base__ffi>>('compare').asFunction<compare__base>();
+final sum__base matply__sum = dylib.lookup<NativeFunction<sum__base__ffi>>('sum').asFunction<sum__base>();
+final mean__base matply__mean = dylib.lookup<NativeFunction<mean__base__ffi>>('mean').asFunction<mean__base>();
+final max__base matply__max = dylib.lookup<NativeFunction<max__base__ffi>>('max').asFunction<max__base>();
+final min__base matply__min = dylib.lookup<NativeFunction<min__base__ffi>>('min').asFunction<min__base>();
+final data_isSame__base matply__data__isSame = dylib.lookup<NativeFunction<data_isSame__base__ffi>>('data_isSame').asFunction<data_isSame__base>();
+final spc__isSame__base matply__spc__isSame = dylib.lookup<NativeFunction<spc__isSame__base__ffi>>('spc__isSame').asFunction<spc__isSame__base>();
+final cut__base matply__cut = dylib.lookup<NativeFunction<cut__base__ffi>>('cut').asFunction<cut__base>();
+final cutfree__base matply__cutfree = dylib.lookup<NativeFunction<cutfree__base__ffi>>('cutfree').asFunction<cutfree__base>();
+final concatR__base matply__concatR = dylib.lookup<NativeFunction<concatR__base__ffi>>('concatR').asFunction<concatR__base>();
+final concatC__base matply__concatC = dylib.lookup<NativeFunction<concatC__base__ffi>>('concatC').asFunction<concatC__base>();
+final resizeR__base matply__resizeR = dylib.lookup<NativeFunction<resizeR__base__ffi>>('resizeR').asFunction<resizeR__base>();
+final resizeC__base matply__resizeC = dylib.lookup<NativeFunction<resizeC__base__ffi>>('resizeC').asFunction<resizeC__base>();
+final reshape__base matply__reshape = dylib.lookup<NativeFunction<reshape__base__ffi>>('reshape').asFunction<reshape__base>();
+final resizeRNoReturned__base matply__resizeRNoReturned = dylib.lookup<NativeFunction<resizeRNoReturned__base__ffi>>('resizeRNoReturned').asFunction<resizeRNoReturned__base>();
+final resizeCNoReturned__base matply__resizeCNoReturned = dylib.lookup<NativeFunction<resizeCNoReturned__base__ffi>>('resizeCNoReturned').asFunction<resizeCNoReturned__base>();
+final reshapeNoReturned__base matply__reshapeNoReturned = dylib.lookup<NativeFunction<reshapeNoReturned__base__ffi>>('reshapeNoReturned').asFunction<reshapeNoReturned__base>();
 
 dynamic debug_matply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {

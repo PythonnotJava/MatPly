@@ -1,2 +1,2 @@
 a:
-	gcc -shared -o matply.dll matply.c
+	gcc -shared -o matply.dll  matply.c Auxiliary.c

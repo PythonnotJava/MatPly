@@ -1,4 +1,7 @@
 import 'dart:ffi';
+import 'package:ffi/ffi.dart';
+import 'package:path/path.dart';
+
 import 'matply.dart';
 
 main(){
@@ -46,19 +49,35 @@ main(){
   // (matrixType * 2).visible();
   // matrixType.kronecker(matrixType1).visible();
   // MatrixType.E(n: 5)..visible()..visible_spc();
+  set_round('%.2f');
   MatrixType mt = MatrixType([
     [3, 6, 2],
     [0, 9, 2],
     [1, 1, 6]
   ]);
   mt.visible();
-  print(mt.det);
-  print(mt.trace);
-  mt.cofactor(1, 1).visible();
-  mt.inv!.visible();
-  mt.adj.visible();
-  var d = MatrixType.deepCopy(mt);
-  print(d.hashCode);
-  print(mt.hashCode);
-  d.visible();
+  // print(mt.det);
+  // print(mt.trace);
+  // mt.cofactor(1, 1).visible();
+  // mt.inv!.visible();
+  // mt.adj.visible();
+  // var d = MatrixType.deepCopy(mt);
+  // print(d.hashCode);
+  // print(mt.hashCode);
+  // d.visible();
+  // print(mt.max());
+  // print(mt.max(dim: 0));
+  // print(mt.max(dim: 1));
+  // MatrixType mt2 = MatrixType([
+  //   [13, 6, 2],
+  //   [0, 9, -2],
+  //   [3, 13, -6]
+  // ]);
+  // mt2.visible();
+  // print(mt == mt2);
+  // print(mt < mt2);
+  // print(mt <= mt2);
+  // print(mt.compare(mt2));
+  print(matply__set__round.runtimeType);
+
 }

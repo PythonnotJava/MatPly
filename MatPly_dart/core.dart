@@ -10,9 +10,11 @@ final class Alert{
 }
 
 class MatrixType{
+  /// Attributes
   late Pointer<Matrix> self;
   late List shape;
 
+  /// Auxiliary functions
   void _setSpecialAttributes({
     bool identityMatrix = false,
     bool principalDiagonalMatrix = false,
@@ -29,6 +31,7 @@ class MatrixType{
     this.self.ref.spc.ref.principalDiagonalMatrix = principalDiagonalMatrix;
   }
 
+  /// Constructors
   // 一般构造
   MatrixType(
       List<List<double>> data, {
@@ -164,6 +167,7 @@ class MatrixType{
   // 深拷贝矩阵
   factory MatrixType.deepCopy(MatrixType other) => MatrixType.__fromPointer(matply__deepcopy(other.self), other.shape);
 
+  /// setter && getter
   get identityMatrix => this.self.ref.spc.ref.identityMatrix;
   set identityMatrix(value) => this.self.ref.spc.ref.identityMatrix = value;
 
@@ -196,7 +200,69 @@ class MatrixType{
   }
   MatrixType get adj => MatrixType.__fromPointer(matply__adjugate(self), shape);
 
+  /// Overloading Operators
+  @Alert('Just return a List?, do not support pointer type.')
+  List? operator [](int row) {
+    if (row < 0 || row >= shape[0]) {
+      throw row_outRange;
+    } else {
+      return matply__row_(row, self).asTypedList(shape[1]).toList();
+    }
+  }
 
+  MatrixType operator +(Object other) {
+    if (other is num) {
+      return this.add(number: other.toDouble());
+    } else if (other is MatrixType) {
+      return this.add(other: other);
+    } else {
+      throw UnsupportedError('Unsupported operand type for +: ${other.runtimeType}');
+    }
+  }
+
+  MatrixType operator -(Object other) {
+    if (other is num) {
+      return this.minus(number: other.toDouble());
+    } else if (other is MatrixType) {
+      return this.minus(other: other);
+    } else {
+      throw UnsupportedError('Unsupported operand type for -: ${other.runtimeType}');
+    }
+  }
+
+  MatrixType operator / (double number) => divide(number);
+
+  MatrixType operator * (Object other) {
+    if (other is num) {
+      return this.multiply(number: other.toDouble());
+    } else if (other is MatrixType) {
+      return this.multiply(other: other);
+    } else {
+      throw UnsupportedError('Unsupported operand type for *: ${other.runtimeType}');
+    }
+  }
+
+  MatrixType? operator >> (List<int> shape) => reshape(row: shape[0], column: shape[1]);
+  void operator << (List<int> shape) => reshape_no_returned(row:shape[0], column: shape[1]);
+
+  @Alert('The == operator is only used to determine whether the properties of the objects are the same. '
+      'If you only want to compare data, use the compare method and set mode to 0.')
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! MatrixType) return false;
+    final MatrixType otherMatrix = other;
+    return hasSameShape(otherMatrix) &&
+        matply__data__isSame(self.ref.data, otherMatrix.self.ref.data, shape[0], shape[1]) &&
+        matply__spc__isSame(self.ref.spc, otherMatrix.self.ref.spc);
+  }
+
+  List<List<bool>>? operator >(MatrixType other) => compare(other, 1);
+  List<List<bool>>? operator <(MatrixType other) => compare(other, 2);
+  List<List<bool>>? operator <=(MatrixType other) => compare(other, 3);
+  List<List<bool>>? operator >=(MatrixType other) => compare(other, 4);
+
+  /// Methods
   void visible() {
     matply__VisibleMatrix(this.self);
   }
@@ -214,7 +280,7 @@ class MatrixType{
       if (T == Pointer) {
         return matply__row_(row, self);
       } else if (T == List || T == dynamic) {
-        return matply__row_(row, self).asTypedList(shape[1]);
+        return matply__row_(row, self).asTypedList(shape[1]).toList();
       } else {
         throw UnsupportedError('T must be Pointer or List');
       }
@@ -230,7 +296,7 @@ class MatrixType{
       if (T == Pointer) {
         return matply__column_(column, self);
       } else if (T == List) {
-        return matply__column_(column, self).asTypedList(shape[1]);
+        return matply__column_(column, self).asTypedList(shape[1]).toList();
       } else {
         throw UnsupportedError('T must be Pointer or List');
       }
@@ -242,15 +308,6 @@ class MatrixType{
       throw random_outRange;
     else{
       return matply__at(row, column, self);
-    }
-  }
-  
-  @Alert('Just return a List?, do not support pointer type.')
-  List? operator [](int row) {
-    if (row < 0 || row >= shape[0]) {
-      throw row_outRange;
-    } else {
-      return matply__row_(row, self).asTypedList(shape[1]);
     }
   }
 
@@ -307,16 +364,6 @@ class MatrixType{
     }
   }
 
-  MatrixType operator +(Object other) {
-    if (other is num) {
-      return this.add(number: other.toDouble());
-    } else if (other is MatrixType) {
-      return this.add(other: other);
-    } else {
-      throw UnsupportedError('Unsupported operand type for +: ${other.runtimeType}');
-    }
-  }
-
   MatrixType minus({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
@@ -326,16 +373,6 @@ class MatrixType{
         return MatrixType.__fromPointer(matply__minusMatrix(self, other.self), shape);
       else
         throw different_shape;
-    }
-  }
-
-  MatrixType operator -(Object other) {
-    if (other is num) {
-      return this.minus(number: other.toDouble());
-    } else if (other is MatrixType) {
-      return this.minus(other: other);
-    } else {
-      throw UnsupportedError('Unsupported operand type for -: ${other.runtimeType}');
     }
   }
 
@@ -394,16 +431,6 @@ class MatrixType{
     }
   }
 
-  MatrixType operator * (Object other) {
-    if (other is num) {
-      return this.multiply(number: other.toDouble());
-    } else if (other is MatrixType) {
-      return this.multiply(other: other);
-    } else {
-      throw UnsupportedError('Unsupported operand type for *: ${other.runtimeType}');
-    }
-  }
-
   MatrixType kronecker(MatrixType other) => MatrixType.__fromPointer(
     matply__kronecker(self, other.self),
     [shape[0] * other.shape[0], shape[1] * shape[1]]
@@ -415,8 +442,6 @@ class MatrixType{
     else
       throw UnsupportedError('Division by zero');
   }
-
-  MatrixType operator / (double number) => divide(number);
 
   void divide_no_returned(double number) {
     if (number != 0)
@@ -436,5 +461,124 @@ class MatrixType{
     }
   }
 
+  List<List<bool>>? compare(MatrixType other, [int mode = 0]){
+    if (hasSameShape(other)){
+      Pointer<Pointer<Bool>> results = matply__compare(self, other.self, mode);
+      return List.generate(
+          shape[0],
+          (e) {
+            Pointer<Bool> rowPointer = (results + e).value;
+            return List.generate(shape[1], (j) => (rowPointer + j).value
+          );
+      });
+    }
+    else
+      throw different_shape;
+  }
+
+  Object sum({int dim = -1}){
+    switch(dim){
+      case 0:
+        return matply__sum(self, 0).asTypedList(shape[0]).toList();
+      case 1:
+        return matply__sum(self, 1).asTypedList(shape[1]).toList();
+      default:
+        return matply__sum(self, -1).value;
+    }
+  }
+
+  Object mean({int dim = -1}){
+    switch(dim){
+      case 0:
+        return matply__mean(self, 0).asTypedList(shape[0]).toList();
+      case 1:
+        return matply__mean(self, 1).asTypedList(shape[1]).toList();
+      default:
+        return matply__mean(self, -1).value;
+    }
+  }
+
+  Object min({int dim = -1}){
+    switch(dim){
+      case 0:
+        return matply__min(self, 0).asTypedList(shape[0]).toList();
+      case 1:
+        return matply__min(self, 1).asTypedList(shape[1]).toList();
+      default:
+        return matply__min(self, -1).value;
+    }
+  }
+
+  Object max({int dim = -1}){
+    switch(dim){
+      case 0:
+        return matply__max(self, 0).asTypedList(shape[0]).toList();
+      case 1:
+        return matply__max(self, 1).asTypedList(shape[1]).toList();
+      default:
+        return matply__max(self, -1).value;
+    }
+  }
+
+  MatrixType? cut({required int row, required int column, required int width, required int height}){
+    assert(width > 0 && height > 0);
+    if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1] || column + width >= shape[1] || row + height >= shape[0])
+      throw random_outRange;
+    else
+      return MatrixType.__fromPointer(matply__cut(self, row, column, width, height), [width, height]);
+  }
+
+  MatrixType? cutfree({required int row, required int column, required int width, required int height, double number = .0}){
+    assert(width > 0 && height > 0);
+    if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1])
+      throw random_outRange;
+    else
+      return MatrixType.__fromPointer(matply__cutfree(self, row, column, width, height, number), [width, height]);
+  }
+
+  MatrixType? concat({required MatrixType other, required bool horizontal}) {
+    if (horizontal ? other.shape[0] == shape[0] : other.shape[1] == shape[1]) {
+      return horizontal ? MatrixType.__fromPointer(
+          matply__concatR(self, other.self),
+          [shape[0], shape[1] + other.shape[1]])
+          : MatrixType.__fromPointer(
+          matply__concatC(self, other.self), [shape[0] + shape[1], shape[1]]);
+    } else
+      throw row_or_column_not_sampe;
+  }
+
+  MatrixType? reshape({required int row, required int column}){
+    if (row * column != size)
+      throw size_changed;
+    else{
+      if (row == shape[0])
+        return MatrixType.deepCopy(this);
+      assert (row > 0 && column > 0);
+      return MatrixType.__fromPointer(matply__reshape(self, row, column), [row, column]);
+    }
+  }
+
+  void reshape_no_returned({required int row, required int column}) {
+    if (row * column != size)
+      throw size_changed;
+    else{
+      if (row == shape[0])
+        return;
+      assert(row > 0 && column > 0);
+      matply__reshapeNoReturned(self, row, column);
+    }
+  }
+
+  MatrixType? resize({required int row, required int column, double number = .0, required bool horizontal}){
+    assert(row > 0 && column > 0);
+    return horizontal ? MatrixType.__fromPointer(matply__resizeR(self, row, column, number), [row, column])
+        : MatrixType.__fromPointer(matply__resizeC(self, row, column, number), [row, column]);
+  }
+
+  void resize_no_returned({required int row, required int column, double number = .0, required bool horizontal}){
+    assert(row > 0 && column > 0);
+    horizontal ? matply__resizeRNoReturned(self, row, column, number)
+        : matply__resizeCNoReturned(self, row, column, number);
+  }
 }
 

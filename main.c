@@ -6,6 +6,7 @@
 
 int main()
 {
+    set_round("%.3f");
     // double data[3][3] = {
     //     {3, 6, 2},
     //     {0, 9, 2},
@@ -50,24 +51,24 @@ int main()
     // VisibleMatrix(matrix3);
     // printf("%f\n", det(matrix3));
     // __delete__(matrix3);
-    double data[3][3] = {
-        {3., 6., 2.},
-        {0., 9., 2.},
-        {1., 1., 6.}
-    };
-    Matrix * matrix = __init__(3, 3, data, NULL);
-    double de = det(matrix);
-    printf("Det == %f\n", de);
-    Matrix * co = cofactor(0,1, matrix);
-    VisibleMatrix(co);
-    printf("Det == %f\n", det(co));
-    __delete__(co);
-
-    __delete__(matrix);
-
+    // double data[3][3] = {
+    //     {3., 6., 2.},
+    //     {0., 9., 2.},
+    //     {1., 1., 6.}
+    // };
+    // Matrix * matrix = __init__(3, 3, data, NULL);
+    // double de = det(matrix);
+    // printf("Det == %f\n", de);
+    // Matrix * co = cofactor(0,1, matrix);
+    // VisibleMatrix(co);
+    // printf("Det == %f\n", det(co));
+    // __delete__(co);
+    //
+    // __delete__(matrix);
+    //
     Matrix * e = E(4);
     VisibleMatrix(e);
-    printf("Det == %f\n", det(e));
+    printf("Det == %.2f\n", det(e));
     Matrix * e1 = cofactor(3, 2, e);
     VisibleMatrix(e1);
     __delete__(e1);

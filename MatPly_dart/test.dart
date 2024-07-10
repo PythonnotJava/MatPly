@@ -12,4 +12,6 @@ main(){
   print(ccc(2));
   print(ccc(.0));
   print((1, 3).runtimeType);
+  print(2 + double.infinity);
+  print(2 + double.nan);
 }

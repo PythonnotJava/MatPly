@@ -32,3 +32,5 @@ clean:
 
 # Phony targets
 .PHONY: all clean
+
+# my orders : gcc -shared -o matply.dll  matply.c Auxiliary.c

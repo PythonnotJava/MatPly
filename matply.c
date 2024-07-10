@@ -61,7 +61,9 @@ void __delete__data__(double ** data, const int row)
     if(data)
     {
         for (int r=0;r < row;r++)
+        {
             free(data[r]);
+        }
         free(data);
     }
 }
@@ -826,7 +828,7 @@ Matrix * resizeR(const Matrix * matrix, const int row, const int column, const d
     int counter = 0;
     if (origin_size >= new_size)
     {
-        for (int r = row;r < row;r++)
+        for (int r = 0;r < row;r++)
         {
             for (int c = 0;c < column;c ++)
             {
@@ -840,7 +842,8 @@ Matrix * resizeR(const Matrix * matrix, const int row, const int column, const d
         {
             for (int c = 0;c < matrix->column;c ++)
             {
-                new->data[counter / matrix->column][counter % matrix->column] = matrix->data[r][c];
+                new->data[counter / column][counter % column] = matrix->data[r][c];
+                counter++;
             }
         }
         while (counter < new_size) {
@@ -855,31 +858,24 @@ Matrix * resizeC(const Matrix * matrix, const int row, const int column, const d
 {
     const int origin_size = matrix->column * matrix->row;
     const int new_size = row * column;
-    Matrix * new = __new__(row, column);
+    Matrix *new = __new__(row, column);
     int counter = 0;
-    if (origin_size >= new_size)
-    {
-        for (int c = 0;c < column;c ++)
-        {
-            for (int r = 0;r < row; r++)
-            {
-                new->data[c][r] = matrix->data[counter % matrix->column][counter / matrix->column];
+    if (origin_size >= new_size) {
+        for (int c = 0; c < column; c ++) {
+             for (int r = 0; r < row; r++){
+                new->data[r][c] = matrix->data[counter % matrix->row][counter / matrix->row];
                 counter++;
             }
         }
-    }else
-    {
-        for (int c = 0;c < matrix->column;c ++)
-        {
-            for (int r=0;r < matrix->row;r ++)
-            {
-                new->data[counter % matrix->column][counter / matrix->column] = matrix->data[c][r];
+    } else {
+        for (int c = 0; c < matrix->column; c ++) {
+            for (int r = 0; r < matrix->row; r++) {
+                new->data[counter % row][counter / row] = matrix->data[r][c];
                 counter++;
             }
         }
-        while (counter < new_size)
-        {
-            new->data[counter % column][counter / column] = number;
+        while (counter < new_size) {
+            new->data[counter % row][counter / row] = number;
             counter++;
         }
     }
@@ -888,16 +884,15 @@ Matrix * resizeC(const Matrix * matrix, const int row, const int column, const d
 
 void resizeRNoReturned(Matrix * matrix, const int row, const int column, const double number)
 {
-    double **newdata = (double**)malloc(sizeof(double*) * row);
-    for (int r=0;r< column;r ++)
-        newdata[r] = (double *)malloc(sizeof(double) * column);
     const int origin_size = matrix->column * matrix->row;
     const int new_size = row * column;
-    const int origin_row = matrix->row;
+    double ** newdata = (double **)malloc(sizeof(double*) * row);
+    for(int r =0;r<row;r++)
+        newdata[r] = (double*)malloc(sizeof(double) *column);
     int counter = 0;
     if (origin_size >= new_size)
     {
-        for (int r = row;r < row;r++)
+        for (int r = 0;r < row;r++)
         {
             for (int c = 0;c < column;c ++)
             {
@@ -911,7 +906,8 @@ void resizeRNoReturned(Matrix * matrix, const int row, const int column, const d
         {
             for (int c = 0;c < matrix->column;c ++)
             {
-                newdata[counter / matrix->column][counter % matrix->column] = matrix->data[r][c];
+                newdata[counter / column][counter % column] = matrix->data[r][c];
+                counter++;
             }
         }
         while (counter < new_size) {
@@ -919,51 +915,43 @@ void resizeRNoReturned(Matrix * matrix, const int row, const int column, const d
             counter++;
         }
     }
-    __delete__data__(matrix->data, origin_row);
+    __delete__data__(matrix->data, matrix->row);
     matrix->data = newdata;
-    matrix->column = column;
     matrix->row = row;
+    matrix->column = column;
 }
 
 void resizeCNoReturned(Matrix * matrix, const int row, const int column, const double number)
 {
-    double **newdata = (double**)malloc(sizeof(double*) * row);
-    for (int r=0;r< column;r ++)
-        newdata[r] = (double *)malloc(sizeof(double) * column);
     const int origin_size = matrix->column * matrix->row;
     const int new_size = row * column;
-    const int origin_row = matrix->row;
+    double ** newdata = (double **)malloc(sizeof(double*) * row);
+    for(int r =0;r<row;r++)
+        newdata[r] = (double*)malloc(sizeof(double) *column);
     int counter = 0;
-    if (origin_size >= new_size)
-    {
-        for (int c = 0;c < column;c ++)
-        {
-            for (int r = 0;r < row; r++)
-            {
-                newdata[c][r] = matrix->data[counter % matrix->column][counter / matrix->column];
+    if (origin_size >= new_size) {
+        for (int c = 0; c < column; c ++) {
+            for (int r = 0; r < row; r++){
+                newdata[r][c] = matrix->data[counter % matrix->row][counter / matrix->row];
                 counter++;
             }
         }
-    }else
-    {
-        for (int c = 0;c < matrix->column;c ++)
-        {
-            for (int r=0;r < matrix->row;r ++)
-            {
-                newdata[counter % matrix->column][counter / matrix->column] = matrix->data[c][r];
+    } else {
+        for (int c = 0; c < matrix->column; c ++) {
+            for (int r = 0; r < matrix->row; r++) {
+                newdata[counter % row][counter / row] = matrix->data[r][c];
                 counter++;
             }
         }
-        while (counter < new_size)
-        {
-            newdata[counter % column][counter / column] = number;
+        while (counter < new_size) {
+            newdata[counter % row][counter / row] = number;
             counter++;
         }
     }
-    __delete__data__(matrix->data, origin_row);
+    __delete__data__(matrix->data, matrix->row);
     matrix->data = newdata;
-    matrix->column = column;
     matrix->row = row;
+    matrix->column = column;
 }
 
 void reshapeNoReturned(Matrix * matrix, const int row, const int column)
@@ -1001,34 +989,118 @@ Matrix * reshape(const Matrix * matrix, const int row, const int column)
     return new;
 }
 
-Matrix * power_(const void * matrix_array, const double p, const bool array, const int row, const int column)
+void setSeed(const int seed) {srand(seed);}
+
+double getnan() {return NAN;}
+
+double getinf() {return INFINITY;}
+
+Matrix * uniform(const double start, const double end, const int row, const int column, const int seed, bool use)
 {
-    double ** data = array ? (double**)matrix_array : ((Matrix *)matrix_array)->data;
+    if (use)
+        srand(seed);
     Matrix * new = __new__(row, column);
-    for (int r =0;r <row;r++)
+    for (int r=0;r < row;r ++)
     {
-        for (int c=0;c < column;c ++)
+        for(int c = 0;c < column;c ++)
         {
-            new->data[r][c] = pow(data[r][c], p);
+            new->data[r][c] = start + (end - start) * ((double)rand() / RAND_MAX);
         }
     }
     return new;
 }
 
-Matrix * exp_(const void * matrix_array, const bool array, const int row, const int column)
+Matrix * normal(const double mu, const double sigma,
+    const int row, const int column, const int start, const int end, const int seed, bool use)
 {
-    double ** data = array ? (double**)matrix_array : ((Matrix *)matrix_array)->data;
-    Matrix * new = __new__(row, column);
-    for (int r =0;r <row;r++)
-    {
-        for (int c=0;c < column;c ++)
-        {
-            new->data[r][c] = exp(data[r][c]);
+    const double p = 1.0 / (sqrt(2.0 * M_PI) * sigma);
+    const double s2 = 2.0 * pow(sigma, 2);
+    double x;
+    Matrix* new = __new__(row, column);
+    for (int r = 0; r < row; r++) {
+        for (int c = 0; c< column; c ++) {
+            do {
+                const double u1 = ((double)rand() / RAND_MAX);
+                const double u2 = ((double)rand() / RAND_MAX);
+                const double z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+                x = mu + z0 * sigma;
+            } while (x < start || x > end);
+            new->data[r][c] = x;
         }
     }
     return new;
 }
 
-Matrix * log_(const void * matrix_array, const bool array, const int row, const int column);
+Matrix * poisson(const double lambda, const int row, const int column, const int seed, bool use);
 
-Matrix * log10_(const void * matrix_array, const bool array, const int row, const int column);
+Matrix * mathBasement1(const Matrix * matrix, const int mode)
+{
+    Matrix * new = __new__(matrix->row, matrix->column);
+
+    #define MATCH(m, func) \
+    do { \
+        for (int r = 0; r < m->row; r++) { \
+            for (int c = 0; c < m->column; c++) { \
+                new->data[r][c] = func(m->data[r][c]); \
+            } \
+        } \
+    } while (0)\
+
+    switch (mode) {
+    case 0:
+        MATCH(new, acos);
+        break;
+    case 1:
+        MATCH(new, asin);
+        break;
+    case 2:
+        MATCH(new, atan);
+        break;
+    case 3:
+        MATCH(new, cos);
+        break;
+    case 4:
+        MATCH(new, sin);
+        break;
+    case 5:
+        MATCH(new, tan);
+        break;
+    case 6:
+        MATCH(new, cosh);
+        break;
+    case 7:
+        MATCH(new, sinh);
+        break;
+    case 8:
+        MATCH(new, tanh);
+        break;
+    case 9:
+        MATCH(new, exp);
+        break;
+    case 10:
+        MATCH(new, log);
+        break;
+    case 11:
+        MATCH(new, log10);
+        break;
+    case 12:
+        MATCH(new, sqrt);
+        break;
+    case 13:
+        MATCH(new, ceil);
+        break;
+    case 14:
+        MATCH(new, floor);
+        break;
+    case 15:
+        MATCH(new, fabs);
+        break;
+    default:
+        break;
+    }
+    return new;
+}
+
+Matrix * mathBasement2(const Matrix * matrix, const int mode, const double number);
+
+Matrix * mathBasement2reverse(const Matrix * matrix, const int mode, const double number);

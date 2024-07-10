@@ -14,13 +14,13 @@
       "languageVersion": "3.0"
     },
     {
-      "name": "MatPly",
+      "name": "MatPly_Dart",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     }
   ],
-  "generated": "2024-07-07T16:03:02.576041Z",
+  "generated": "2024-07-10T05:05:40.986605Z",
   "generator": "pub",
   "generatorVersion": "3.4.4",
   "pubCache": "file:///C:/Users/20281/AppData/Local/Pub/Cache"

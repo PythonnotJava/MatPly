@@ -1,4 +1,4 @@
-name: MatPly
+name: MatPly_Dart
 description: "Dart Matrix realized by C Dll"
 version: 1.0.0+1
 environment:

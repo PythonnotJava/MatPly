@@ -95,7 +95,17 @@ main(){
   // mt5.visible();
   // MatrixType mt6 = mt4.reshape(row: 6, column: 3);
   // mt6.visible();
-  mt4.resize(row: 2, column: 2, horizontal: true).visible();
+  // mt4.cutfree(row: 2, column:  5, width: 2, height: 3).visible();
+  // mt4.visible();
+  // mt4.resize(row: 2, column: 2, horizontal: true).visible();
   // mt4.resize(row: 2, column: 2, horizontal: false).visible();
-
+  // mt4..resize_no_returned(row: 3, column: 4)..visible()..resize_no_returned(row: 5, column: 3, number: 100)..visible();
+  // mt4
+  //   ..resize_no_returned(row: 3, column: 2, horizontal: false)
+  //   ..visible()
+  //   ..resize_no_returned(row: 4, column: 3, horizontal: false ,number: 111)
+  //   ..visible();
+  // print(nan.isNaN);
+  // print(inf);
+  // matply__setSeed(1);
 }

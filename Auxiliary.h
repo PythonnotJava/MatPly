@@ -9,4 +9,7 @@
 double getMin(const double * arr, const int len);
 double getMax(const double * arr, const int len);
 
+// @test 快速拷贝一个数组
+void ** copy_array(void ** datas, const int row, const int column);
+
 #endif //MATPLY_AUXILIARY_H

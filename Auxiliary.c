@@ -4,6 +4,16 @@
 
 #include "Auxiliary.h"
 
+#if defined _INC_STDLIB
+#else
+#include <stdlib.h>
+#endif
+
+#if defined _INC_STRING
+#else
+#include <string.h>
+#endif
+
 double getMin(const double *arr, const int len)
 {
     double min = arr[0];
@@ -16,7 +26,6 @@ double getMin(const double *arr, const int len)
     return min;
 }
 
-
 double getMax(const double * arr, const int len)
 {
     double max = arr[0];
@@ -27,4 +36,15 @@ double getMax(const double * arr, const int len)
         }
     }
     return max;
+}
+
+void ** copy_array(void ** datas, const int row, const int column)
+{
+    void ** new = (void **)malloc(sizeof(void**) * row);
+    for(int r = 0;r < row;r ++)
+    {
+        new[r] = malloc(column * sizeof(void *));
+        memcpy(new[r], datas[r], column * sizeof(void *));
+    }
+    return new;
 }

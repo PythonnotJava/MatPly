@@ -743,14 +743,12 @@ double * max(const Matrix * matrix, const int dim)
 
 Matrix * cut(const Matrix * matrix, const int row, const int column, const int width, const int height)
 {
-    Matrix * new = __new__(width, height);
-    int _row = row;
-    for(int r = 0;r < width;r++)
+    Matrix * new = __new__(height, width);
+    for (int r = 0; r < height; r++)
     {
-        _row += r;
-        for (int c=0;c < height;c ++)
+        for (int c = 0; c < width; c ++)
         {
-            new->data[r][c] = matrix->data[_row][column + c];
+            new->data[r][c] = matrix->data[row + r][column + c];
         }
     }
     return new;
@@ -758,7 +756,7 @@ Matrix * cut(const Matrix * matrix, const int row, const int column, const int w
 
 Matrix * cutfree(const Matrix * matrix, const int row, const int column, const int width, const int height, const double number)
 {
-    Matrix * new = __new__(width, height);
+    Matrix * new = __new__(height, width);
     // 有效部分
     const int valid_rows = (row + height <= matrix->row) ? height : matrix->row - row;
     const int valid_cols = (column + width <= matrix->column) ? width : matrix->column - column;
@@ -923,6 +921,8 @@ void resizeRNoReturned(Matrix * matrix, const int row, const int column, const d
     }
     __delete__data__(matrix->data, origin_row);
     matrix->data = newdata;
+    matrix->column = column;
+    matrix->row = row;
 }
 
 void resizeCNoReturned(Matrix * matrix, const int row, const int column, const double number)
@@ -962,6 +962,8 @@ void resizeCNoReturned(Matrix * matrix, const int row, const int column, const d
     }
     __delete__data__(matrix->data, origin_row);
     matrix->data = newdata;
+    matrix->column = column;
+    matrix->row = row;
 }
 
 void reshapeNoReturned(Matrix * matrix, const int row, const int column)
@@ -980,6 +982,8 @@ void reshapeNoReturned(Matrix * matrix, const int row, const int column)
     }
     __delete__data__(matrix->data, origin_row);
     matrix->data = newdata;
+    matrix->column = column;
+    matrix->row = row;
 }
 
 Matrix * reshape(const Matrix * matrix, const int row, const int column)

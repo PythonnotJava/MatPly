@@ -9,27 +9,36 @@ final class Alert{
   const Alert(this.info);
 }
 
+/// Auxiliary functions
+void _setSpecialAttributes(MatrixType matrixType,
+{
+  bool identityMatrix = false,
+  bool principalDiagonalMatrix = false,
+  bool subDiagonalMatrix = false,
+  bool upperTriangularMatrix = false,
+  bool lowerTriangularMatrix = false,
+  bool singularMatrix = false
+}) {
+  matrixType
+    ..identityMatrix = identityMatrix
+    ..upperTriangularMatrix = upperTriangularMatrix
+    ..lowerTriangularMatrix = lowerTriangularMatrix
+    ..singularMatrix = singularMatrix
+    ..subDiagonalMatrix = subDiagonalMatrix
+    ..principalDiagonalMatrix = principalDiagonalMatrix;
+}
+
+typedef void DefaultSpc(MatrixType matrixType, {
+  bool identityMatrix, bool principalDiagonalMatrix, bool subDiagonalMatrix,
+  bool upperTriangularMatrix, bool lowerTriangularMatrix, bool singularMatrix}
+);
+
+final DefaultSpc defaultSpc = _setSpecialAttributes;
+
 class MatrixType{
   /// Attributes
   late Pointer<Matrix> self;
   late List shape;
-
-  /// Auxiliary functions
-  void _setSpecialAttributes({
-    bool identityMatrix = false,
-    bool principalDiagonalMatrix = false,
-    bool subDiagonalMatrix = false,
-    bool upperTriangularMatrix = false,
-    bool lowerTriangularMatrix = false,
-    bool singularMatrix = false,
-  }) {
-    this.self.ref.spc.ref.identityMatrix = identityMatrix;
-    this.self.ref.spc.ref.upperTriangularMatrix = upperTriangularMatrix;
-    this.self.ref.spc.ref.lowerTriangularMatrix = lowerTriangularMatrix;
-    this.self.ref.spc.ref.singularMatrix = singularMatrix;
-    this.self.ref.spc.ref.subDiagonalMatrix = subDiagonalMatrix;
-    this.self.ref.spc.ref.principalDiagonalMatrix = principalDiagonalMatrix;
-  }
 
   /// Constructors
   // 一般构造
@@ -49,89 +58,38 @@ class MatrixType{
         this.self.ref.data[r][c] = data[r][c];
       }
     }
-
-    _setSpecialAttributes(
-      identityMatrix: identityMatrix,
-      principalDiagonalMatrix: principalDiagonalMatrix,
-      subDiagonalMatrix: subDiagonalMatrix,
-      upperTriangularMatrix: upperTriangularMatrix,
-      lowerTriangularMatrix: lowerTriangularMatrix,
-      singularMatrix: singularMatrix,
-    );
+    defaultSpc(this);
   }
 
   // 全number的矩阵
-  MatrixType.filled(
-      {
+  MatrixType.filled({
         required double number,
         required int row,
-        required int column,
-        bool identityMatrix = false,
-        bool principalDiagonalMatrix = false,
-        bool subDiagonalMatrix = false,
-        bool upperTriangularMatrix = false,
-        bool lowerTriangularMatrix = false,
-        bool singularMatrix  = false
+        required int column
   }) {
     shape = [row, column];
     this.self = matply__filled(row, column, number);
-
-    _setSpecialAttributes(
-      identityMatrix: identityMatrix,
-      principalDiagonalMatrix: principalDiagonalMatrix,
-      subDiagonalMatrix: subDiagonalMatrix,
-      upperTriangularMatrix: upperTriangularMatrix,
-      lowerTriangularMatrix: lowerTriangularMatrix,
-      singularMatrix: singularMatrix,
-    );
+    defaultSpc(this);
   }
 
   // 全1矩阵
   MatrixType.ones({
       required int row,
-      required int column,
-      bool identityMatrix = false,
-      bool principalDiagonalMatrix = false,
-      bool subDiagonalMatrix = false,
-      bool upperTriangularMatrix = false,
-      bool lowerTriangularMatrix = false,
-      bool singularMatrix  = false
+      required int column
     }) {
     shape = [row, column];
     this.self = matply__ones(row, column);
-
-    _setSpecialAttributes(
-      identityMatrix: identityMatrix,
-      principalDiagonalMatrix: principalDiagonalMatrix,
-      subDiagonalMatrix: subDiagonalMatrix,
-      upperTriangularMatrix: upperTriangularMatrix,
-      lowerTriangularMatrix: lowerTriangularMatrix,
-      singularMatrix: singularMatrix,
-    );
+    defaultSpc(this);
   }
 
   // 全0矩阵
   MatrixType.zeros({
     required int row,
-    required int column,
-    bool identityMatrix = false,
-    bool principalDiagonalMatrix = false,
-    bool subDiagonalMatrix = false,
-    bool upperTriangularMatrix = false,
-    bool lowerTriangularMatrix = false,
-    bool singularMatrix  = false
+    required int column
   }){
     shape = [row, column];
     this.self = matply__zeros(row, column);
-
-    _setSpecialAttributes(
-      identityMatrix: identityMatrix,
-      principalDiagonalMatrix: principalDiagonalMatrix,
-      subDiagonalMatrix: subDiagonalMatrix,
-      upperTriangularMatrix: upperTriangularMatrix,
-      lowerTriangularMatrix: lowerTriangularMatrix,
-      singularMatrix: singularMatrix,
-    );
+    defaultSpc(this);
   }
 
   // 连续创建
@@ -143,6 +101,7 @@ class MatrixType{
     shape = [row, column];
     start = start ?? 0.0;
     this.self = matply__arrange(start, row, column);
+    defaultSpc(this);
   }
 
   // 等差创建
@@ -152,7 +111,12 @@ class MatrixType{
     required int row,
     required int column,
     bool keep = true
-  }) : assert(start < end), shape = [row, column], this.self = matply__linspace(start, end, row, column, keep);
+  }) : assert(start < end)
+  {
+    shape = [row, column];
+    this.self = matply__linspace(start, end, row, column, keep);
+    defaultSpc(this);
+  }
 
   // n阶单位矩阵
   MatrixType.E({required int n}){
@@ -191,7 +155,7 @@ class MatrixType{
   MatrixType get T_ => transpose();
   double get trace => matply__trace(self);
   double get det => matply__det(self);
-  MatrixType? get inv {
+  MatrixType get inv {
     double value = this.det;
     if (value == 0)
       throw UnsupportedError('The matrix is not invertible.');
@@ -202,7 +166,7 @@ class MatrixType{
 
   /// Overloading Operators
   @Alert('Just return a List?, do not support pointer type.')
-  List? operator [](int row) {
+  List operator [](int row) {
     if (row < 0 || row >= shape[0]) {
       throw row_outRange;
     } else {
@@ -242,7 +206,7 @@ class MatrixType{
     }
   }
 
-  MatrixType? operator >> (List<int> shape) => reshape(row: shape[0], column: shape[1]);
+  MatrixType operator >> (List<int> shape) => reshape(row: shape[0], column: shape[1]);
   void operator << (List<int> shape) => reshape_no_returned(row:shape[0], column: shape[1]);
 
   @Alert('The == operator is only used to determine whether the properties of the objects are the same. '
@@ -257,10 +221,10 @@ class MatrixType{
         matply__spc__isSame(self.ref.spc, otherMatrix.self.ref.spc);
   }
 
-  List<List<bool>>? operator >(MatrixType other) => compare(other, 1);
-  List<List<bool>>? operator <(MatrixType other) => compare(other, 2);
-  List<List<bool>>? operator <=(MatrixType other) => compare(other, 3);
-  List<List<bool>>? operator >=(MatrixType other) => compare(other, 4);
+  List<List<bool>> operator >(MatrixType other) => compare(other, 1);
+  List<List<bool>> operator <(MatrixType other) => compare(other, 2);
+  List<List<bool>> operator <=(MatrixType other) => compare(other, 3);
+  List<List<bool>> operator >=(MatrixType other) => compare(other, 4);
 
   /// Methods
   void visible() {
@@ -303,7 +267,7 @@ class MatrixType{
     }
   }
 
-  double? at(int row, int column){
+  double at(int row, int column){
     if (column < 0 || column >= shape[1] || row < 0 || row >= shape[0])
       throw random_outRange;
     else{
@@ -461,7 +425,7 @@ class MatrixType{
     }
   }
 
-  List<List<bool>>? compare(MatrixType other, [int mode = 0]){
+  List<List<bool>> compare(MatrixType other, [int mode = 0]){
     if (hasSameShape(other)){
       Pointer<Pointer<Bool>> results = matply__compare(self, other.self, mode);
       return List.generate(
@@ -520,15 +484,15 @@ class MatrixType{
     }
   }
 
-  MatrixType? cut({required int row, required int column, required int width, required int height}){
+  MatrixType cut({required int row, required int column, required int width, required int height}){
     assert(width > 0 && height > 0);
-    if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1] || column + width >= shape[1] || row + height >= shape[0])
+    if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1] || column + width > shape[1] || row + height > shape[0])
       throw random_outRange;
     else
       return MatrixType.__fromPointer(matply__cut(self, row, column, width, height), [width, height]);
   }
 
-  MatrixType? cutfree({required int row, required int column, required int width, required int height, double number = .0}){
+  MatrixType cutfree({required int row, required int column, required int width, required int height, double number = .0}){
     assert(width > 0 && height > 0);
     if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1])
       throw random_outRange;
@@ -536,7 +500,7 @@ class MatrixType{
       return MatrixType.__fromPointer(matply__cutfree(self, row, column, width, height, number), [width, height]);
   }
 
-  MatrixType? concat({required MatrixType other, required bool horizontal}) {
+  MatrixType concat({required MatrixType other, required bool horizontal}) {
     if (horizontal ? other.shape[0] == shape[0] : other.shape[1] == shape[1]) {
       return horizontal ? MatrixType.__fromPointer(
           matply__concatR(self, other.self),
@@ -547,7 +511,7 @@ class MatrixType{
       throw row_or_column_not_sampe;
   }
 
-  MatrixType? reshape({required int row, required int column}){
+  MatrixType reshape({required int row, required int column}){
     if (row * column != size)
       throw size_changed;
     else{
@@ -569,13 +533,13 @@ class MatrixType{
     }
   }
 
-  MatrixType? resize({required int row, required int column, double number = .0, required bool horizontal}){
+  MatrixType resize({required int row, required int column, double number = .0, bool horizontal = true}){
     assert(row > 0 && column > 0);
     return horizontal ? MatrixType.__fromPointer(matply__resizeR(self, row, column, number), [row, column])
         : MatrixType.__fromPointer(matply__resizeC(self, row, column, number), [row, column]);
   }
 
-  void resize_no_returned({required int row, required int column, double number = .0, required bool horizontal}){
+  void resize_no_returned({required int row, required int column, double number = .0, bool horizontal = true}){
     assert(row > 0 && column > 0);
     horizontal ? matply__resizeRNoReturned(self, row, column, number)
         : matply__resizeCNoReturned(self, row, column, number);

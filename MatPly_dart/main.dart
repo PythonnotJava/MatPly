@@ -49,13 +49,13 @@ main(){
   // (matrixType * 2).visible();
   // matrixType.kronecker(matrixType1).visible();
   // MatrixType.E(n: 5)..visible()..visible_spc();
-  set_round('%.2f');
+  set_round('%.8f');
   MatrixType mt = MatrixType([
     [3, 6, 2],
     [0, 9, 2],
     [1, 1, 6]
   ]);
-  mt.visible();
+  // mt.visible();
   // print(mt.det);
   // print(mt.trace);
   // mt.cofactor(1, 1).visible();
@@ -78,6 +78,24 @@ main(){
   // print(mt < mt2);
   // print(mt <= mt2);
   // print(mt.compare(mt2));
-  print(matply__set__round.runtimeType);
+  // print(matply__set__round.runtimeType);
+  MatrixType mt4 = MatrixType([
+    [3, 6, 2, 10, -34, 2],
+    [0, 9, 2, 4, 6, 0],
+    [1, 1, 6, 4, 6, 2]
+  ]);
+  // MatrixType e2 = MatrixType.E(n: 3);
+  // MatrixType e3 = MatrixType.E(n: 6);
+  // mt4.cut(row: 1, column: 2, width: 3, height: 2).visible();
+  // mt4.cutfree(row: 2, column: 5, width: 6, height: 6, number: 5).visible();
+  // e2.concat(other: mt4, horizontal: true).visible();
+  // e3.concat(other: mt4, horizontal: false).visible();
+  // MatrixType mt5 = MatrixType.deepCopy(mt4);
+  // mt5 << [2, 9];
+  // mt5.visible();
+  // MatrixType mt6 = mt4.reshape(row: 6, column: 3);
+  // mt6.visible();
+  mt4.resize(row: 2, column: 2, horizontal: true).visible();
+  // mt4.resize(row: 2, column: 2, horizontal: false).visible();
 
 }

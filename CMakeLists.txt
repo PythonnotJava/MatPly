@@ -11,4 +11,6 @@ add_executable(MatPly
         main.c
         matply.c
         matply.h
+        vector_extend.c
+        vector_extend.h
 )

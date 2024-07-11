@@ -48,3 +48,11 @@ void ** copy_array(void ** datas, const int row, const int column)
     }
     return new;
 }
+
+double ** allocateButNoNumbers(const int row, const int column)
+{
+    double ** new = (double**)malloc(sizeof(double *) * row);
+    for (int r=0;r < row;r++)
+        new[r] = (double*)malloc(sizeof(double) * column);
+    return new;
+}

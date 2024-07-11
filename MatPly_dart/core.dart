@@ -1,6 +1,5 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
-
 import 'errors.dart';
 import 'matply_api.dart';
 
@@ -59,6 +58,13 @@ class MatrixType{
       }
     }
     defaultSpc(this);
+  }
+
+  @override
+  String toString() {
+    print("MatrixType:");
+    visible();
+    return 'shape : [${shape[0]}, ${shape[1]}]';
   }
 
   // 全number的矩阵
@@ -163,6 +169,23 @@ class MatrixType{
       return MatrixType.__fromPointer(matply__inverse(self, det), shape);
   }
   MatrixType get adj => MatrixType.__fromPointer(matply__adjugate(self), shape);
+
+  MatrixType get acos => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 0, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get asin => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 1, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get atan => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 2, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get cos => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 3, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get sin => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 4, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get tan => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 5, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get cosh => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 6, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get sinh => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 7, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get tanh => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 8, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get exp => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 9, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get log => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 10, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get log10 => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 11, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get sqrt => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 12, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get ceil => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 13, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get floor => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 14, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get fabs => MatrixType.__fromPointer(matply__mathBasement1(self.ref.data, 15, shape[0], shape[1], false).cast<Matrix>(), shape);
 
   /// Overloading Operators
   @Alert('Just return a List?, do not support pointer type.')
@@ -544,5 +567,17 @@ class MatrixType{
     horizontal ? matply__resizeRNoReturned(self, row, column, number)
         : matply__resizeCNoReturned(self, row, column, number);
   }
+
+  MatrixType power({required double number, bool reverse = false})
+    => reverse ?
+    MatrixType.__fromPointer(matply__mathBasement2reverse(self.ref.data, 0, number, shape[0], shape[1], false).cast<Matrix>(), shape) :
+    MatrixType.__fromPointer(matply__mathBasement2(self.ref.data, 0, number, shape[0], shape[1], false).cast<Matrix>(), shape);
+
+
+  MatrixType atan2({required double number, bool reverse = true})
+  => reverse
+      ? MatrixType.__fromPointer(matply__mathBasement2(self.ref.data, 1, number, shape[0], shape[1], false).cast<Matrix>(), shape)
+      : MatrixType.__fromPointer(matply__mathBasement2reverse(self.ref.data, 1, number,  shape[0], shape[1], false).cast<Matrix>(), shape);
+
 }
 

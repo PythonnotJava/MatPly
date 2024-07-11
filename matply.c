@@ -10,13 +10,16 @@ void set_round(const char* new_round) {
     ROUND = new_round;
 }
 
+__attribute__((visibility("default"))) double PI = M_PI;
+__attribute__((visibility("default"))) double e = M_E;
+__attribute__((visibility("default"))) double _nan = NAN;
+__attribute__((visibility("default"))) double inf = INFINITY;
+
 Matrix * __new__(const int row, const int column){
     Matrix * new = (Matrix *) malloc(sizeof (Matrix));
     new->column = column;
     new->row = row;
-    new->data = (double **) malloc(sizeof (double *) * row);
-    for (int r = 0;r < row;r++)
-        new->data[r] = (double *) malloc(sizeof (double ) * column);
+    new->data = allocateButNoNumbers(row, column);
     new->spc = (Spc *) malloc(sizeof (Spc));;
     *new->spc = (Spc){false, false, false, false, false, false};
     return new;
@@ -27,12 +30,20 @@ Matrix * __init__(const int row, const int column, double data[][column], Spc * 
     new->data = (double **) malloc(sizeof (double *) * row);
     for (int r = 0;r < row;r++){
         new->data[r] = (double *) malloc(sizeof (double ) * column);
-        for (int c = 0; c < column;c ++){
-            new->data[r][c] = data[r][c];
-        }
+        memcpy(new->data[r], data[r], column * sizeof(double));
     }
     new->spc = (Spc *) malloc(sizeof (Spc));;
     *new->spc = (Spc){false, false, false, false, false, false};
+    if (spc)
+        *new->spc = *spc;
+    return new;
+}
+
+Matrix * __init__point__data__(const int row, const int column, double ** data, Spc * spc)
+{
+    Matrix * new = __new__(row, column);
+    new->data = data;
+    new->spc = (Spc *) malloc(sizeof (Spc));
     if (spc)
         *new->spc = *spc;
     return new;
@@ -511,9 +522,7 @@ Matrix * deepcopy(const Matrix * matrix)
     Matrix * new = __new__(matrix->row, matrix->column);
 
     for (int r = 0; r < matrix->row; r++) {
-        for (int c = 0; c < matrix->column; c++) {
-            new->data[r][c] = matrix->data[r][c];
-        }
+        memcpy(new->data[r], matrix->data[r], matrix->column * sizeof(double));
     }
     new->spc = (Spc *) malloc(sizeof(Spc));
     *new->spc = *matrix->spc;
@@ -991,9 +1000,128 @@ Matrix * reshape(const Matrix * matrix, const int row, const int column)
 
 void setSeed(const int seed) {srand(seed);}
 
-double getnan() {return NAN;}
+void * mathBasement1(const double ** matrix_array, const int mode, const int row, const int column, const bool returnArray)
+{
+    double ** new = NULL;
 
-double getinf() {return INFINITY;}
+    #define MATCH(n, func, m, _c, _r)                                                  \
+        n = (double**)malloc(sizeof(double*) * _r);                                    \
+    do {                                                                               \
+        for (int r = 0; r < _r; r++) {                                                 \
+        n[r] = (double*)malloc(sizeof(double)*_c);                                     \
+            for (int c = 0; c < _c; c++) {                                             \
+                n[r][c] = func(m[r][c]);                                               \
+            }                                                                          \
+        }                                                                              \
+    } while (0)                                                                        \
+
+    switch (mode) {
+    case 0:
+        MATCH(new, acos, matrix_array, column, row);
+        break;
+    case 1:
+        MATCH(new, asin, matrix_array, column, row);
+        break;
+    case 2:
+        MATCH(new, atan, matrix_array, column, row);
+        break;
+    case 3:
+        MATCH(new, cos, matrix_array, column, row);
+        break;
+    case 4:
+        MATCH(new, sin, matrix_array, column, row);
+        break;
+    case 5:
+        MATCH(new, tan, matrix_array, column, row);
+        break;
+    case 6:
+        MATCH(new, cosh, matrix_array, column, row);
+        break;
+    case 7:
+        MATCH(new, sinh, matrix_array, column, row);
+        break;
+    case 8:
+        MATCH(new, tanh, matrix_array, column, row);
+        break;
+    case 9:
+        MATCH(new, exp, matrix_array, column, row);
+        break;
+    case 10:
+        MATCH(new, log, matrix_array, column, row);
+        break;
+    case 11:
+        MATCH(new, log10, matrix_array, column, row);
+        break;
+    case 12:
+        MATCH(new, sqrt, matrix_array, column, row);
+        break;
+    case 13:
+        MATCH(new, ceil, matrix_array, column, row);
+        break;
+    case 14:
+        MATCH(new, floor, matrix_array, column, row);
+        break;
+    case 15:
+        MATCH(new, fabs, matrix_array, column, row);
+        break;
+    default:
+        break;
+    }
+    #undef MATCH
+    return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
+}
+
+void * mathBasement2(const double ** matrix_array, const int mode, const double number,
+    const int row, const int column, const bool returnArray)
+{
+    double ** new = NULL;
+
+    #define MATCH2(m, func, n, _c, _r)                      \
+        {new = (double**)malloc(sizeof(double*) * _r);      \
+        for (int r = 0;r < _r;r++)                          \
+        {new[r]  = (double*)malloc(sizeof(double)*_c);      \
+            for (int c = 0;c < _c;c ++)                     \
+            {                                               \
+                n[r][c] = func(m[r][c], number);            \
+            }                                               \
+        }                                                   \
+    }                                                       \
+
+    switch (mode)
+    {
+        case 0: MATCH2(matrix_array, pow, new, column, row);break;
+        case 1: MATCH2(matrix_array, atan2, new, column, row);break;
+        default:break;
+    }
+    #undef MATCH2
+    return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
+}
+
+void * mathBasement2reverse(const double ** matrix_array, const int mode, const double number,
+    const int row, const int column, const bool returnArray)
+{
+    double **new = NULL;
+
+    #define MATCH3(m, func, n, _c, _r)                      \
+        {new = (double**)malloc(sizeof(double*) * _r);      \
+        for (int r = 0;r < _r;r++)                          \
+        {new[r]  = (double*)malloc(sizeof(double)*_c);      \
+            for (int c = 0;c < _c;c ++)                     \
+            {                                               \
+                n[r][c] = func(number, m[r][c]);            \
+            }                                               \
+        }                                                   \
+    break;}                                                 \
+
+    switch (mode)
+    {
+        case 0: MATCH3(matrix_array, pow, new, column, row);
+        case 1: MATCH3(matrix_array, atan2, new, column, row);
+        default:break;
+    }
+    #undef MATCH3
+    return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
+}
 
 Matrix * uniform(const double start, const double end, const int row, const int column, const int seed, bool use)
 {
@@ -1013,94 +1141,9 @@ Matrix * uniform(const double start, const double end, const int row, const int 
 Matrix * normal(const double mu, const double sigma,
     const int row, const int column, const int start, const int end, const int seed, bool use)
 {
-    const double p = 1.0 / (sqrt(2.0 * M_PI) * sigma);
-    const double s2 = 2.0 * pow(sigma, 2);
-    double x;
     Matrix* new = __new__(row, column);
-    for (int r = 0; r < row; r++) {
-        for (int c = 0; c< column; c ++) {
-            do {
-                const double u1 = ((double)rand() / RAND_MAX);
-                const double u2 = ((double)rand() / RAND_MAX);
-                const double z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
-                x = mu + z0 * sigma;
-            } while (x < start || x > end);
-            new->data[r][c] = x;
-        }
-    }
+
     return new;
 }
 
 Matrix * poisson(const double lambda, const int row, const int column, const int seed, bool use);
-
-Matrix * mathBasement1(const Matrix * matrix, const int mode)
-{
-    Matrix * new = __new__(matrix->row, matrix->column);
-
-    #define MATCH(m, func) \
-    do { \
-        for (int r = 0; r < m->row; r++) { \
-            for (int c = 0; c < m->column; c++) { \
-                new->data[r][c] = func(m->data[r][c]); \
-            } \
-        } \
-    } while (0)\
-
-    switch (mode) {
-    case 0:
-        MATCH(new, acos);
-        break;
-    case 1:
-        MATCH(new, asin);
-        break;
-    case 2:
-        MATCH(new, atan);
-        break;
-    case 3:
-        MATCH(new, cos);
-        break;
-    case 4:
-        MATCH(new, sin);
-        break;
-    case 5:
-        MATCH(new, tan);
-        break;
-    case 6:
-        MATCH(new, cosh);
-        break;
-    case 7:
-        MATCH(new, sinh);
-        break;
-    case 8:
-        MATCH(new, tanh);
-        break;
-    case 9:
-        MATCH(new, exp);
-        break;
-    case 10:
-        MATCH(new, log);
-        break;
-    case 11:
-        MATCH(new, log10);
-        break;
-    case 12:
-        MATCH(new, sqrt);
-        break;
-    case 13:
-        MATCH(new, ceil);
-        break;
-    case 14:
-        MATCH(new, floor);
-        break;
-    case 15:
-        MATCH(new, fabs);
-        break;
-    default:
-        break;
-    }
-    return new;
-}
-
-Matrix * mathBasement2(const Matrix * matrix, const int mode, const double number);
-
-Matrix * mathBasement2reverse(const Matrix * matrix, const int mode, const double number);

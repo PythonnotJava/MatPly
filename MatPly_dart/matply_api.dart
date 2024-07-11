@@ -5,6 +5,11 @@ import 'package:path/path.dart' as path;
 
 final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
 
+Pointer<Double> _Pi = dylib.lookup('PI').cast<Double>();
+Pointer<Double> _e = dylib.lookup('e').cast<Double>();
+Pointer<Double> _nan = dylib.lookup('_nan').cast<Double>();
+Pointer<Double> _inf = dylib.lookup('inf').cast<Double>();
+
 typedef set__round__base__ffi = Void Function(Pointer<Utf8> new_round);
 typedef set__round__base = void Function(Pointer<Utf8> new_round);
 
@@ -219,14 +224,20 @@ typedef resizeCNoReturned__base = void Function(Pointer<Matrix> matrix, int row,
 typedef reshapeNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column);
 typedef reshapeNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column);
 
-typedef getnan__base__ffi = Double Function();
-typedef getnan__base = double Function();
-
-typedef getinf__base__ffi = Double Function();
-typedef getinf__base = double Function();
-
 typedef setSeed__base__ffi = Void Function(Int32 seed);
 typedef setSeed__base = void Function(int seed);
+
+typedef mathBasement1__base__ffi = Pointer<Void> Function(Pointer<Pointer<Double>>, Int32 mode, Int32 row, Int32 column, Bool returnArray);
+typedef mathBasement1__base = Pointer<void> Function(Pointer<Pointer<Double>>, int mode, int row, int column, bool returnArray);
+
+typedef mathBasement2__base__ffi = Pointer<Void> Function(Pointer<Pointer<Double>>, Int32 mode, Double number, Int32 row, Int32 column, Bool returnArray);
+typedef mathBasement2__base = Pointer<void> Function(Pointer<Pointer<Double>>, int mode, double number, int row, int column, bool returnArray);
+
+typedef mathBasement2reverse__base__ffi = Pointer<Void> Function(Pointer<Pointer<Double>>, Int32 mode, Double number, Int32 row, Int32 column, Bool returnArray);
+typedef mathBasement2reverse__base = Pointer<void> Function(Pointer<Pointer<Double>>, int mode, double number, int row, int column, bool returnArray);
+
+typedef allocateButNoNumbers__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
+typedef allocateButNoNumbers__base = Pointer<Pointer<Double>> Function(int row, int column);
 
 final __new__base matply__new__ = dylib.lookup<NativeFunction<__new__base__ffi>>('__new__').asFunction<__new__base>();
 final __init__base matply__init__ = dylib.lookup<NativeFunction<__init__base__ffi>>('__init__').asFunction<__init__base>();
@@ -286,9 +297,11 @@ final reshape__base matply__reshape = dylib.lookup<NativeFunction<reshape__base_
 final resizeRNoReturned__base matply__resizeRNoReturned = dylib.lookup<NativeFunction<resizeRNoReturned__base__ffi>>('resizeRNoReturned').asFunction<resizeRNoReturned__base>();
 final resizeCNoReturned__base matply__resizeCNoReturned = dylib.lookup<NativeFunction<resizeCNoReturned__base__ffi>>('resizeCNoReturned').asFunction<resizeCNoReturned__base>();
 final reshapeNoReturned__base matply__reshapeNoReturned = dylib.lookup<NativeFunction<reshapeNoReturned__base__ffi>>('reshapeNoReturned').asFunction<reshapeNoReturned__base>();
-final getnan__base matply__getnan = dylib.lookup<NativeFunction<getnan__base__ffi>>('getnan').asFunction<getnan__base>();
-final getinf__base matply__getinf = dylib.lookup<NativeFunction<getinf__base__ffi>>('getinf').asFunction<getinf__base>();
 final setSeed__base matply__setSeed = dylib.lookup<NativeFunction<setSeed__base__ffi>>('setSeed').asFunction<setSeed__base>();
+final mathBasement1__base matply__mathBasement1 = dylib.lookup<NativeFunction<mathBasement1__base__ffi>>('mathBasement1').asFunction<mathBasement1__base>();
+final mathBasement2__base matply__mathBasement2 = dylib.lookup<NativeFunction<mathBasement2__base__ffi>>('mathBasement2').asFunction<mathBasement2__base>();
+final mathBasement2reverse__base matply__mathBasement2reverse = dylib.lookup<NativeFunction<mathBasement2reverse__base__ffi>>('mathBasement2reverse').asFunction<mathBasement2reverse__base>();
+final allocateButNoNumbers__base matply__allocateButNoNumbers = dylib.lookup<NativeFunction<allocateButNoNumbers__base__ffi>>('allocateButNoNumbers').asFunction<allocateButNoNumbers__base>();
 
 dynamic debug_matply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
@@ -310,8 +323,8 @@ Pointer<Pointer<Double>> toMatrixPPointerData(List<List<double>> data, int row, 
   return dataPointer;
 }
 
-const double Pi = 3.14159265358979323846;
-const double e = 2.7182818284590452354;
-final double inf = matply__getinf();  // 正无穷大
+final double Pi = _Pi.value;
+final double e = _e.value;
+final double inf = _inf.value;  // 正无穷大，和Dart的内置相通，下同
 final double negativeinf = -inf;  // 负无穷大
-final double nan = matply__getnan();  // 非法数据
+final double nan = _nan.value;  // 非法数据

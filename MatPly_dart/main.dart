@@ -108,4 +108,23 @@ main(){
   // print(nan.isNaN);
   // print(inf);
   // matply__setSeed(1);
+  // print(e);
+  // print(Pi);
+  // print(nan);
+  // print(inf);
+  // print(negativeinf);
+  // print(inf + negativeinf);
+  // print(negativeinf.isInfinite);
+  // print(nan.isNaN);
+  MatrixType mt8 = MatrixType([
+    [3, 6, 2, 10, -0.1, -inf],
+    [0, 9, 2, 4, 6, 0],
+    [1, 1, nan, 4, 6, inf]
+  ]);
+  // mt8.exp.visible();
+  // mt8.ceil.visible();
+  // mt8.cos.visible();
+  // mt8.power(number: 3, reverse: true).visible();
+  // mt8.power(number: 3, reverse: false).visible();
+  print(mt8.toString());
 }

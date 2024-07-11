@@ -102,22 +102,29 @@ int main()
         {3, 6, 2, 10, -34, 2},
         {0, 9, 2, 4, 6, 0},
         {INFINITY, 1, 6, 4, 6, 2}};
-
     double ** dat = (double**)malloc(sizeof(double*) *3);
     for (int r=0;r<3;r++)
     {
         dat[r] = (double*)malloc(sizeof(double)*6);
         for (int c=0;c<6;c++)
             dat[r][c] = mt4data[r][c];
-    }
-
-    Matrix * m11 = log_((void**)dat,true,3 ,6 );
-    __delete__data__(dat,3);
-    VisibleMatrix(m11);
-
-    Matrix * m12 = log_((void**)m11, false, 3, 6);
-    VisibleMatrix(m12);
-    __delete__(m12);
-    __delete__(m11);
+    };
+    // }
+    //
+    // Matrix * m11 = log_((void**)dat,true,3 ,6 );
+    // __delete__data__(dat,3);
+    // VisibleMatrix(m11);
+    //
+    // Matrix * m12 = log_((void**)m11, false, 3, 6);
+    // VisibleMatrix(m12);
+    // __delete__(m12);
+    // __delete__(m11);
+    // double mt4data [][6]=   {
+    //     {3, 6, 2, 10, -34, 2},
+    //     {0, 9, 2, 4, 6, 0},
+    //     {INFINITY, 1, 6, 4, 6, 2}};
+    Matrix * matrix11 = (Matrix*)mathBasement2reverse(dat, 0, 2, 3, 6, false);
+    VisibleMatrix(matrix11);
+    __delete__(matrix11);
     return 0;
 }

@@ -116,15 +116,32 @@ main(){
   // print(inf + negativeinf);
   // print(negativeinf.isInfinite);
   // print(nan.isNaN);
-  MatrixType mt8 = MatrixType([
-    [3, 6, 2, 10, -0.1, -inf],
-    [0, 9, 2, 4, 6, 0],
-    [1, 1, nan, 4, 6, inf]
-  ]);
+  // MatrixType mt8 = MatrixType([
+  //   [3, 6, 2, 10, -0.1, -inf],
+  //   [0, 9, 2, 4, 6, 0],
+  //   [1, 1, nan, 4, 6, inf]
+  // ]);
+  // mt8.visible();
   // mt8.exp.visible();
   // mt8.ceil.visible();
   // mt8.cos.visible();
   // mt8.power(number: 3, reverse: true).visible();
   // mt8.power(number: 3, reverse: false).visible();
-  print(mt8.toString());
+  // print(mt8.toString());
+  // mt8.softmax(dim: -1).visible();
+  // mt8.softmax(dim: 0).visible();
+  // mt8.softmax(dim: 1).visible();
+  // mt8.sigmoid().visible();
+  // set_seed(412);
+  // mt8..shuffle()..visible();
+  // set_seed(12);
+  // mt8..shuffle()..visible();
+  // mt8.sort(dim: -1, mask_nan: -100).visible();
+  // mt8.sort(dim: 0, mask_nan: 100).visible();
+  // mt8.sort(dim: 1, mask_nan: e).visible();
+  // mt8..sort_no_returned(dim: 1, mask_nan: e)..visible();
+  set_round('%.8f,');
+  // MatrixType.uniform(row: 10, column: 100, start: 1, end: 2, seed: 42).visible();
+  // MatrixType.normal(row: 10, column: 100, mu: 2, sigma: 1.5).visible();
+  // MatrixType.poisson(lambda: 5, row: 1, column: 1000).visible();
 }

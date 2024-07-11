@@ -239,6 +239,30 @@ typedef mathBasement2reverse__base = Pointer<void> Function(Pointer<Pointer<Doub
 typedef allocateButNoNumbers__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
 typedef allocateButNoNumbers__base = Pointer<Pointer<Double>> Function(int row, int column);
 
+typedef sigmoid__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef sigmoid__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+
+typedef softmax__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 dim, Double mask_nan, Double mask_inf, Double mask_neginf);
+typedef softmax__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int dim, double mask_nan, double mask_inf, double mask_neginf);
+
+typedef shuffle__base__ffi = Void Function(Pointer<Pointer<Double>> array, Int32 row, Int32 column);
+typedef shuffle__base = void Function(Pointer<Pointer<Double>> array, int row, int column);
+
+typedef sortNoReturned__base__ffi = Void Function(Pointer<Pointer<Double>> array, Int32 row, Int32 column, Bool reverse, Int32 dim, Double mask_nan);
+typedef sortNoReturned__base = void Function(Pointer<Pointer<Double>> array, int row, int column, bool reverse, int dim, double mask_nan);
+
+typedef sort__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Bool reverse, Int32 dim, Double mask_nan);
+typedef sort__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, bool reverse, int dim, double mask_nan);
+
+typedef uniform__base__ffi = Pointer<Matrix> Function(Double start, Double end, Int32 row, Int32 column, Int32 seed, Bool use);
+typedef uniform__base = Pointer<Matrix> Function(double start, double end, int row, int column, int seed, bool use);
+
+typedef normal__base__ffi = Pointer<Matrix> Function(Double mu, Double sigma, Int32 row, Int32 column, Int32 seed, Bool use);
+typedef normal__base = Pointer<Matrix> Function(double mu, double sigma, int row, int column, int seed, bool use);
+
+typedef poisson__base__ffi = Pointer<Matrix> Function(Double lambda, Int32 row, Int32 column, Int32 seed, Bool use);
+typedef poisson__base = Pointer<Matrix> Function(double lambda, int row, int column, int seed, bool use);
+
 final __new__base matply__new__ = dylib.lookup<NativeFunction<__new__base__ffi>>('__new__').asFunction<__new__base>();
 final __init__base matply__init__ = dylib.lookup<NativeFunction<__init__base__ffi>>('__init__').asFunction<__init__base>();
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookup<NativeFunction<VisibleMatrix__base__ffi>>('VisibleMatrix').asFunction<VisibleMatrix__base>();
@@ -302,6 +326,15 @@ final mathBasement1__base matply__mathBasement1 = dylib.lookup<NativeFunction<ma
 final mathBasement2__base matply__mathBasement2 = dylib.lookup<NativeFunction<mathBasement2__base__ffi>>('mathBasement2').asFunction<mathBasement2__base>();
 final mathBasement2reverse__base matply__mathBasement2reverse = dylib.lookup<NativeFunction<mathBasement2reverse__base__ffi>>('mathBasement2reverse').asFunction<mathBasement2reverse__base>();
 final allocateButNoNumbers__base matply__allocateButNoNumbers = dylib.lookup<NativeFunction<allocateButNoNumbers__base__ffi>>('allocateButNoNumbers').asFunction<allocateButNoNumbers__base>();
+final sigmoid__base matply__sigmoid = dylib.lookup<NativeFunction<sigmoid__base__ffi>>('sigmoid').asFunction<sigmoid__base>();
+final softmax__base matply__softmax = dylib.lookup<NativeFunction<softmax__base__ffi>>('softmax').asFunction<softmax__base>();
+final shuffle__base matply__shuffle = dylib.lookup<NativeFunction<shuffle__base__ffi>>('shuffle').asFunction<shuffle__base>();
+final sortNoReturned__base matply__sortNoReturned = dylib.lookup<NativeFunction<sortNoReturned__base__ffi>>('sortNoReturned').asFunction<sortNoReturned__base>();
+final sort__base matply__sort = dylib.lookup<NativeFunction<sort__base__ffi>>('sort').asFunction<sort__base>();
+final uniform__base matply__uniform = dylib.lookup<NativeFunction<uniform__base__ffi>>('uniform').asFunction<uniform__base>();
+final normal__base matply__normal = dylib.lookup<NativeFunction<normal__base__ffi>>('normal').asFunction<normal__base>();
+final poisson__base matply__poisson = dylib.lookup<NativeFunction<poisson__base__ffi>>('poisson').asFunction<poisson__base>();
+
 
 dynamic debug_matply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {

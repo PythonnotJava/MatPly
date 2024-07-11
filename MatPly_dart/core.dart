@@ -37,7 +37,7 @@ final DefaultSpc defaultSpc = _setSpecialAttributes;
 class MatrixType{
   /// Attributes
   late Pointer<Matrix> self;
-  late List shape;
+  late List<int> shape;
 
   /// Constructors
   // 一般构造
@@ -51,7 +51,7 @@ class MatrixType{
         bool singularMatrix  = false
       }){
     this.shape = [data.length, data[0].length];
-    this.self = matply__new__(this.shape[0], this.shape[1]);  // 已经对data和spc分配了内存
+    this.self = matply__new__(this.shape[0], this.shape[1]);  // 已经对data和spc分配了内存，并且对spc初始化了
     for (int r = 0;r < this.shape[0];r++){
       for (int c = 0;c < this.shape[1];c ++){
         this.self.ref.data[r][c] = data[r][c];
@@ -72,7 +72,7 @@ class MatrixType{
         required double number,
         required int row,
         required int column
-  }) {
+  }) :assert(row > 0 && column > 0){
     shape = [row, column];
     this.self = matply__filled(row, column, number);
     defaultSpc(this);
@@ -82,7 +82,7 @@ class MatrixType{
   MatrixType.ones({
       required int row,
       required int column
-    }) {
+    }) :assert(row > 0 && column > 0) {
     shape = [row, column];
     this.self = matply__ones(row, column);
     defaultSpc(this);
@@ -92,7 +92,7 @@ class MatrixType{
   MatrixType.zeros({
     required int row,
     required int column
-  }){
+  }):assert(row > 0 && column > 0){
     shape = [row, column];
     this.self = matply__zeros(row, column);
     defaultSpc(this);
@@ -103,7 +103,7 @@ class MatrixType{
     required double? start,
     required int row,
     required int column
-  }){
+  }):assert(row > 0 && column > 0){
     shape = [row, column];
     start = start ?? 0.0;
     this.self = matply__arrange(start, row, column);
@@ -117,7 +117,7 @@ class MatrixType{
     required int row,
     required int column,
     bool keep = true
-  }) : assert(start < end)
+  }) : assert(start < end && row > 0 && column > 0)
   {
     shape = [row, column];
     this.self = matply__linspace(start, end, row, column, keep);
@@ -131,6 +131,41 @@ class MatrixType{
     this.identityMatrix = true;
   }
 
+  // 均匀分布
+  MatrixType.uniform({
+    double start = .0,
+    double end = 1.0,
+    required int row,
+    required int column,
+    int? seed
+  }) : assert(start < end && row > 0 && column > 0){
+    this.shape = [row, column];
+    this.self = matply__uniform(start, end, row, column, seed ?? 0, seed != null);
+  }
+
+  // 正态分布
+  MatrixType.normal({
+    double mu = 0.0,
+    double sigma = 1.0,
+    required int row,
+    required int column,
+    int? seed
+  }):assert(sigma >= 0 && row > 0 && column > 0){
+    this.shape = [row, column];
+    this.self = matply__normal(mu, sigma, row, column, seed ?? 0, seed != null);
+  }
+
+  // 泊松分布
+  MatrixType.poisson({
+    required double lambda,
+    required int row,
+    required int column,
+    int? seed
+  }):assert(lambda >= 0 && row > 0 && column > 0){
+    this.shape = [row, column];
+    this.self = matply__poisson(lambda, row, column, seed ?? 0, seed != null);
+  }
+
   // 根据已经建立好的Matrix指针初始化
   MatrixType.__fromPointer(this.self, this.shape);
 
@@ -138,23 +173,23 @@ class MatrixType{
   factory MatrixType.deepCopy(MatrixType other) => MatrixType.__fromPointer(matply__deepcopy(other.self), other.shape);
 
   /// setter && getter
-  get identityMatrix => this.self.ref.spc.ref.identityMatrix;
-  set identityMatrix(value) => this.self.ref.spc.ref.identityMatrix = value;
+  bool get identityMatrix => this.self.ref.spc.ref.identityMatrix;
+  set identityMatrix(bool value) => this.self.ref.spc.ref.identityMatrix = value;
 
-  get principalDiagonalMatrix => this.self.ref.spc.ref.principalDiagonalMatrix;
-  set principalDiagonalMatrix(value) => this.self.ref.spc.ref.principalDiagonalMatrix = value;
+  bool get principalDiagonalMatrix => this.self.ref.spc.ref.principalDiagonalMatrix;
+  set principalDiagonalMatrix(bool value) => this.self.ref.spc.ref.principalDiagonalMatrix = value;
 
-  get upperTriangularMatrix => this.self.ref.spc.ref.upperTriangularMatrix;
-  set upperTriangularMatrix(value) => this.self.ref.spc.ref.upperTriangularMatrix = value;
+  bool get upperTriangularMatrix => this.self.ref.spc.ref.upperTriangularMatrix;
+  set upperTriangularMatrix(bool value) => this.self.ref.spc.ref.upperTriangularMatrix = value;
 
-  get subDiagonalMatrix => this.self.ref.spc.ref.subDiagonalMatrix;
-  set subDiagonalMatrix(value) => this.self.ref.spc.ref.subDiagonalMatrix = value;
+  bool get subDiagonalMatrix => this.self.ref.spc.ref.subDiagonalMatrix;
+  set subDiagonalMatrix(bool value) => this.self.ref.spc.ref.subDiagonalMatrix = value;
 
-  get lowerTriangularMatrix => this.self.ref.spc.ref.lowerTriangularMatrix;
-  set lowerTriangularMatrix(value) => this.self.ref.spc.ref.lowerTriangularMatrix = value;
+  bool get lowerTriangularMatrix => this.self.ref.spc.ref.lowerTriangularMatrix;
+  set lowerTriangularMatrix(bool value) => this.self.ref.spc.ref.lowerTriangularMatrix = value;
 
-  get singularMatrix => this.self.ref.spc.ref.singularMatrix;
-  set singularMatrix(value) => this.self.ref.spc.ref.singularMatrix = value;
+  bool get singularMatrix => this.self.ref.spc.ref.singularMatrix;
+  set singularMatrix(bool value) => this.self.ref.spc.ref.singularMatrix = value;
 
   int get size => shape[0] * shape[1];
   bool get isSquare => shape[0] == shape[1];
@@ -579,5 +614,27 @@ class MatrixType{
       ? MatrixType.__fromPointer(matply__mathBasement2(self.ref.data, 1, number, shape[0], shape[1], false).cast<Matrix>(), shape)
       : MatrixType.__fromPointer(matply__mathBasement2reverse(self.ref.data, 1, number,  shape[0], shape[1], false).cast<Matrix>(), shape);
 
+  MatrixType sigmoid() => MatrixType.__fromPointer(matply__sigmoid(self), shape);
+
+  MatrixType softmax({
+    int dim = -1,
+    double mask_nan = 0.0,
+    double mask_inf = 0.0,
+    double mask_neginf = 0.0
+  }) => MatrixType.__fromPointer(matply__softmax(self, dim, mask_nan, mask_inf, mask_neginf), shape);
+
+  void shuffle() => matply__shuffle(self.ref.data, shape[0], shape[1]);
+
+  void sort_no_returned({
+    int dim = -1,
+    bool reverse = false,
+    double mask_nan = 0.0
+  }) => matply__sortNoReturned(self.ref.data, shape[0], shape[1], reverse, dim, mask_nan);
+
+  MatrixType sort({
+    int dim = -1,
+    bool reverse = false,
+    double mask_nan = 0.0
+  }) => MatrixType.__fromPointer(matply__sort(self, reverse, dim, mask_nan), shape);
 }
 

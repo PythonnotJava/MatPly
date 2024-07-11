@@ -3,6 +3,7 @@
 //
 
 #include "matply.h"
+#include "Auxiliary.h"
 
 const char * ROUND = "%.5lf\t";  // 输出精度
 
@@ -1123,7 +1124,185 @@ void * mathBasement2reverse(const double ** matrix_array, const int mode, const 
     return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
 }
 
-Matrix * uniform(const double start, const double end, const int row, const int column, const int seed, bool use)
+Matrix * sigmoid(const Matrix * matrix)
+{
+    Matrix * new = __new__(matrix->row, matrix->column);
+    for (int r=0;r < matrix->row;r ++)
+    {
+        for (int c = 0;c < matrix->column;c ++)
+        {
+            new->data[r][c] = 1.0 / (1.0 + exp(-matrix->data[r][c]));
+        }
+    }
+    return new;
+}
+
+Matrix * softmax(const Matrix * matrix, const int dim, const double mask_nan, const double mask_inf, const double mask_neginf)
+{
+    Matrix * new = __new__(matrix->row, matrix->column);
+    double data = 0.;
+    for (int r = 0;r < matrix->row;r ++)
+    {
+        for (int c = 0;c <matrix->column;c ++)
+        {
+            data = matrix->data[r][c ];
+            if (!isnan(data) && !isinf(data))
+                new->data[r][c ] = exp(data);
+            else
+            {
+                if (isnan(data))
+                    new->data[r][c] = exp(mask_nan);
+                else if (isinf(data) && data > 0)
+                    new->data[r][c] = exp(mask_inf);
+                else
+                    new->data[r][c] = exp(mask_neginf);
+            }
+        }
+    }
+
+    switch (dim)
+    {
+    case 0:
+        {
+            double * sums = sum(new, 0);
+            for(int r=0;r < matrix->row;r ++)
+            {
+                for (int c = 0;c < matrix->column;c ++)
+                {
+                    new->data[r][c] /= sums[r];
+                }
+            }
+            free(sums);
+            break;
+        }
+    case 1:
+        {
+            double * sums = sum(new, 1);
+            for(int r=0;r < matrix->row;r ++)
+            {
+                for (int c = 0;c < matrix->column;c ++)
+                {
+                    new->data[r][c] /= sums[c];
+                }
+            }
+            free(sums);
+            break;
+        }
+    default:
+        {
+            double * sums = sum(new, -1);
+            for(int r=0;r < matrix->row;r ++)
+            {
+                for (int c = 0;c < matrix->column;c ++)
+                {
+                    new->data[r][c] /= *sums;
+                }
+            }
+            free(sums);
+            break;
+        }
+    }
+    return new;
+}
+
+void shuffle(double ** array, const int row, const int column)
+{
+    int ri = 0, rj = 0, temp = 0;
+    for (int r = row - 1; r > 0; r--) {
+        for (int c = column - 1; c > 0; c--) {
+            ri = rand() % (r + 1);
+            rj = rand() % (c + 1);
+            temp = array[r][c];
+            array[r][c] = array[ri][rj];
+            array[ri][rj] = temp;
+        }
+    }
+}
+
+int __compare(const void* a, const void* b) {
+    const double diff = *(double*)a - *(double*)b;
+    return (diff > 0) - (diff < 0);
+}
+
+int __reverse_compare(const void* a, const void* b) {
+    const double diff = *(double*)b - *(double*)a;
+    return (diff > 0) - (diff < 0);
+}
+
+void sortNoReturned(double** array, const int row, const int column, const bool reverse, const int dim, const double mask_nan) {
+    for (int r = 0;r < row;r ++)
+    {
+        for(int c = 0;c < column;c ++)
+        {
+            if (isnan(array[r][c]))
+                array[r][c] = mask_nan;
+        }
+    }
+    switch (dim) {
+        case 0:
+            {
+                for (int r = 0; r < row;r++) {
+                    if (reverse) {
+                        qsort(array[r], column, sizeof(double), __reverse_compare);
+                    } else {
+                        qsort(array[r], column, sizeof(double), __compare);
+                    }
+                }
+                break;
+            }
+        case 1:
+            {
+                for (int c = 0; c < column;c ++) {
+                    double* col = (double*)malloc(row * sizeof(double));
+                    for (int r = 0; r < row;r++) {
+                        col[r] = array[r][c];
+                    }
+                    if (reverse) {
+                        qsort(col, row, sizeof(double), __reverse_compare);
+                    } else {
+                        qsort(col, row, sizeof(double), __compare);
+                    }
+                    for (int r = 0; r< row;r++) {
+                        array[r][c] = col[r];
+                    }
+                    free(col);
+                }
+                break;
+            }
+        default:
+            {
+                double* flat = (double*)malloc(row * column * sizeof(double));
+                int index = 0;
+                for (int r= 0; r < row; r++) {
+                    for (int c = 0; c < column; c ++) {
+                        flat[index++] = array[r][c];
+                    }
+                }
+                if (reverse) {
+                    qsort(flat, row * column, sizeof(double), __reverse_compare);
+                } else {
+                    qsort(flat, row * column, sizeof(double), __compare);
+                }
+                index = 0;
+                for (int r = 0; r < row; r ++) {
+                    for (int c= 0; c < column;c++) {
+                        array[r][c] = flat[index++];
+                    }
+                }
+                free(flat);
+                break;
+            }
+    }
+}
+
+Matrix * sort(const Matrix * matrix, const bool reverse, const int dim, const double mask_nan)
+{
+    Matrix * new = deepcopy(matrix);
+    sortNoReturned(new->data, matrix->row, matrix->column, reverse, dim, mask_nan);
+    return new;
+}
+
+Matrix * uniform(const double start, const double end, const int row, const int column, const int seed, const bool use)
 {
     if (use)
         srand(seed);
@@ -1138,12 +1317,36 @@ Matrix * uniform(const double start, const double end, const int row, const int 
     return new;
 }
 
-Matrix * normal(const double mu, const double sigma,
-    const int row, const int column, const int start, const int end, const int seed, bool use)
+Matrix * normal(const double mu, const double sigma, const int row, const int column, const int seed, const bool use)
 {
+    if(use)
+        srand(seed);
     Matrix* new = __new__(row, column);
-
+    for(int r = 0; r < row; ++r){
+        for(int c = 0; c < column; ++c){
+            new->data[r][c] = sqrt(-2 * log((double)rand() / RAND_MAX)) * cos(M_PI * 2 * (double)rand() / RAND_MAX) * sigma + mu;
+        }
+    }
     return new;
 }
 
-Matrix * poisson(const double lambda, const int row, const int column, const int seed, bool use);
+Matrix * poisson(const double lambda, const int row, const int column, const int seed, const bool use){
+    if(use)
+        srand(seed);
+    Matrix * new = __new__(row, column);
+    double p = 1.0;
+    int k = 0;
+    const double L  = exp(-lambda);
+    for(int r = 0; r < row; ++r){
+        for(int c = 0; c < column; ++c){
+            p = 1.0;
+            k = 0;
+            while(p >= L) {
+                ++k;
+                p *= (double)rand() / RAND_MAX;
+            }
+            new->data[r][c] = k;
+        }
+    }
+    return new;
+}

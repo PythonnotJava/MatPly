@@ -125,6 +125,9 @@ int main()
     //     {INFINITY, 1, 6, 4, 6, 2}};
     Matrix * matrix11 = (Matrix*)mathBasement2reverse(dat, 0, 2, 3, 6, false);
     VisibleMatrix(matrix11);
+    shuffle(matrix11->data, 3, 6);
     __delete__(matrix11);
+    printf("%f\n", inf);
+    printf("%d\n", INFINITY >= NAN);
     return 0;
 }

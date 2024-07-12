@@ -15,4 +15,8 @@ void ** copy_array(void ** datas, const int row, const int column);
 // 获取一个开辟内存但是未分配数据的二维浮点数数组
 double ** allocateButNoNumbers(const int row, const int column);
 
+// 对一个一维数组转成二维数组
+double ** oneTotwoArray(const double * array, const int row, const int column);
+
+
 #endif //MATPLY_AUXILIARY_H

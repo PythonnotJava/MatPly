@@ -1,7 +1,3 @@
-import 'dart:ffi';
-import 'package:ffi/ffi.dart';
-import 'package:path/path.dart';
-
 import 'matply.dart';
 
 main(){
@@ -49,7 +45,7 @@ main(){
   // (matrixType * 2).visible();
   // matrixType.kronecker(matrixType1).visible();
   // MatrixType.E(n: 5)..visible()..visible_spc();
-  set_round('%.8f');
+  set_visible_round('%.8f');
   MatrixType mt = MatrixType([
     [3, 6, 2],
     [0, 9, 2],
@@ -140,8 +136,25 @@ main(){
   // mt8.sort(dim: 0, mask_nan: 100).visible();
   // mt8.sort(dim: 1, mask_nan: e).visible();
   // mt8..sort_no_returned(dim: 1, mask_nan: e)..visible();
-  set_round('%.8f,');
+  set_visible_round('%.3f,');
   // MatrixType.uniform(row: 10, column: 100, start: 1, end: 2, seed: 42).visible();
   // MatrixType.normal(row: 10, column: 100, mu: 2, sigma: 1.5).visible();
   // MatrixType.poisson(lambda: 5, row: 1, column: 1000).visible();
+  // MatrixType mt8 = MatrixType([
+  //   [3, 6, 2, 10, -0.1, -inf],
+  //   [0, 9, 2, 4, 6, 0],
+  //   [1, 1, nan, 4, 6, inf]
+  // ]);
+  // mt8.visible();
+  // print(mt8.rank);
+  // mt8..setMask(mask_nan: 2, mask_inf: 1, isNegativeInf: true, both: true)..visible();
+  // mt8.rref().visible();
+  MatrixType mt10 = MatrixType( [
+      [1.0, 2.0, 3.0, 4.0, 5.0],
+      [6.0, 7.0, 8.0, 9.0, 10.0],
+      [11.0, 12.0, 13.0, 14.0, 15.0]
+  ]);
+  mt10.visible();
+  mt10.rref().visible();
+  print(mt10.rank);
 }

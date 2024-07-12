@@ -1,7 +1,4 @@
-import 'dart:ffi';
-import 'dart:io' show Directory;
-import 'package:ffi/ffi.dart';
-import 'package:path/path.dart' as path;
+part of 'core.dart';
 
 final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
 
@@ -10,9 +7,13 @@ Pointer<Double> _e = dylib.lookup('e').cast<Double>();
 Pointer<Double> _nan = dylib.lookup('_nan').cast<Double>();
 Pointer<Double> _inf = dylib.lookup('inf').cast<Double>();
 
-typedef set__round__base__ffi = Void Function(Pointer<Utf8> new_round);
-typedef set__round__base = void Function(Pointer<Utf8> new_round);
+/// global functions
+typedef set__visible__round__base__ffi = Void Function(Pointer<Utf8> new_round);
+typedef set__visible__round__base = void Function(Pointer<Utf8> new_round);
+final set__visible__round__base matply__set__visible__round = dylib.lookupFunction<set__visible__round__base__ffi, set__visible__round__base>('set_visible_round');
 
+typedef set__round__base__ffi = Void Function(Double number);
+typedef set__round__base = void Function(double number);
 final set__round__base matply__set__round = dylib.lookupFunction<set__round__base__ffi, set__round__base>('set_round');
 
 // 定义与SpecialAttributes结构体对应的Dart结构体
@@ -263,80 +264,95 @@ typedef normal__base = Pointer<Matrix> Function(double mu, double sigma, int row
 typedef poisson__base__ffi = Pointer<Matrix> Function(Double lambda, Int32 row, Int32 column, Int32 seed, Bool use);
 typedef poisson__base = Pointer<Matrix> Function(double lambda, int row, int column, int seed, bool use);
 
-final __new__base matply__new__ = dylib.lookup<NativeFunction<__new__base__ffi>>('__new__').asFunction<__new__base>();
-final __init__base matply__init__ = dylib.lookup<NativeFunction<__init__base__ffi>>('__init__').asFunction<__init__base>();
-final VisibleMatrix__base matply__VisibleMatrix = dylib.lookup<NativeFunction<VisibleMatrix__base__ffi>>('VisibleMatrix').asFunction<VisibleMatrix__base>();
-final __delete__base matply__delete__ = dylib.lookup<NativeFunction<__delete__base__ffi>>('__delete__').asFunction<__delete__base>();
-final filled__base matply__filled = dylib.lookup<NativeFunction<filled__base__ffi>>('filled').asFunction<filled__base>();
-final zeros__base matply__zeros = dylib.lookup<NativeFunction<zeros__base__ffi>>('zeros').asFunction<zeros__base>();
-final ones__base matply__ones = dylib.lookup<NativeFunction<ones__base__ffi>>('ones').asFunction<ones__base>();
-final VisibleMatrixSpc__base matply__VisibleMatrixSpc = dylib.lookup<NativeFunction<VisibleMatrixSpc__base__ffi>>('VisibleMatrixSpc').asFunction<VisibleMatrixSpc__base>();
-final row__base matply__row_ = dylib.lookup<NativeFunction<row__base__ffi>>('row_').asFunction<row__base>();
-final column__base matply__column_ = dylib.lookup<NativeFunction<column__base__ffi>>('column_').asFunction<column__base>();
-final at__base matply__at = dylib.lookup<NativeFunction<at__base__ffi>>('at').asFunction<at__base>();
-final transpose__base matply__transpose = dylib.lookup<NativeFunction<transpose__base__ffi>>('transpose').asFunction<transpose__base>();
-final exchangeR__base matply__exchangeR = dylib.lookup<NativeFunction<exchangeR__base__ffi>>('exchangeR').asFunction<exchangeR__base>();
-final multiplyR__base matply__multiplyR = dylib.lookup<NativeFunction<multiplyR__base__ffi>>('multiplyR').asFunction<multiplyR__base>();
-final addR__base matply__addR = dylib.lookup<NativeFunction<addR__base__ffi>>('addR').asFunction<addR__base>();
-final addC__base matply__addC = dylib.lookup<NativeFunction<addC__base__ffi>>('addC').asFunction<addC__base>();
-final exchangeC__base matply__exchangeC = dylib.lookup<NativeFunction<exchangeC__base__ffi>>('exchangeC').asFunction<exchangeC__base>();
-final multiplyC__base matply__multiplyC = dylib.lookup<NativeFunction<multiplyC__base__ffi>>('multiplyC').asFunction<multiplyC__base>();
-final addNumber__base matply__addNumber = dylib.lookup<NativeFunction<addNumber__base__ffi>>('addNumber').asFunction<addNumber__base>();
-final addNumberNoReturned__base matply__addNumberNoReturned = dylib.lookup<NativeFunction<addNumberNoReturned__base__ffi>>('addNumberNoReturned').asFunction<addNumberNoReturned__base>();
-final addMatrix__base matply__addMatrix = dylib.lookup<NativeFunction<addMatrix__base__ffi>>('addMatrix').asFunction<addMatrix__base>();
-final addMatrixNoReturned__base matply__addMatrixNoReturned = dylib.lookup<NativeFunction<addMatrixNoReturned__base__ffi>>('addMatrixNoReturned').asFunction<addMatrixNoReturned__base>();
-final minusMatrix__base matply__minusMatrix = dylib.lookup<NativeFunction<minusMatrix__base__ffi>>('minusMatrix').asFunction<minusMatrix__base>();
-final minusMatrixNoReturned__base matply__minusMatrixNoReturned = dylib.lookup<NativeFunction<minusMatrixNoReturned__base__ffi>>('minusMatrixNoReturned').asFunction<minusMatrixNoReturned__base>();
-final matmul__base matply__matmul = dylib.lookup<NativeFunction<matmul__base__ffi>>('matmul').asFunction<matmul__base>();
-final multiplyMatrixNoReturned__base matply__multiplyMatrixNoReturned = dylib.lookup<NativeFunction<multiplyMatrixNoReturned__base__ffi>>('multiplyMatrixNoReturned').asFunction<multiplyMatrixNoReturned__base>();
-final multiplyMatrix__base matply__multiplyMatrix = dylib.lookup<NativeFunction<multiplyMatrix__base__ffi>>('multiplyMatrix').asFunction<multiplyMatrix__base>();
-final multiplyNumberNoReturned__base matply__multiplyNumberNoReturned = dylib.lookup<NativeFunction<multiplyNumberNoReturned__base__ffi>>('multiplyNumberNoReturned').asFunction<multiplyNumberNoReturned__base>();
-final multiplyNumber__base matply__multiplyNumber = dylib.lookup<NativeFunction<multiplyNumber__base__ffi>>('multiplyNumber').asFunction<multiplyNumber__base>();
-final kronecker__base matply__kronecker = dylib.lookup<NativeFunction<kronecker__base__ffi>>('kronecker').asFunction<kronecker__base>();
-final divide__base matply__divide = dylib.lookup<NativeFunction<divide__base__ffi>>('divide').asFunction<divide__base>();
-final divideNoReturned__base matply__divideNoReturned = dylib.lookup<NativeFunction<divideNoReturned__base__ffi>>('divideNoReturned').asFunction<divideNoReturned__base>();
-final arrange__base matply__arrange = dylib.lookup<NativeFunction<arrange__base__ffi>>('arrange').asFunction<arrange__base>();
-final linspace__base matply__linspace = dylib.lookup<NativeFunction<linspace__base__ffi>>('linspace').asFunction<linspace__base>();
-final trace__base matply__trace = dylib.lookup<NativeFunction<trace__base__ffi>>('trace').asFunction<trace__base>();
-final det__base matply__det = dylib.lookup<NativeFunction<det__base__ffi>>('det').asFunction<det__base>();
-final E__base matply__E = dylib.lookup<NativeFunction<E__base__ffi>>('E').asFunction<E__base>();
-final cofactor__base matply__cofacto = dylib.lookup<NativeFunction<cofactor__base__ffi>>('cofactor').asFunction<cofactor__base>();
-final inverse__base matply__inverse = dylib.lookup<NativeFunction<inverse__base__ffi>>('inverse').asFunction<inverse__base>();
-final adjugate__base matply__adjugate = dylib.lookup<NativeFunction<adjugate__base__ffi>>('adjugate').asFunction<adjugate__base>();
-final deepcopy__base matply__deepcopy = dylib.lookup<NativeFunction<deepcopy__base__ffi>>('deepcopy').asFunction<deepcopy__base>();
-final compare__base matply__compare = dylib.lookup<NativeFunction<compare__base__ffi>>('compare').asFunction<compare__base>();
-final sum__base matply__sum = dylib.lookup<NativeFunction<sum__base__ffi>>('sum').asFunction<sum__base>();
-final mean__base matply__mean = dylib.lookup<NativeFunction<mean__base__ffi>>('mean').asFunction<mean__base>();
-final max__base matply__max = dylib.lookup<NativeFunction<max__base__ffi>>('max').asFunction<max__base>();
-final min__base matply__min = dylib.lookup<NativeFunction<min__base__ffi>>('min').asFunction<min__base>();
-final data_isSame__base matply__data__isSame = dylib.lookup<NativeFunction<data_isSame__base__ffi>>('data_isSame').asFunction<data_isSame__base>();
-final spc__isSame__base matply__spc__isSame = dylib.lookup<NativeFunction<spc__isSame__base__ffi>>('spc__isSame').asFunction<spc__isSame__base>();
-final cut__base matply__cut = dylib.lookup<NativeFunction<cut__base__ffi>>('cut').asFunction<cut__base>();
-final cutfree__base matply__cutfree = dylib.lookup<NativeFunction<cutfree__base__ffi>>('cutfree').asFunction<cutfree__base>();
-final concatR__base matply__concatR = dylib.lookup<NativeFunction<concatR__base__ffi>>('concatR').asFunction<concatR__base>();
-final concatC__base matply__concatC = dylib.lookup<NativeFunction<concatC__base__ffi>>('concatC').asFunction<concatC__base>();
-final resizeR__base matply__resizeR = dylib.lookup<NativeFunction<resizeR__base__ffi>>('resizeR').asFunction<resizeR__base>();
-final resizeC__base matply__resizeC = dylib.lookup<NativeFunction<resizeC__base__ffi>>('resizeC').asFunction<resizeC__base>();
-final reshape__base matply__reshape = dylib.lookup<NativeFunction<reshape__base__ffi>>('reshape').asFunction<reshape__base>();
-final resizeRNoReturned__base matply__resizeRNoReturned = dylib.lookup<NativeFunction<resizeRNoReturned__base__ffi>>('resizeRNoReturned').asFunction<resizeRNoReturned__base>();
-final resizeCNoReturned__base matply__resizeCNoReturned = dylib.lookup<NativeFunction<resizeCNoReturned__base__ffi>>('resizeCNoReturned').asFunction<resizeCNoReturned__base>();
-final reshapeNoReturned__base matply__reshapeNoReturned = dylib.lookup<NativeFunction<reshapeNoReturned__base__ffi>>('reshapeNoReturned').asFunction<reshapeNoReturned__base>();
-final setSeed__base matply__setSeed = dylib.lookup<NativeFunction<setSeed__base__ffi>>('setSeed').asFunction<setSeed__base>();
-final mathBasement1__base matply__mathBasement1 = dylib.lookup<NativeFunction<mathBasement1__base__ffi>>('mathBasement1').asFunction<mathBasement1__base>();
-final mathBasement2__base matply__mathBasement2 = dylib.lookup<NativeFunction<mathBasement2__base__ffi>>('mathBasement2').asFunction<mathBasement2__base>();
-final mathBasement2reverse__base matply__mathBasement2reverse = dylib.lookup<NativeFunction<mathBasement2reverse__base__ffi>>('mathBasement2reverse').asFunction<mathBasement2reverse__base>();
-final allocateButNoNumbers__base matply__allocateButNoNumbers = dylib.lookup<NativeFunction<allocateButNoNumbers__base__ffi>>('allocateButNoNumbers').asFunction<allocateButNoNumbers__base>();
-final sigmoid__base matply__sigmoid = dylib.lookup<NativeFunction<sigmoid__base__ffi>>('sigmoid').asFunction<sigmoid__base>();
-final softmax__base matply__softmax = dylib.lookup<NativeFunction<softmax__base__ffi>>('softmax').asFunction<softmax__base>();
-final shuffle__base matply__shuffle = dylib.lookup<NativeFunction<shuffle__base__ffi>>('shuffle').asFunction<shuffle__base>();
-final sortNoReturned__base matply__sortNoReturned = dylib.lookup<NativeFunction<sortNoReturned__base__ffi>>('sortNoReturned').asFunction<sortNoReturned__base>();
-final sort__base matply__sort = dylib.lookup<NativeFunction<sort__base__ffi>>('sort').asFunction<sort__base>();
-final uniform__base matply__uniform = dylib.lookup<NativeFunction<uniform__base__ffi>>('uniform').asFunction<uniform__base>();
-final normal__base matply__normal = dylib.lookup<NativeFunction<normal__base__ffi>>('normal').asFunction<normal__base>();
-final poisson__base matply__poisson = dylib.lookup<NativeFunction<poisson__base__ffi>>('poisson').asFunction<poisson__base>();
+typedef rref__base__ffi = Pointer<Matrix> Function(Pointer<Pointer<Double>> matrix, Int32 row, Int32 column);
+typedef rref__base = Pointer<Matrix> Function(Pointer<Pointer<Double>> matrix, int row, int column);
 
+typedef set_mask_nan__base__ffi = Void Function(Pointer<Matrix> matrix, Double number);
+typedef set_mask_nan__base  = void Function(Pointer<Matrix> matrix, double number);
 
-dynamic debug_matply_api<T>(T Function() func, [String info = 'Error Here']) {
+typedef set_mask_inf__base__ffi = Void Function(Pointer<Matrix> matrix, Double number, Bool isNegativeInf);
+typedef set_mask_inf__base  = void Function(Pointer<Matrix> matrix, double number, bool isNegativeInf);
+
+typedef rank__base__ffi = Int32 Function(Pointer<Matrix> matrix);
+typedef rank__base  = int Function(Pointer<Matrix> matrix);
+
+final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
+final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
+final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
+final __delete__base matply__delete__ = dylib.lookupFunction<__delete__base__ffi, __delete__base>('__delete__');
+final filled__base matply__filled = dylib.lookupFunction<filled__base__ffi, filled__base>('filled');
+final zeros__base matply__zeros = dylib.lookupFunction<zeros__base__ffi, zeros__base>('zeros');
+final ones__base matply__ones = dylib.lookupFunction<ones__base__ffi, ones__base>('ones');
+final VisibleMatrixSpc__base matply__VisibleMatrixSpc = dylib.lookupFunction<VisibleMatrixSpc__base__ffi, VisibleMatrixSpc__base>('VisibleMatrixSpc');
+final row__base matply__row_ = dylib.lookupFunction<row__base__ffi, row__base>('row_');
+final column__base matply__column_ = dylib.lookupFunction<column__base__ffi, column__base>('column_');
+final at__base matply__at = dylib.lookupFunction<at__base__ffi, at__base>('at');
+final transpose__base matply__transpose = dylib.lookupFunction<transpose__base__ffi, transpose__base>('transpose');
+final exchangeR__base matply__exchangeR = dylib.lookupFunction<exchangeR__base__ffi, exchangeR__base>('exchangeR');
+final multiplyR__base matply__multiplyR = dylib.lookupFunction<multiplyR__base__ffi, multiplyR__base>('multiplyR');
+final addR__base matply__addR = dylib.lookupFunction<addR__base__ffi, addR__base>('addR');
+final addC__base matply__addC = dylib.lookupFunction<addC__base__ffi, addC__base>('addC');
+final exchangeC__base matply__exchangeC = dylib.lookupFunction<exchangeC__base__ffi, exchangeC__base>('exchangeC');
+final multiplyC__base matply__multiplyC = dylib.lookupFunction<multiplyC__base__ffi, multiplyC__base>('multiplyC');
+final addNumber__base matply__addNumber = dylib.lookupFunction<addNumber__base__ffi, addNumber__base>('addNumber');
+final addNumberNoReturned__base matply__addNumberNoReturned = dylib.lookupFunction<addNumberNoReturned__base__ffi, addNumberNoReturned__base>('addNumberNoReturned');
+final addMatrix__base matply__addMatrix = dylib.lookupFunction<addMatrix__base__ffi, addMatrix__base>('addMatrix');
+final addMatrixNoReturned__base matply__addMatrixNoReturned = dylib.lookupFunction<addMatrixNoReturned__base__ffi, addMatrixNoReturned__base>('addMatrixNoReturned');
+final minusMatrix__base matply__minusMatrix = dylib.lookupFunction<minusMatrix__base__ffi, minusMatrix__base>('minusMatrix');
+final minusMatrixNoReturned__base matply__minusMatrixNoReturned = dylib.lookupFunction<minusMatrixNoReturned__base__ffi, minusMatrixNoReturned__base>('minusMatrixNoReturned');
+final matmul__base matply_matmul = dylib.lookupFunction<matmul__base__ffi, matmul__base>('matmul');
+final multiplyMatrixNoReturned__base matply__multiplyMatrixNoReturned = dylib.lookupFunction<multiplyMatrixNoReturned__base__ffi, multiplyMatrixNoReturned__base>('multiplyMatrixNoReturned');
+final multiplyMatrix__base matply__multiplyMatrix = dylib.lookupFunction<multiplyMatrix__base__ffi, multiplyMatrix__base>('multiplyMatrix');
+final multiplyNumberNoReturned__base matply__multiplyNumberNoReturned = dylib.lookupFunction<multiplyNumberNoReturned__base__ffi, multiplyNumberNoReturned__base>('multiplyNumberNoReturned');
+final multiplyNumber__base matply__multiplyNumber = dylib.lookupFunction<multiplyNumber__base__ffi, multiplyNumber__base>('multiplyNumber');
+final kronecker__base matply__kronecker = dylib.lookupFunction<kronecker__base__ffi, kronecker__base>('kronecker');
+final divide__base matply__divide = dylib.lookupFunction<divide__base__ffi, divide__base>('divide');
+final divideNoReturned__base matply__divideNoReturned = dylib.lookupFunction<divideNoReturned__base__ffi, divideNoReturned__base>('divideNoReturned');
+final arrange__base matply__arrange = dylib.lookupFunction<arrange__base__ffi, arrange__base>('arrange');
+final linspace__base matply__linspace = dylib.lookupFunction<linspace__base__ffi, linspace__base>('linspace');
+final trace__base matply__trace = dylib.lookupFunction<trace__base__ffi, trace__base>('trace');
+final det__base matply__det = dylib.lookupFunction<det__base__ffi, det__base>('det');
+final E__base matply__E = dylib.lookupFunction<E__base__ffi, E__base>('E');
+final cofactor__base matply__cofacto = dylib.lookupFunction<cofactor__base__ffi, cofactor__base>('cofactor');
+final inverse__base matply__inverse = dylib.lookupFunction<inverse__base__ffi, inverse__base>('inverse');
+final adjugate__base matply__adjugate = dylib.lookupFunction<adjugate__base__ffi, adjugate__base>('adjugate');
+final deepcopy__base matply__deepcopy = dylib.lookupFunction<deepcopy__base__ffi, deepcopy__base>('deepcopy');
+final compare__base matply__compare = dylib.lookupFunction<compare__base__ffi, compare__base>('compare');
+final sum__base matply__sum = dylib.lookupFunction<sum__base__ffi, sum__base>('sum');
+final mean__base matply__mean = dylib.lookupFunction<mean__base__ffi, mean__base>('mean');
+final max__base matply__max = dylib.lookupFunction<max__base__ffi, max__base>('max');
+final min__base matply__min = dylib.lookupFunction<min__base__ffi, min__base>('min');
+final data_isSame__base matply__data__isSame = dylib.lookupFunction<data_isSame__base__ffi, data_isSame__base>('data_isSame');
+final spc__isSame__base matply__spc__isSame = dylib.lookupFunction<spc__isSame__base__ffi, spc__isSame__base>('spc__isSame');
+final cut__base matply__cut = dylib.lookupFunction<cut__base__ffi, cut__base>('cut');
+final cutfree__base matply__cutfree = dylib.lookupFunction<cutfree__base__ffi, cutfree__base>('cutfree');
+final concatR__base matply__concatR = dylib.lookupFunction<concatR__base__ffi, concatR__base>('concatR');
+final concatC__base matply__concatC = dylib.lookupFunction<concatC__base__ffi, concatC__base>('concatC');
+final resizeR__base matply__resizeR = dylib.lookupFunction<resizeR__base__ffi, resizeR__base>('resizeR');
+final resizeC__base matply__resizeC = dylib.lookupFunction<resizeC__base__ffi, resizeC__base>('resizeC');
+final reshape__base matply__reshape = dylib.lookupFunction<reshape__base__ffi, reshape__base>('reshape');
+final resizeRNoReturned__base matply__resizeRNoReturned = dylib.lookupFunction<resizeRNoReturned__base__ffi, resizeRNoReturned__base>('resizeRNoReturned');
+final resizeCNoReturned__base matply__resizeCNoReturned = dylib.lookupFunction<resizeCNoReturned__base__ffi, resizeCNoReturned__base>('resizeCNoReturned');
+final reshapeNoReturned__base matply__reshapeNoReturned = dylib.lookupFunction<reshapeNoReturned__base__ffi, reshapeNoReturned__base>('reshapeNoReturned');
+final setSeed__base matply__setSeed = dylib.lookupFunction<setSeed__base__ffi, setSeed__base>('setSeed');
+final mathBasement1__base matply_mathBasement1 = dylib.lookupFunction<mathBasement1__base__ffi, mathBasement1__base>('mathBasement1');
+final mathBasement2__base matply_mathBasement2 = dylib.lookupFunction<mathBasement2__base__ffi, mathBasement2__base>('mathBasement2');
+final mathBasement2reverse__base matply_mathBasement2reverse = dylib.lookupFunction<mathBasement2reverse__base__ffi, mathBasement2reverse__base>('mathBasement2reverse');
+final allocateButNoNumbers__base matply__allocateButNoNumbers = dylib.lookupFunction<allocateButNoNumbers__base__ffi, allocateButNoNumbers__base>('allocateButNoNumbers');
+final sigmoid__base matply__sigmoid = dylib.lookupFunction<sigmoid__base__ffi, sigmoid__base>('sigmoid');
+final softmax__base matply__softmax = dylib.lookupFunction<softmax__base__ffi, softmax__base>('softmax');
+final shuffle__base matply__shuffle = dylib.lookupFunction<shuffle__base__ffi, shuffle__base>('shuffle');
+final sortNoReturned__base matply__sortNoReturned = dylib.lookupFunction<sortNoReturned__base__ffi, sortNoReturned__base>('sortNoReturned');
+final sort__base matply__sort = dylib.lookupFunction<sort__base__ffi, sort__base>('sort');
+final uniform__base matply__uniform = dylib.lookupFunction<uniform__base__ffi, uniform__base>('uniform');
+final normal__base matply__normal = dylib.lookupFunction<normal__base__ffi, normal__base>('normal');
+final poisson__base matply__poisson = dylib.lookupFunction<poisson__base__ffi, poisson__base>('poisson');
+final rref__base matply__rref = dylib.lookupFunction<rref__base__ffi, rref__base>('rref');
+final set_mask_nan__base matply__set_mask_nan = dylib.lookupFunction<set_mask_nan__base__ffi, set_mask_nan__base>('set_mask_nan');
+final set_mask_inf__base matply__set_mask_inf = dylib.lookupFunction<set_mask_inf__base__ffi, set_mask_inf__base>('set_mask_inf');
+final rank__base matply__rank = dylib.lookupFunction<rank__base__ffi, rank__base>('rank');
+
+dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
     return func();
   } catch (e) {

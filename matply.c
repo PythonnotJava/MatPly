@@ -6,9 +6,16 @@
 #include "Auxiliary.h"
 
 const char * ROUND = "%.5lf\t";  // 输出精度
+static double DROUND = 1e-10;
 
-void set_round(const char* new_round) {
+void set_visible_round(const char* new_round)
+{
     ROUND = new_round;
+}
+
+extern void set_round(const double number)
+{
+    DROUND = number;
 }
 
 __attribute__((visibility("default"))) double PI = M_PI;
@@ -26,7 +33,7 @@ Matrix * __new__(const int row, const int column){
     return new;
 }
 
-Matrix * __init__(const int row, const int column, double data[][column], Spc * spc){
+Matrix * __init__(const int row, const int column, double ** data, const Spc * spc){
     Matrix * new = __new__(row, column);
     new->data = (double **) malloc(sizeof (double *) * row);
     for (int r = 0;r < row;r++){
@@ -1349,4 +1356,102 @@ Matrix * poisson(const double lambda, const int row, const int column, const int
         }
     }
     return new;
+}
+
+Matrix* rref( double **array, const int row, const int column)
+{
+    Matrix *new = __init__(row, column, array, NULL);
+    int lead = 0;
+    
+    for (int r = 0; r < row; r++) {
+        if (lead >= column) {
+            return new;
+        }
+        
+        int i = r;
+        while (fabs(new->data[i][lead]) < DROUND) { // 这里不能设置!=0，因为计算精度问题
+            i++;
+            if (i == row) {
+                i = r;
+                lead++;
+                if (lead == column) {
+                    return new;
+                }
+            }
+        }
+        
+        if (i != r) {
+            double temp = 0.;
+            for (int c= 0;c< column; c ++) {
+                temp = new->data[i][c];
+                new->data[i][c] = new->data[r][c];
+                new->data[r][c] = temp;
+            }
+        }
+        
+        double lv = new->data[r][lead];
+        for (int c= 0; c < column; c ++) {
+            new->data[r][c] /= lv;
+        }
+        
+        for (int r1= 0; r1 < row; r1++) {
+            if (r1!= r) {
+                lv = new->data[r1][lead];
+                for (int c = 0; c< column; c ++) {
+                    new->data[r1][c] -= lv * new->data[r][c];
+                }
+            }
+        }
+        lead++;
+    }
+    return new;
+}
+
+void set_mask_nan(const Matrix * matrix, const double number)
+{
+    for(int r = 0;r < matrix->row;r ++)
+    {
+        for (int c = 0;c < matrix->column;c ++)
+        {
+            if (isnan(matrix->data[r][c]))
+                matrix->data[r][c] = number;
+        }
+    }
+}
+
+void set_mask_inf(const Matrix * matrix, const double number, const bool isNegativeInf)
+{
+    double data = 0.;
+    for(int r = 0;r < matrix->row;r ++)
+    {
+        for (int c = 0;c < matrix->column;c ++)
+        {
+            data = matrix->data[r][c];
+            if (isinf(data) && data > 0 && !isNegativeInf)
+                matrix->data[r][c] = number;
+            else if (isinf(data) && data < 0 && isNegativeInf)
+                matrix->data[r][c] = number;
+        }
+    }
+}
+
+int rank(const Matrix * matrix)
+{
+    Matrix *newMatrix = rref(matrix->data, matrix->row, matrix->column);
+    int counter = 0;
+    const int n = matrix->row > matrix->column ? matrix->column : matrix->row;
+    for (int r = 0; r < n; r++) {
+        int isZeroRow = 1;
+        for (int c = 0; c < matrix->column; c ++) {
+            if (fabs(newMatrix->data[r][c]) > DROUND)
+            {
+                isZeroRow = 0;
+                break;
+            }
+        }
+        if (!isZeroRow)
+            counter++;
+    }
+    __delete__(newMatrix);
+    return counter;
 }

@@ -56,3 +56,18 @@ double ** allocateButNoNumbers(const int row, const int column)
         new[r] = (double*)malloc(sizeof(double) * column);
     return new;
 }
+
+double ** oneTotwoArray(const double * array, const int row, const int column)
+{
+    double ** new = (double**)malloc(sizeof(double *) * row);
+    int counter = 0;
+    for (int r = 0;r<row;r++)
+    {
+        new[r] = (double*)malloc(sizeof(double) *column);
+        for (int c = 0;c < column;c ++)
+        {
+            new[r][c] = array[counter++];
+        }
+    }
+    return new;
+}

@@ -1,3 +1,5 @@
+part of 'core.dart';
+
 // 涉及到row与column不符合的错误
 class ShapeRangeError implements Exception {
   final String message;

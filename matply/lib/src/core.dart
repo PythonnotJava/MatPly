@@ -10,8 +10,10 @@ part 'errors.dart';
 
 /// Global functions
 void set_visible_round(String format) => matply__set__visible__round(format.toNativeUtf8());
+String get_visible_round() => matply__get__visible__round().toDartString();
 
 void set_round(double number) => matply__set__round(number);
+double get_round() => matply__get__round();
 
 void set_seed(int seed) => matply__setSeed(seed);
 

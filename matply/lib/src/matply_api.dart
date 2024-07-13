@@ -1,6 +1,6 @@
 part of 'core.dart';
 
-final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
+final dylib = DynamicLibrary.open(path.join(Directory.current.path, 'lib/src/C', 'matply.dll'));
 
 Pointer<Double> _Pi = dylib.lookup('PI').cast<Double>();
 Pointer<Double> _e = dylib.lookup('e').cast<Double>();
@@ -15,6 +15,14 @@ final set__visible__round__base matply__set__visible__round = dylib.lookupFuncti
 typedef set__round__base__ffi = Void Function(Double number);
 typedef set__round__base = void Function(double number);
 final set__round__base matply__set__round = dylib.lookupFunction<set__round__base__ffi, set__round__base>('set_round');
+
+typedef get__visible__round__base__ffi = Pointer<Utf8> Function();
+typedef get__visible__round__base = Pointer<Utf8> Function();
+final get__visible__round__base matply__get__visible__round = dylib.lookupFunction<get__visible__round__base__ffi, get__visible__round__base>('get_visible_round');
+
+typedef get__round__base__ffi = Double Function();
+typedef get__round__base = double Function();
+final get__round__base matply__get__round = dylib.lookupFunction<get__round__base__ffi, get__round__base>('get_round');
 
 // 定义与SpecialAttributes结构体对应的Dart结构体
 final class SpecialAttributes extends Struct {
@@ -276,6 +284,12 @@ typedef set_mask_inf__base  = void Function(Pointer<Matrix> matrix, double numbe
 typedef rank__base__ffi = Int32 Function(Pointer<Matrix> matrix);
 typedef rank__base  = int Function(Pointer<Matrix> matrix);
 
+typedef oneTotwoArray__base__ffi = Pointer<Pointer<Double>> Function(Pointer<Double> array, Int32 row, Int32 column);
+typedef oneTotwoArray__base = Pointer<Pointer<Double>> Function(Pointer<Double> array, int row, int column);
+
+typedef __init__point__data__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Pointer<SpecialAttributes> spc);
+typedef __init__point__data__base = Pointer<Matrix> Function(int row, int column, Pointer<Pointer<Double>> data, Pointer<SpecialAttributes> spc);
+
 final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
@@ -350,7 +364,9 @@ final poisson__base matply__poisson = dylib.lookupFunction<poisson__base__ffi, p
 final rref__base matply__rref = dylib.lookupFunction<rref__base__ffi, rref__base>('rref');
 final set_mask_nan__base matply__set_mask_nan = dylib.lookupFunction<set_mask_nan__base__ffi, set_mask_nan__base>('set_mask_nan');
 final set_mask_inf__base matply__set_mask_inf = dylib.lookupFunction<set_mask_inf__base__ffi, set_mask_inf__base>('set_mask_inf');
+final __init__point__data__base matply__init__point__data__ = dylib.lookupFunction<__init__point__data__base__ffi, __init__point__data__base>('__init__point__data__');
 final rank__base matply__rank = dylib.lookupFunction<rank__base__ffi, rank__base>('rank');
+final oneTotwoArray__base matply__oneTotwoArray = dylib.lookupFunction<oneTotwoArray__base__ffi, oneTotwoArray__base>('oneTotwoArray');
 
 dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
@@ -377,3 +393,5 @@ final double e = _e.value;
 final double inf = _inf.value;  // 正无穷大，和Dart的内置相通，下同
 final double negativeinf = -inf;  // 负无穷大
 final double nan = _nan.value;  // 非法数据
+
+

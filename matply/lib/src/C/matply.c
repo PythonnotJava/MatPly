@@ -5,17 +5,24 @@
 #include "matply.h"
 #include "Auxiliary.h"
 
-const char * ROUND = "%.5lf\t";  // 输出精度
+static const char * ROUND = "%.5lf\t";
 static double DROUND = 1e-10;
 
 void set_visible_round(const char* new_round)
 {
     ROUND = new_round;
 }
-
-extern void set_round(const double number)
+const char * get_visible_round()
+{
+    return ROUND;
+}
+void set_round(const double number)
 {
     DROUND = number;
+}
+ double get_round()
+{
+    return DROUND;
 }
 
 __attribute__((visibility("default"))) double PI = M_PI;
@@ -41,9 +48,10 @@ Matrix * __init__(const int row, const int column, double ** data, const Spc * s
         memcpy(new->data[r], data[r], column * sizeof(double));
     }
     new->spc = (Spc *) malloc(sizeof (Spc));;
-    *new->spc = (Spc){false, false, false, false, false, false};
     if (spc)
         *new->spc = *spc;
+    else
+        *new->spc = (Spc){false, false, false, false, false, false};
     return new;
 }
 
@@ -54,6 +62,8 @@ Matrix * __init__point__data__(const int row, const int column, double ** data, 
     new->spc = (Spc *) malloc(sizeof (Spc));
     if (spc)
         *new->spc = *spc;
+    else
+        *new->spc = (Spc){false, false, false, false, false, false};
     return new;
 }
 
@@ -1455,3 +1465,4 @@ int rank(const Matrix * matrix)
     __delete__(newMatrix);
     return counter;
 }
+

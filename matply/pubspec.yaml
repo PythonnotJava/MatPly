@@ -1,5 +1,14 @@
 name: MatPly_Dart
+
 description: "Dart Matrix realized by C Dll"
+
+repository: https://github.com/PythonnotJava/MatPly
+
+author:
+  name: PythonnotJava
+
+
+
 version: 1.0.0+1
 environment:
   sdk: '^3.4.3'
@@ -7,4 +16,3 @@ environment:
 dependencies:
   ffi:
   path:
-

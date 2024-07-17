@@ -14,7 +14,7 @@
 #include <string.h>
 #endif
 
-double getMin(const double *arr, const int len)
+double getMin( double *arr,  int len)
 {
     double min = arr[0];
 
@@ -26,7 +26,7 @@ double getMin(const double *arr, const int len)
     return min;
 }
 
-double getMax(const double * arr, const int len)
+double getMax( double * arr,  int len)
 {
     double max = arr[0];
 
@@ -38,7 +38,7 @@ double getMax(const double * arr, const int len)
     return max;
 }
 
-void ** copy_array(void ** datas, const int row, const int column)
+void ** copy_array(void ** datas,  int row,  int column)
 {
     void ** new = (void **)malloc(sizeof(void**) * row);
     for(int r = 0;r < row;r ++)
@@ -49,7 +49,7 @@ void ** copy_array(void ** datas, const int row, const int column)
     return new;
 }
 
-double ** allocateButNoNumbers(const int row, const int column)
+double ** allocateButNoNumbers( int row,  int column)
 {
     double ** new = (double**)malloc(sizeof(double *) * row);
     for (int r=0;r < row;r++)
@@ -57,7 +57,7 @@ double ** allocateButNoNumbers(const int row, const int column)
     return new;
 }
 
-double ** oneTotwoArray(const double * array, const int row, const int column)
+double ** oneTotwoArray( double * array,  int row,  int column)
 {
     double ** new = (double**)malloc(sizeof(double *) * row);
     int counter = 0;
@@ -70,4 +70,13 @@ double ** oneTotwoArray(const double * array, const int row, const int column)
         }
     }
     return new;
+}
+
+void insertSorted(double * arr, int len, double value){
+    int i = len - 1;
+    while (i >= 0 && arr[i] > value) {
+        arr[i + 1] = arr[i];
+        i--;
+    }
+    arr[i + 1] = value;
 }

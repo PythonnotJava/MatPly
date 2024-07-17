@@ -5,18 +5,18 @@
 #include "matply.h"
 #include "Auxiliary.h"
 
-static const char * ROUND = "%.5lf\t";
+static  char * ROUND = "%.5lf\t";
 static double DROUND = 1e-10;
 
-void set_visible_round(const char* new_round)
+void set_visible_round( char* new_round)
 {
     ROUND = new_round;
 }
-const char * get_visible_round()
+ char * get_visible_round()
 {
     return ROUND;
 }
-void set_round(const double number)
+void set_round( double number)
 {
     DROUND = number;
 }
@@ -30,18 +30,98 @@ __attribute__((visibility("default"))) double e = M_E;
 __attribute__((visibility("default"))) double _nan = NAN;
 __attribute__((visibility("default"))) double inf = INFINITY;
 
-Matrix * __new__(const int row, const int column){
+///////////////////////////////////////////////////////////////////////////////////////
+
+void initMp(Matrix * matrix)
+{
+    if (matrix && __Mp.instances == 0)
+    {
+        MatrixLinked *matrix_linked = (MatrixLinked *)malloc(sizeof(MatrixLinked));
+        matrix_linked->matrix = matrix;
+        matrix_linked->next = NULL;
+        __Mp.matrix_linked = matrix_linked;
+    }
+}
+
+void addToMp(Matrix * matrix)
+{
+    MatrixLinked *matrix_linked = (MatrixLinked *)malloc(sizeof(MatrixLinked));
+    matrix_linked->matrix = matrix;
+    matrix_linked->next = NULL;
+    if (__Mp.instances == 0)
+        __Mp.matrix_linked = matrix_linked;
+    else
+    {
+        MatrixLinked *current = __Mp.matrix_linked;
+        while (current->next)
+            current = current->next;
+        current->next = matrix_linked;
+    }
+    __Mp.instances++;
+}
+
+void freeMp(bool visible)
+{
+    MatrixLinked * current = __Mp.matrix_linked;
+    MatrixLinked * temp = NULL;
+    if (visible)
+    {
+        while (current)
+        {
+            temp = current;
+            current = current->next;
+            __delete__(temp->matrix);
+            printf("Free Memory in location : %p\n", (void *)temp);
+            free(temp);
+        }
+    }else
+    {
+        while (current)
+        {
+            temp = current;
+            current = current->next;
+            __delete__(temp->matrix);
+            free(temp);
+        }
+    }
+    __Mp.instances = 0;
+}
+
+int getInstances() {return __Mp.instances;}
+///////////////////////////////////////////////////////////////////////////////////////
+
+void visible_data( double**matrix,  int row,  int column) {
+    printf("[\n");
+    for (int r = 0; r <row; r++) {
+        printf(" [");
+        for (int c = 0; c < column; c++) {
+            printf(ROUND, matrix[r][c]);
+            if (c < column - 1) {
+                printf(" ");
+            }
+        }
+        printf("]");
+        if (r <row - 1) {
+            printf("\n");
+        }
+    }
+    printf("\n]\n");
+}
+
+// __new__方法类似面向对象中的类初始化方法
+Matrix * __new__( int row,  int column){
     Matrix * new = (Matrix *) malloc(sizeof (Matrix));
     new->column = column;
     new->row = row;
     new->data = allocateButNoNumbers(row, column);
     new->spc = (Spc *) malloc(sizeof (Spc));;
     *new->spc = (Spc){false, false, false, false, false, false};
+    Signal(new)
     return new;
 }
 
-Matrix * __init__(const int row, const int column, double ** data, const Spc * spc){
-    Matrix * new = __new__(row, column);
+Matrix * __init__( int row,  int column,  double ** data,  Spc * spc){
+    Matrix * new = __new__(row, column);  // 已经Signal了
     new->data = (double **) malloc(sizeof (double *) * row);
     for (int r = 0;r < row;r++){
         new->data[r] = (double *) malloc(sizeof (double ) * column);
@@ -55,9 +135,9 @@ Matrix * __init__(const int row, const int column, double ** data, const Spc * s
     return new;
 }
 
-Matrix * __init__point__data__(const int row, const int column, double ** data, Spc * spc)
+Matrix * __init__point__data__( int row,  int column, double ** data,  Spc * spc)
 {
-    Matrix * new = __new__(row, column);
+    Matrix * new = __new__(row, column);  // 已经Signal了
     new->data = data;
     new->spc = (Spc *) malloc(sizeof (Spc));
     if (spc)
@@ -67,7 +147,7 @@ Matrix * __init__point__data__(const int row, const int column, double ** data, 
     return new;
 }
 
-void VisibleMatrix(const Matrix *matrix) {
+void VisibleMatrix( Matrix *matrix) {
     printf("[\n");
     for (int r = 0; r < matrix->row; r++) {
         printf(" [");
@@ -85,7 +165,7 @@ void VisibleMatrix(const Matrix *matrix) {
     printf("\n]\n");
 }
 
-void __delete__data__(double ** data, const int row)
+void __delete__data__(double ** data,  int row)
 {
     if(data)
     {
@@ -107,21 +187,22 @@ void __delete__(Matrix * matrix){
     }
 }
 
-Matrix * filled(const int row, const int column, const double number)
+double ** filled( int row,  int column,  double number)
 {
-    Matrix * new = __new__(row, column);
+    double ** new = (double **)malloc(sizeof(double *) * row);
     for (int r = 0;r < row;r++)
     {
+        new[r] = (double * )malloc(sizeof(double ) * column);
         for (int c = 0;c < column;c ++)
-            new->data[r][c] = number;
+            new[r][c] = number;
     }
     return new;
 }
 
-Matrix * zeros(const int row, const int column){return filled(row, column, 0.);}
-Matrix * ones(const int row, const int column){return filled(row, column, 1.);}
+double ** zeros( int row,  int column){return filled(row, column, 0.);}
+double ** ones( int row,  int column){return filled(row, column, 1.);}
 
-void VisibleMatrixSpc(const Matrix * matrix)
+void VisibleMatrixSpc( Matrix * matrix)
 {
     printf("Matrix identityMatrix == %s\n", matrix->spc->identityMatrix ? "true" : "false");
     printf("Matrix upperTriangularMatrix == %s\n", matrix->spc->upperTriangularMatrix ? "true" : "false");
@@ -131,238 +212,238 @@ void VisibleMatrixSpc(const Matrix * matrix)
     printf("Matrix principalDiagonalMatrix == %s\n", matrix->spc->principalDiagonalMatrix ? "true" : "false");
 }
 
-double * row_(const int row, const Matrix * matrix)
+double * row_( int row,  int column,  double ** data)
 {
-    double *arr = (double *)malloc(matrix->column * sizeof(double));
-    for (int c = 0;c < matrix->column;c ++)
-        arr[c] = matrix->data[row][c];
-    return arr;
-}
-
-double * column_(const int column, const Matrix * matrix)
-{
-    double *arr = (double*)malloc(matrix->row *sizeof(double));
-    for (int r = 0;r < matrix->row;r++)
-        arr[r] = matrix->data[r][column];
-    return arr;
-}
-
-double at(const int row, const int column, const Matrix * matrix) {return matrix->data[row][column];}
-
-bool isSquare(const Matrix * matrix) {return matrix->column == matrix->row;}
-
-Matrix * transpose(const Matrix * matrix)
-{
-    Matrix * new = __new__(matrix->column, matrix->row);
-    for (int r = 0; r < matrix->row; r++) {
-        for (int c = 0; c < matrix->column; c++) {
-            new->data[c][r] = matrix->data[r][c];
-        }
-    }
-    new->spc->identityMatrix = matrix->spc->identityMatrix;
-    new->spc->singularMatrix = matrix->spc->singularMatrix;
-    new->spc->lowerTriangularMatrix = matrix->spc->lowerTriangularMatrix;
-    new->spc->upperTriangularMatrix = matrix->spc->upperTriangularMatrix;
-    new->spc->subDiagonalMatrix = matrix->spc->subDiagonalMatrix;
-    new->spc->principalDiagonalMatrix = matrix->spc->principalDiagonalMatrix;
+    double *new = (double *)malloc(column * sizeof(double));
+    for (int c = 0;c < column;c ++)
+        new[c] = data[row][c];
     return new;
 }
 
-void exchangeR(const int row1, const int row2, const Matrix * matrix)
+double * column_( int row,  int column,  double ** data)
+{
+    double *new = (double*)malloc(row *sizeof(double));
+    for (int r = 0;r < row;r++)
+        new[r] = data[r][column];
+    return new;
+}
+
+double at( int row,  int column,  double ** data){return data[row][column];}
+
+bool isSquare( Matrix * matrix) {return matrix->column == matrix->row;}
+
+double ** transpose( int row,  int column,  double ** data)
+{
+    double ** new = (double ** )allocateButNoNumbers(column, row);
+    for (int r = 0; r < row; r++) {
+        for (int c = 0; c < column; c++) {
+            new[c][r] = data[r][c];
+        }
+    }
+    return new;
+}
+
+void exchangeR( int column, double ** data,  int row1,  int row2)
 {
     if (row1 != row2)
     {
         double temp = 0.;
-        for (int c= 0;c < matrix->column;c ++)
+        for (int c= 0;c < column;c ++)
         {
-            temp = matrix->data[row1][c];
-            matrix->data[row1][c] = matrix->data[row2][c];
-            matrix->data[row2][c] = temp;
+            temp = data[row1][c];
+            data[row1][c] = data[row2][c];
+            data[row2][c] = temp;
         }
     }
 }
 
-void multiplyR(const int row, const double size, const Matrix * matrix)
+void multiplyR( int row,  int column, double **data,  double size)
 {
-    for (int c = 0;c < matrix->column;c ++)
-        matrix->data[row][c] *= size;
+    for (int c = 0;c < column;c ++)
+        data[row][c] *= size;
 }
 
 
-void addR(const int row1, const int row2, const double size, const Matrix * matrix)
+void addR( int column, double **data,  int row1,  int row2,  double size)
 {
-    for (int c = 0;c < matrix->column;c ++)
-        matrix->data[row1][c] += matrix->data[row2][c] * size;
+    for (int c = 0;c < column;c ++)
+        data[row1][c] += data[row2][c] * size;
 }
 
-void exchangeC(const int column1, const int column2, const Matrix * matrix)
+void exchangeC( int row, double ** data,  int column1,  int column2)
 {
     if (column1 != column2)
     {
         double temp = 0.;
-        for (int r= 0;r < matrix->row;r ++)
+        for (int r= 0;r < row;r ++)
         {
-            temp = matrix->data[r][column1];
-            matrix->data[r][column1] = matrix->data[r][column2];
-            matrix->data[r][column2] = temp;
+            temp = data[r][column1];
+            data[r][column1] = data[r][column2];
+            data[r][column2] = temp;
         }
     }
 }
 
-void multiplyC(const int column, const double size, const Matrix * matrix)
+void multiplyC( int row,  int column, double **data,  double size)
 {
-    for (int r = 0;r < matrix->row;r ++)
-        matrix->data[r][column] *= size;
+    for (int r = 0;r < row;r ++)
+        data[r][column] *= size;
 }
 
-void addC(const int column1, const int column2, const double size, const Matrix * matrix)
+void addC( int row, double **data,  int column1,  int column2,  double size)
 {
-    for (int r = 0;r < matrix->row;r++)
-        matrix->data[r][column1] += matrix->data[r][column2] * size;
+    for (int r = 0;r < row;r++)
+        data[r][column1] += data[r][column2] * size;
 }
 
-Matrix * addNumber(const double number, const Matrix * matrix)
+double ** addNumber( int row,  int column,  double **data,  double number)
 {
-    Matrix * new = __new__(matrix->row, matrix->column);
-    for (int r = 0;r < matrix->row;r++)
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix->column;c ++)
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
         {
-            new->data[r][c] = matrix->data[r][c] + number;
+            new[r][c] = data[r][c] + number;
         }
     }
     return new;
 }
 
-Matrix * addMatrix(const Matrix * matrix1, const Matrix * matrix2)
+double ** addMatrix( int row,  int column,  double **data1,  double **data2)
 {
-    Matrix * new = __new__(matrix1->row, matrix1->column);
-    for (int r = 0;r < matrix1->row;r++)
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix1->column;c ++)
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
         {
-            new->data[r][c] = matrix1->data[r][c] + matrix2->data[r][c];
+            new[r][c] = data1[r][c] + data2[r][c];
         }
     }
     return new;
 }
 
-void addNumberNoReturned(const double number, const Matrix * matrix)
+void addNumberNoReturned( int row,  int column, double **data,  double number)
 {
-    for (int r = 0;r < matrix->row;r++)
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix->column;c ++)
+        for (int c = 0;c < column;c ++)
         {
-            matrix->data[r][c] += number;
+            data[r][c] += number;
         }
     }
 }
 
-void addMatrixNoReturned(const Matrix * matrix1, const Matrix * matrix2)
+void addMatrixNoReturned( int row,  int column, double **data1,  double **data2)
 {
-    for (int r = 0;r < matrix1->row;r++)
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix1->column;c ++)
+        for (int c = 0;c < column;c ++)
         {
-            matrix1->data[r][c] += matrix2->data[r][c];
+            data1[r][c] += data2[r][c];
         }
     }
 }
 
-Matrix * minusMatrix(const Matrix * matrix1, const Matrix * matrix2)
+double ** minusMatrix( int row,  int column,  double **data1,  double **data2)
 {
-    Matrix * new = __new__(matrix1->row, matrix1->column);
-    for (int r = 0;r < matrix1->row;r++)
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix1->column;c ++)
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
         {
-            new->data[r][c] = matrix1->data[r][c] - matrix2->data[r][c];
+            new[r][c] = data1[r][c] - data2[r][c];
         }
     }
     return new;
 }
 
-void minusMatrixNoReturned(const Matrix * matrix1, const Matrix * matrix2)
+void minusMatrixNoReturned( int row,  int column, double **data1,  double **data2)
 {
-    for (int r = 0;r < matrix1->row;r++)
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix1->column;c ++)
+        for (int c = 0;c < column;c ++)
         {
-            matrix1->data[r][c] -= matrix2->data[r][c];
+            data1[r][c] -= data2[r][c];
         }
     }
 }
 
-Matrix * matmul(const Matrix * matrix1, const Matrix * matrix2)
+double ** matmul( int row,  int column,  double **data1,  double **data2)
 {
-    Matrix * new = __new__(matrix1->row, matrix2->column);
-    for (int i = 0; i < matrix1->row; ++i) {
-        for (int j = 0; j < matrix2->column; ++j) {
-            new->data[i][j] = 0.0;
-            for (int k = 0; k < matrix1->column; ++k) {
-                new->data[i][j] += matrix1->data[i][k] * matrix2->data[k][j];
+    double ** new = (double **)malloc(sizeof(double*) * row);
+    for (int r = 0; r < row; r++) {
+        for (int c = 0; c < column;c ++) {
+            new[r][c] = 0.0;
+            for (int k = 0; k < column;k++) {
+                new[r][c] += data1[r][k] * data2[k][c];
             }
         }
     }
     return new;
 }
 
-void multiplyMatrixNoReturned(const Matrix * matrix1, const Matrix * matrix2)
+void multiplyMatrixNoReturned( int row,  int column, double **data1,  double **data2)
 {
-    for (int r = 0;r <matrix1->row;r++)
+    for (int r = 0;r <row;r++)
     {
-        for (int c =0;c<matrix1->column;c ++)
+        for (int c =0;c<column;c ++)
         {
-            matrix1->data[r][c] *= matrix2->data[r][c];
+            data1[r][c] *= data2[r][c];
         }
     }
 }
 
-Matrix * multiplyMatrix(const Matrix * matrix1, const Matrix * matrix2)
+double ** multiplyMatrix( int row,  int column,  double **data1,  double **data2)
 {
-    Matrix * new = __new__(matrix1->row, matrix1->column);
-    for (int r = 0;r <matrix1->row;r++)
+    double ** new = (double**)malloc(sizeof(double *) * row);
+    for (int r = 0;r <row;r++)
     {
-        for (int c =0;c<matrix1->column;c ++)
+        new[r] = (double*)malloc(sizeof(double ) * column);
+        for (int c =0;c<column;c ++)
         {
-            new->data[r][c] = matrix1->data[r][c] * matrix2->data[r][c];
-        }
-    }
-    return new;
-}
-
-void multiplyNumberNoReturned(const double number, const Matrix * matrix)
-{
-    for(int r=0;r < matrix->row;r ++)
-    {
-        for (int c = 0;c < matrix->column;c ++)
-        {
-            matrix->data[r][c] *= number;
-        }
-    }
-}
-
-Matrix * multiplyNumber(const double number, const Matrix * matrix)
-{
-    Matrix * new = __new__(matrix->row, matrix->column);
-    for (int r = 0;r <matrix->row;r++)
-    {
-        for (int c =0;c<matrix->column;c ++)
-        {
-            new->data[r][c] = matrix->data[r][c] * number;
+            new[r][c] = data1[r][c] * data2[r][c];
         }
     }
     return new;
 }
 
-Matrix * kronecker(const Matrix * matrix1, const Matrix * matrix2)
+void multiplyNumberNoReturned( int row,  int column, double **data,  double number)
 {
-    Matrix * new = __new__(matrix1->row * matrix2->row, matrix1->column * matrix2->column);
-    for (int i = 0; i < matrix1->row; ++i) {
-        for (int j = 0; j < matrix1->column; ++j) {
-            for (int k = 0; k < matrix2->row; ++k) {
-                for (int l = 0; l < matrix2->column; ++l) {
-                    new->data[i * matrix2->row + k][j * matrix2->column + l] = matrix1->data[i][j] * matrix2->data[k][l];
+    for(int r=0;r < row;r ++)
+    {
+        for (int c = 0;c < column;c ++)
+        {
+            data[r][c] *= number;
+        }
+    }
+}
+
+double ** multiplyNumber( int row,  int column,  double **data,  double number)
+{
+    double ** new = (double**)malloc(sizeof(double*) *row);
+    for (int r = 0;r < row;r++)
+    {
+        new[r] = (double*)malloc(sizeof(double) * column);
+        for (int c =0;c< column;c ++)
+        {
+            new[r][c] = data[r][c] * number;
+        }
+    }
+    return new;
+}
+
+double ** kronecker( int row1,  int column1,  double **data1,  int row2,  int column2,  double **data2)
+{
+    double **new = (double **)malloc(sizeof(double *) * (row1 * row2));
+    for (int i = 0; i < row1; ++i) {
+        for (int k = 0; k < row2; ++k) {
+            new[i * row2 + k] = (double *)malloc(sizeof(double) * (column1 * column2));
+            for (int j = 0; j < column1; ++j) {
+                for (int l = 0; l < column2; ++l) {
+                    new[i * row2 + k][j * column2 + l] = data1[i][j] * data2[k][l];
                 }
             }
         }
@@ -370,130 +451,128 @@ Matrix * kronecker(const Matrix * matrix1, const Matrix * matrix2)
     return new;
 }
 
-Matrix * divide(const double number, const Matrix * matrix)
+double ** divide( int row,  int column,  double **data,  double number)
 {
-    Matrix * new = __new__(matrix->row, matrix->column);
-    for (int r = 0;r <matrix->row;r++)
+    double ** new = (double **)malloc(sizeof(double*) * row);
+    for (int r = 0;r <row;r++)
     {
-        for (int c =0;c<matrix->column;c ++)
+        for (int c =0;c<column;c ++)
         {
-            new->data[r][c] = matrix->data[r][c] / number;
+            new[r][c] = data[r][c] / number;
         }
     }
     return new;
 }
 
-void divideNoReturned(const double number, const Matrix * matrix)
+void divideNoReturned( int row,  int column, double **data,  double number)
 {
-    for (int r = 0;r <matrix->row;r++)
+    for (int r = 0;r <row;r++)
     {
-        for (int c =0;c<matrix->column;c ++)
+        for (int c =0;c < column;c ++)
         {
-            matrix->data[r][c] /= number;
+            data[r][c] /= number;
         }
     }
 }
 
-Matrix * arrange(const double start, const int row, const int column)
+double ** arrange( double start,  int row,  int column)
 {
-    Matrix* new = __new__(row, column);
+    double ** new = (double **)malloc(sizeof(double *) * row);
     double counter = start;
     for (int r = 0;r < row;r++)
     {
+        new[r] = (double *)malloc(sizeof(double) * column);
         for(int c = 0;c < column;c ++)
         {
-            new->data[r][c] = counter++;
+            new[r][c] = counter++;
         }
     }
     return new;
 }
 
-Matrix * linspace(const double start, const double end, const int row, const int column, const bool keep)
+double ** linspace( double start,  double end,  int row,  int column,  bool keep)
 {
-    const int counts = row * column;
-    const double step = keep ? (end - start) / (counts - 1) : (end - start) / counts;
-    Matrix* matrix = __new__(row, column);
+     int counts = row * column;
+     double step = keep ? (end - start) / (counts - 1) : (end - start) / counts;
+    double ** new = (double **)malloc(sizeof(double *) * row);
     double value = start;
     for (int r = 0; r < row; r++) {
         for (int c = 0; c< column; c ++) {
-            matrix->data[r][c] = value;
+            new[r][c] = value;
             value += step;
         }
     }
     if (keep)
-        matrix->data[row - 1][column - 1] = end;
-    return matrix;
+        new[row - 1][column - 1] = end;
+    return new;
 }
 
-double trace(const Matrix * matrix)
+double trace( int row,  int column,  double **data)
 {
-    const int n = matrix->row < matrix->column ? matrix->row : matrix->column;
+     int n = row < column ? row : column;
     double sum = 0.;
     for (int r = 0;r < n;r++)
-        sum += matrix->data[r][r];
+        sum += data[r][r];
     return sum;
 }
 
-
-double det(const Matrix *matrix) {
+double det( int row,  int column,  double **data)
+{
     double detValue = 1;
-    const int n = matrix->column;
-    Matrix * matrixcpy = deepcopy(matrix);
+     int n = row;
+    double ** matrixcpy = deepcopy(row, column, data);
 
     for (int i = 0; i < n; i++) {
         int max_row = i;
         for (int k = i + 1; k < n; k++) {
-            if (fabs(matrixcpy->data[k][i]) > fabs(matrixcpy->data[max_row][i])) {
+            if (fabs(matrixcpy[k][i]) > fabs(matrixcpy[max_row][i])) {
                 max_row = k;
             }
         }
-        if (matrixcpy->data[max_row][i] == 0) {
-            __delete__(matrixcpy);
+        if (matrixcpy[max_row][i] == 0) {
+            __delete__data__(matrixcpy, row);
             return 0;
         }
 
         if (max_row != i) {
-            double *temp = matrixcpy->data[max_row];
-            matrixcpy->data[max_row] = matrixcpy->data[i];
-            matrixcpy->data[i] = temp;
+            double *temp = matrixcpy[max_row];
+            matrixcpy[max_row] = matrixcpy[i];
+            matrixcpy[i] = temp;
             detValue = -detValue;
         }
-        detValue *= matrixcpy->data[i][i];
+        detValue *= matrixcpy[i][i];
         for (int k = i + 1; k < n; k++) {
-            const double factor = matrixcpy->data[k][i] / matrixcpy->data[i][i];
+             double factor = matrixcpy[k][i] / matrixcpy[i][i];
             for (int j = i; j < n; j++) {
-                matrixcpy->data[k][j] -= factor * matrixcpy->data[i][j];
+                matrixcpy[k][j] -= factor * matrixcpy[i][j];
             }
         }
     }
-    __delete__(matrixcpy);
+    __delete__data__(matrixcpy, row);
     return detValue;
 }
 
-Matrix * E(const int n)
+double ** E( int n)
 {
-    Matrix * new = (Matrix *) malloc(sizeof (Matrix));
-    new->column = n;
-    new->row = n;
-    new->data = (double **)calloc(n, sizeof (double *));
+    double**new = (double **)calloc(n, sizeof (double *));
     for (int r = 0;r < n;r++)
     {
-        new->data[r] = (double *) calloc(n, sizeof (double ));
-        new->data[r][r] = 1.;
+        new[r] = (double *) calloc(n, sizeof (double ));
+        new[r][r] = 1.;
     }
-    new->spc = (Spc *) malloc(sizeof (Spc));;
-    *new->spc = (Spc){false, false, false, false, false, false};
     return new;
 }
 
-Matrix * cofactor(const int row, const int column, const Matrix * matrix) {
-    Matrix * new = __new__(matrix->row - 1, matrix->column - 1);
+double ** cofactor( int row,  int column,  double ** data,  int prow,  int pcolumn)
+{
+    double **new = (double **)malloc(sizeof(double *) * (row - 1));
     int i = 0, j = 0;
-    for (int r = 0; r < matrix->row; r++) {
-        for (int c = 0; c < matrix->column; c ++) {
-            if (r != row && c != column) {
-                new->data[i][j++] = matrix->data[r][c];
-                if (j == matrix->column - 1) {
+    for (int r = 0; r < row; r++) {
+        new[r] = (double*)malloc(sizeof(double) *(column - 1));
+        for (int c = 0; c < column; c ++) {
+            if (r != prow && c != pcolumn) {
+                new[i][j++] = data[r][c];
+                if (j == column - 1) {
                     j = 0;
                     i++;
                 }
@@ -503,107 +582,108 @@ Matrix * cofactor(const int row, const int column, const Matrix * matrix) {
     return new;
 }
 
-Matrix * adjugate(const Matrix * matrix)
+double ** adjugate( int row,  int column,  double ** data)
 {
-    const int n = matrix->row;
-    Matrix * new = __new__(n, n);
-    for (int r = 0; r < n;r++)
+     int n = row;
+    double ** new = (double**)malloc(sizeof(double*) * row);
+
+    for (int r = 0; r < row; r++)
     {
-        for (int c = 0; c< n; c ++)
+        new[r] = (double*)malloc(sizeof(double) * column);
+
+        for (int c = 0; c < column; c++)
         {
-            Matrix * cof = cofactor(r, c, matrix);
-            new->data[c][r] = pow(-1, r + c) * det(cof);
-            __delete__(cof);
+            double ** cof = cofactor(row, column, data, r, c);
+            new[c][r] = pow(-1, r + c) * det(row - 1, column - 1, cof);
+            __delete__data__(cof, row);
         }
     }
+
     return new;
 }
 
-Matrix * inverse(const Matrix * matrix, const double det)
+double ** inverse( int row,  int column,  double ** data)
 {
-    const int n = matrix->row;
-    Matrix * new = __new__(n, n);
-
-    Matrix * adj = adjugate(matrix);
-
+     double _det = det(row, column, data);
+     int n = row;
+    double ** new = (double**)malloc(sizeof(double *) * row);
+    double ** adj = adjugate(row, column, data);
     for (int r = 0; r < n; r++) {
         for (int c = 0; c< n;  c ++) {
-            new->data[r][c] = adj->data[r][c] / det;
+            new[r][c] = adj[r][c] / _det;
         }
     }
-    __delete__(adj);
+    __delete__data__(adj, row);
     return new;
 }
 
-Matrix * deepcopy(const Matrix * matrix)
+double ** deepcopy( int row,  int column,  double **data)
 {
-    Matrix * new = __new__(matrix->row, matrix->column);
-
-    for (int r = 0; r < matrix->row; r++) {
-        memcpy(new->data[r], matrix->data[r], matrix->column * sizeof(double));
+    double ** new = (double**)malloc(sizeof(double*)*row);
+    for (int r = 0; r <row; r++) {
+        new[r] = (double*)malloc(sizeof(double) * column);
+        memcpy(new[r], data[r],  column * sizeof(double));
     }
-    new->spc = (Spc *) malloc(sizeof(Spc));
-    *new->spc = *matrix->spc;
-
     return new;
 }
 
-bool ** compare(const Matrix *matrix1, const Matrix *matrix2, const int mode)
+bool ** compare( int row,  int column,  double **data1,  double ** data2,  int mode)
 {
 
-    #define COMPARE_OP(op, m1, m2, n) {\
-        for (int r = 0;r < m1->row;r++)\
+    #define COMPARE_OP(op, d1, d2, col, ro, n) {\
+        for (int r = 0;r < ro;r++)\
         {\
-            new[r] = (bool *)malloc(sizeof(bool) * m1->column);\
-            for(int c=0;c < m1->column;c ++)\
+            n[r] = (bool *)malloc(sizeof(bool) * col);\
+            for(int c=0;c < col;c ++)\
             {\
-                n[r][c] = (m1->data[r][c] op m2->data[r][c]) ? true : false;\
+                n[r][c] = (d1[r][c] op d2[r][c]) ? true : false;\
             }\
         }\
     }\
 
-    bool **new = (bool **)malloc(sizeof(bool *) * matrix1->row);
+    bool **new = (bool **)malloc(sizeof(bool *) * row);
 
     switch (mode) {
     case 1:
-        COMPARE_OP(>, matrix1, matrix2, new);
+        COMPARE_OP(>, data1, data2, column, row, new);
         break;
     case 2:
-        COMPARE_OP(<, matrix1, matrix2, new);
+        COMPARE_OP(<, data1, data2, column, row, new);
         break;
     case 3:
-        COMPARE_OP(<=, matrix1, matrix2, new);
+        COMPARE_OP(<=, data1, data2, column, row, new);
         break;
     case 4:
-        COMPARE_OP(>=, matrix1, matrix2, new);
+        COMPARE_OP(>=, data1, data2, column, row, new);
         break;
     default:
-        COMPARE_OP(==, matrix1, matrix2, new);
+        COMPARE_OP(==, data1, data2, column, row, new);
         break;
     }
     #undef COMPARE_OP
     return new;
 }
 
-double *sum(const Matrix *matrix, const int dim) {
+double * sum( int row,  int column,  double **data,  int dim)
+{
     double *number = NULL;
     switch (dim) {
     case 0:
         {
-            number = (double *)calloc(matrix->row, sizeof(double));
-            for (int r = 0; r < matrix->row; r++) {
-                for (int c = 0; c < matrix->column; c++) {
-                    number[r] += matrix->data[r][c];
+            number = (double *)calloc(row, sizeof(double));
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < column; c++) {
+                    number[r] += data[r][c];
                 }
             }
             break;
         }
     case 1:
         {
-            number = (double *)calloc(matrix->column, sizeof(double));
-            for (int c = 0; c < matrix->column; c++) {
-                for (int r = 0; r < matrix->row; r++) {
-                    number[c] += matrix->data[r][c];
+            number = (double *)calloc(column, sizeof(double));
+            for (int c = 0; c < column; c++) {
+                for (int r = 0; r < row; r++) {
+                    number[c] += data[r][c];
                 }
             }
             break;
@@ -612,9 +692,9 @@ double *sum(const Matrix *matrix, const int dim) {
         {
             number = (double *)malloc(sizeof(double));
             *number = 0.0;
-            for (int r = 0; r < matrix->row; r++) {
-                for (int c = 0; c < matrix->column; c++) {
-                    *number += matrix->data[r][c];
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < column; c++) {
+                    *number += data[r][c];
                 }
             }
             break;
@@ -623,31 +703,30 @@ double *sum(const Matrix *matrix, const int dim) {
     return number;
 }
 
-
-double * mean(const Matrix * matrix, const int dim)
+double * mean( int row,  int column,  double **data,  int dim)
 {
     double *number = NULL;
     switch (dim)
     {
     case 0:
         {
-            number = sum(matrix, 0);
-            for (int r=0;r < matrix->row;r++)
-                number[r] /= matrix->column;
+            number = sum(row, column, data, 0);
+            for (int r=0;r < row;r++)
+                number[r] /=  column;
             break;
         }
     case 1:
         {
-            number = sum(matrix, 1);
-            for (int c = 0;c < matrix->column;c ++)
-                number[c] /= matrix->row;
+            number = sum(row, column, data, 1);
+            for (int c = 0;c < column;c ++)
+                number[c] /= row;
             break;
         }
     default:
         {
-            double *sumResult = sum(matrix, -1);
+            double *sumResult = sum(row, column, data, -1);
             number = (double *)malloc(sizeof(double));
-            *number = *sumResult / (matrix->row * matrix->column);
+            *number = *sumResult / (row * column);
             free(sumResult);
             break;
         }
@@ -655,27 +734,27 @@ double * mean(const Matrix * matrix, const int dim)
     return number;
 }
 
-double * min(const Matrix * matrix, const int dim)
+double * min( int row,  int column,  double **data,  int dim)
 {
     double * number = NULL;
     switch (dim)
     {
     case 0:
         {
-            number = (double *)malloc(sizeof(double) * matrix->row);
-            for (int r = 0; r < matrix->row; r++) {
-                number[r] = getMin(matrix->data[r], matrix->column);
+            number = (double *)malloc(sizeof(double) * row);
+            for (int r = 0; r < row; r++) {
+                number[r] = getMin(data[r], column);
             }
             break;
         }
     case 1:
         {
-            number = (double *)malloc(sizeof(double) * matrix->column);
-            for (int c = 0; c < matrix->column; c++) {
-                double min = matrix->data[0][c];
-                for (int r = 1; r < matrix->row; r++) {
-                    if (matrix->data[r][c] < min) {
-                        min = matrix->data[r][c];
+            number = (double *)malloc(sizeof(double) * column);
+            for (int c = 0; c < column; c++) {
+                double min = data[0][c];
+                for (int r = 1; r < row; r++) {
+                    if (data[r][c] < min) {
+                        min = data[r][c];
                     }
                 }
                 number[c] = min;
@@ -685,11 +764,11 @@ double * min(const Matrix * matrix, const int dim)
     default:
         {
             number = (double *)malloc(sizeof(double));
-            *number = matrix->data[0][0];
-            for (int r = 0; r < matrix->row; r++) {
-                for (int c = 0; c < matrix->column; c++) {
-                    if (matrix->data[r][c] < *number) {
-                        *number = matrix->data[r][c];
+            *number = data[0][0];
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < column; c++) {
+                    if (data[r][c] < *number) {
+                        *number = data[r][c];
                     }
                 }
             }
@@ -699,7 +778,7 @@ double * min(const Matrix * matrix, const int dim)
     return number;
 }
 
-bool data_isSame(const double ** data1, const double ** data2, const int row, const int column)
+bool data_isSame( int row,  int column,  double ** data1,  double ** data2)
 {
     for (int r = 0;r < row;r ++)
     {
@@ -712,7 +791,7 @@ bool data_isSame(const double ** data1, const double ** data2, const int row, co
     return true;
 }
 
-bool spc_isSame(const Spc * spc1, const Spc * spc2)
+bool spc_isSame( Spc * spc1,  Spc * spc2)
 {
     return (
         spc1->identityMatrix == spc2->identityMatrix &&
@@ -724,28 +803,28 @@ bool spc_isSame(const Spc * spc1, const Spc * spc2)
     );
 }
 
-double * max(const Matrix * matrix, const int dim)
+double * max( int row,  int column,  double **data,  int dim)
 {
     double * number = NULL;
     switch (dim)
     {
     case 0:
         {
-            number = (double*)malloc(sizeof(double) * matrix->row);
-            for (int r=0;r < matrix->row;r ++)
+            number = (double*)malloc(sizeof(double) * row);
+            for (int r=0;r < row;r ++)
             {
-                number[r] = getMax(matrix->data[r], matrix->column);
+                number[r] = getMax(data[r], column);
             }
             break;
         }
     case 1:
         {
-            number = (double*)malloc(sizeof(double) * matrix->column);
-            for (int c = 0; c < matrix->column; c++) {
-                double max = matrix->data[0][c];
-                for (int r = 1; r < matrix->row; r++) {
-                    if (matrix->data[r][c] > max) {
-                        max = matrix->data[r][c];
+            number = (double*)malloc(sizeof(double) * column);
+            for (int c = 0; c < column; c++) {
+                double max = data[0][c];
+                for (int r = 1; r < row; r++) {
+                    if (data[r][c] > max) {
+                        max = data[r][c];
                     }
                 }
                 number[c] = max;
@@ -755,13 +834,13 @@ double * max(const Matrix * matrix, const int dim)
     default:
         {
             number = (double *)malloc(sizeof(double));
-            *number = matrix->data[0][0];
-            for(int r=0;r < matrix->row;r++)
+            *number = data[0][0];
+            for(int r=0;r < row;r++)
             {
-                for (int c = 0;c < matrix->column;c ++)
+                for (int c = 0;c < column;c ++)
                 {
-                    if(matrix->data[r][c] > *number)
-                        *number = matrix->data[r][c];
+                    if(data[r][c] > *number)
+                        *number = data[r][c];
                 }
             }
             break;
@@ -770,88 +849,95 @@ double * max(const Matrix * matrix, const int dim)
     return number;
 }
 
-Matrix * cut(const Matrix * matrix, const int row, const int column, const int width, const int height)
+double** cut( int row,  int column,  double ** data,  int prow,  int pcolumn,  int width,  int height)
 {
-    Matrix * new = __new__(height, width);
+    double ** new = (double ** )malloc(sizeof(double *) *height);
     for (int r = 0; r < height; r++)
     {
+        new[r] = (double * )malloc(sizeof(double) * width);
         for (int c = 0; c < width; c ++)
         {
-            new->data[r][c] = matrix->data[row + r][column + c];
+            new[r][c] = data[prow + r][pcolumn + c];
         }
     }
     return new;
 }
 
-Matrix * cutfree(const Matrix * matrix, const int row, const int column, const int width, const int height, const double number)
+double ** cutfree( int row,  int column,  double ** data,
+     int prow,  int pcolumn,  int width,  int height,  double number)
 {
-    Matrix * new = __new__(height, width);
+    double ** new = (double **)malloc(sizeof(double *) * height);
+    for (int r = 0;r < row;r++)
+        new[r] = (double *)malloc(sizeof(double) *width);
     // 有效部分
-    const int valid_rows = (row + height <= matrix->row) ? height : matrix->row - row;
-    const int valid_cols = (column + width <= matrix->column) ? width : matrix->column - column;
+     int valid_rows = (prow + height <= row) ? height : row - prow;
+     int valid_cols = (pcolumn + width <=  column) ? width : column - pcolumn;
 
     for (int r = 0; r < valid_rows; r++) {
-        for (int c = 0; c < valid_cols; c++) {
-            new->data[r][c] = matrix->data[row + r][column + c];
+        for (int c = 0; c < valid_cols; c ++) {
+            new[r][c] = data[prow + r][pcolumn + c];
         }
     }
     // 越界部分
     if (valid_cols < width) {
         for (int r = 0; r < valid_rows; r++) {
-            for (int c = valid_cols; c < width; c++) {
-                new->data[r][c] = number;
+            for (int c = valid_cols; c < width; c ++) {
+                new[r][c] = number;
             }
         }
     }
     // 填补下边越界部分
     if (valid_rows < height) {
         for (int r = valid_rows; r < height; r++) {
-            for (int c = 0; c < width; c++) {
-                new->data[r][c] = number;
+            for (int c = 0; c < width; c ++) {
+                new[r][c] = number;
             }
         }
     }
     return new;
 }
 
-Matrix * concatR(const Matrix * matrix1, const Matrix * matrix2)
+double ** concatR( int row,  int column1,  int column2,  double ** data1,  double ** data2)
 {
-    Matrix * new = __new__(matrix1->row, matrix1->column + matrix2->column);
-    for (int r = 0;r < matrix1->row;r++)
+    double ** new = (double**)malloc(sizeof(double*) *row);
+    for (int r = 0;r < row;r++)
     {
-        for (int c = 0;c < matrix1->column;c ++)
+        new[r] = (double *)malloc(sizeof(double) * (column2 + column1));
+        for (int c = 0;c < column1;c ++)
         {
-            new->data[r][c] = matrix1->data[r][c];
+            new[r][c] = data1[r][c];
         }
-        for (int c = 0;c < matrix2->column;c ++)
+        for (int c = 0;c < column2;c ++)
         {
-            new->data[r][c + matrix1->column] = matrix2->data[r][c];
+            new[r][c + column1] = data2[r][c];
         }
     }
     return new;
 }
 
-Matrix * concatC(const Matrix * matrix1, const Matrix * matrix2)
+double ** concatC( int row1,  int row2,  int column,  double ** data1,  double ** data2)
 {
-    Matrix * new = __new__(matrix1->row + matrix2->row, matrix1->column);
-    for (int r = 0; r < matrix1->row; r++) {
-        for (int c = 0; c < matrix1->column; c++) {
-            new->data[r][c] = matrix1->data[r][c];
+    double ** new = (double**)malloc(sizeof(double*) *(row1 + row2));
+    for (int r = 0; r < row1; r++) {
+        for (int c = 0; c < column; c ++) {
+            new[r][c] =data1[r][c];
         }
     }
-    for (int r = 0; r < matrix2->row; r++) {
-        for (int c = 0; c < matrix2->column; c++) {
-            new->data[r + matrix1->row][c] = matrix2->data[r][c];
+    for (int r = 0; r < row2; r++) {
+        for (int c = 0; c < column; c ++) {
+            new[r + row1][c] = data2[r][c];
         }
     }
     return new;
 }
 
-Matrix * resizeR(const Matrix * matrix, const int row, const int column, const double number)
+double ** resizeR( int row,  int column,  double ** data,  int origin_row,  int origin_column,  double number)
 {
-    const int origin_size = matrix->column * matrix->row;
-    const int new_size = row * column;
-    Matrix * new = __new__(row, column);
+     int origin_size = origin_column * origin_row;
+     int new_size = row * column;
+    double ** new = (double **)malloc(sizeof(double*) * row);
+    for (int r = 0;r < row;r++)
+        new[r] = (double *)malloc(sizeof(double) * column);
     int counter = 0;
     if (origin_size >= new_size)
     {
@@ -859,60 +945,62 @@ Matrix * resizeR(const Matrix * matrix, const int row, const int column, const d
         {
             for (int c = 0;c < column;c ++)
             {
-                new->data[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+                new[r][c] = data[counter / origin_column][counter % origin_column];
                 counter++;
             }
         }
     }else
     {
-        for (int r = 0;r < matrix->row;r++)
+        for (int r = 0;r < origin_row;r++)
         {
-            for (int c = 0;c < matrix->column;c ++)
+            for (int c = 0;c < origin_column;c ++)
             {
-                new->data[counter / column][counter % column] = matrix->data[r][c];
+                new[counter / column][counter % column] = data[r][c];
                 counter++;
             }
         }
         while (counter < new_size) {
-            new->data[counter / column][counter % column] = number;
+            new[counter / column][counter % column] = number;
             counter++;
         }
     }
     return new;
 }
 
-Matrix * resizeC(const Matrix * matrix, const int row, const int column, const double number)
+double ** resizeC( int row,  int column,  double ** data,  int origin_row,  int origin_column,  double number)
 {
-    const int origin_size = matrix->column * matrix->row;
-    const int new_size = row * column;
-    Matrix *new = __new__(row, column);
+     int origin_size = origin_column * origin_row;
+     int new_size = row * column;
+    double ** new = (double **)malloc(sizeof(double*) * row);
+    for (int r = 0;r < row;r++)
+        new[r] = (double *)malloc(sizeof(double) * column);
     int counter = 0;
     if (origin_size >= new_size) {
         for (int c = 0; c < column; c ++) {
              for (int r = 0; r < row; r++){
-                new->data[r][c] = matrix->data[counter % matrix->row][counter / matrix->row];
+                new[r][c] = data[counter % origin_row][counter / origin_row];
                 counter++;
             }
         }
     } else {
-        for (int c = 0; c < matrix->column; c ++) {
-            for (int r = 0; r < matrix->row; r++) {
-                new->data[counter % row][counter / row] = matrix->data[r][c];
+        for (int c = 0; c < origin_column; c ++) {
+            for (int r = 0; r < origin_row; r++) {
+                new[counter % row][counter / row] = data[r][c];
                 counter++;
             }
         }
         while (counter < new_size) {
-            new->data[counter % row][counter / row] = number;
+            new[counter % row][counter / row] = number;
             counter++;
         }
     }
     return new;
 }
 
-void resizeRNoReturned(Matrix * matrix, const int row, const int column, const double number)
+void resizeRNoReturned( int row,  int column, double ** data,  int origin_row,  int origin_column,  double number)
 {
-    const int origin_size = matrix->column * matrix->row;
-    const int new_size = row * column;
+     int origin_size = origin_column * origin_column;
+     int new_size = row * column;
     double ** newdata = (double **)malloc(sizeof(double*) * row);
     for(int r =0;r<row;r++)
         newdata[r] = (double*)malloc(sizeof(double) *column);
@@ -923,17 +1011,17 @@ void resizeRNoReturned(Matrix * matrix, const int row, const int column, const d
         {
             for (int c = 0;c < column;c ++)
             {
-                newdata[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+                newdata[r][c] = data[counter / origin_column][counter % origin_column];
                 counter++;
             }
         }
     }else
     {
-        for (int r = 0;r < matrix->row;r++)
+        for (int r = 0;r < origin_row;r++)
         {
-            for (int c = 0;c < matrix->column;c ++)
+            for (int c = 0;c < origin_column;c ++)
             {
-                newdata[counter / column][counter % column] = matrix->data[r][c];
+                newdata[counter / column][counter % column] = data[r][c];
                 counter++;
             }
         }
@@ -942,16 +1030,14 @@ void resizeRNoReturned(Matrix * matrix, const int row, const int column, const d
             counter++;
         }
     }
-    __delete__data__(matrix->data, matrix->row);
-    matrix->data = newdata;
-    matrix->row = row;
-    matrix->column = column;
+    __delete__data__(data, origin_row);
+    data = newdata;
 }
 
-void resizeCNoReturned(Matrix * matrix, const int row, const int column, const double number)
+void resizeCNoReturned( int row,  int column, double ** data,  int origin_row,  int origin_column,  double number)
 {
-    const int origin_size = matrix->column * matrix->row;
-    const int new_size = row * column;
+     int origin_size = origin_column * origin_row;
+     int new_size = row * column;
     double ** newdata = (double **)malloc(sizeof(double*) * row);
     for(int r =0;r<row;r++)
         newdata[r] = (double*)malloc(sizeof(double) *column);
@@ -959,14 +1045,14 @@ void resizeCNoReturned(Matrix * matrix, const int row, const int column, const d
     if (origin_size >= new_size) {
         for (int c = 0; c < column; c ++) {
             for (int r = 0; r < row; r++){
-                newdata[r][c] = matrix->data[counter % matrix->row][counter / matrix->row];
+                newdata[r][c] = data[counter % origin_row][counter / origin_row];
                 counter++;
             }
         }
     } else {
-        for (int c = 0; c < matrix->column; c ++) {
-            for (int r = 0; r < matrix->row; r++) {
-                newdata[counter % row][counter / row] = matrix->data[r][c];
+        for (int c = 0; c < origin_column; c ++) {
+            for (int r = 0; r < origin_row; r++) {
+                newdata[counter % row][counter / row] = data[r][c];
                 counter++;
             }
         }
@@ -975,50 +1061,46 @@ void resizeCNoReturned(Matrix * matrix, const int row, const int column, const d
             counter++;
         }
     }
-    __delete__data__(matrix->data, matrix->row);
-    matrix->data = newdata;
-    matrix->row = row;
-    matrix->column = column;
+    __delete__data__(data, origin_row);
+    data = newdata;
 }
 
-void reshapeNoReturned(Matrix * matrix, const int row, const int column)
+void reshapeNoReturned( int row,  int column, double ** data,  int origin_row,  int origin_column)
 {
     double **newdata = (double**)malloc(sizeof(double *) * row);
     int counter = 0;
-    const int origin_row = matrix->row;
     for (int r=0;r < row;r ++)
     {
         newdata[r] = (double*)malloc(sizeof(double) * column);
         for(int c = 0;c <column;c ++)
         {
-            newdata[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+            newdata[r][c] = data[counter / origin_column][counter % origin_column];
             counter++;
         }
     }
-    __delete__data__(matrix->data, origin_row);
-    matrix->data = newdata;
-    matrix->column = column;
-    matrix->row = row;
+    __delete__data__(data, origin_row);
+    data = newdata;
 }
 
-Matrix * reshape(const Matrix * matrix, const int row, const int column)
+double ** reshape( int row,  int column,  double ** data,  int origin_column)
 {
-    Matrix * new = __new__(row, column);
+    double ** new = (double **)malloc(sizeof(double *) * row);
     int counter = 0;
     for (int r=0;r < row;r ++)
     {
+        new[r] = (double*)malloc(sizeof(double) * column);
         for(int c = 0;c <column;c ++)
         {
-            new->data[r][c] = matrix->data[counter / matrix->column][counter % matrix->column];
+            new[r][c] = data[counter / origin_column][counter % origin_column];
             counter++;
         }
     }
     return new;
 }
 
-void setSeed(const int seed) {srand(seed);}
+void setSeed( int seed) {srand(seed);}
 
-void * mathBasement1(const double ** matrix_array, const int mode, const int row, const int column, const bool returnArray)
+double ** mathBasement1( int row,  int column,  double ** data,  int mode)
 {
     double ** new = NULL;
 
@@ -1035,62 +1117,61 @@ void * mathBasement1(const double ** matrix_array, const int mode, const int row
 
     switch (mode) {
     case 0:
-        MATCH(new, acos, matrix_array, column, row);
+        MATCH(new, acos, data, column, row);
         break;
     case 1:
-        MATCH(new, asin, matrix_array, column, row);
+        MATCH(new, asin, data, column, row);
         break;
     case 2:
-        MATCH(new, atan, matrix_array, column, row);
+        MATCH(new, atan, data, column, row);
         break;
     case 3:
-        MATCH(new, cos, matrix_array, column, row);
+        MATCH(new, cos, data, column, row);
         break;
     case 4:
-        MATCH(new, sin, matrix_array, column, row);
+        MATCH(new, sin, data, column, row);
         break;
     case 5:
-        MATCH(new, tan, matrix_array, column, row);
+        MATCH(new, tan, data, column, row);
         break;
     case 6:
-        MATCH(new, cosh, matrix_array, column, row);
+        MATCH(new, cosh, data, column, row);
         break;
     case 7:
-        MATCH(new, sinh, matrix_array, column, row);
+        MATCH(new, sinh, data, column, row);
         break;
     case 8:
-        MATCH(new, tanh, matrix_array, column, row);
+        MATCH(new, tanh, data, column, row);
         break;
     case 9:
-        MATCH(new, exp, matrix_array, column, row);
+        MATCH(new, exp, data, column, row);
         break;
     case 10:
-        MATCH(new, log, matrix_array, column, row);
+        MATCH(new, log, data, column, row);
         break;
     case 11:
-        MATCH(new, log10, matrix_array, column, row);
+        MATCH(new, log10, data, column, row);
         break;
     case 12:
-        MATCH(new, sqrt, matrix_array, column, row);
+        MATCH(new, sqrt, data, column, row);
         break;
     case 13:
-        MATCH(new, ceil, matrix_array, column, row);
+        MATCH(new, ceil, data, column, row);
         break;
     case 14:
-        MATCH(new, floor, matrix_array, column, row);
+        MATCH(new, floor, data, column, row);
         break;
     case 15:
-        MATCH(new, fabs, matrix_array, column, row);
+        MATCH(new, fabs, data, column, row);
         break;
     default:
         break;
     }
     #undef MATCH
-    return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
+    return new;
 }
 
-void * mathBasement2(const double ** matrix_array, const int mode, const double number,
-    const int row, const int column, const bool returnArray)
+double ** mathBasement2( int row,  int column,  double ** data,  int mode,  double number)
 {
     double ** new = NULL;
 
@@ -1107,16 +1188,15 @@ void * mathBasement2(const double ** matrix_array, const int mode, const double 
 
     switch (mode)
     {
-        case 0: MATCH2(matrix_array, pow, new, column, row);break;
-        case 1: MATCH2(matrix_array, atan2, new, column, row);break;
+        case 0: MATCH2(data, pow, new, column, row);break;
+        case 1: MATCH2(data, atan2, new, column, row);break;
         default:break;
     }
     #undef MATCH2
-    return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
+    return new;
 }
 
-void * mathBasement2reverse(const double ** matrix_array, const int mode, const double number,
-    const int row, const int column, const bool returnArray)
+double ** mathBasement2reverse( int row,  int column,  double ** data,  int mode,  double number)
 {
     double **new = NULL;
 
@@ -1133,46 +1213,48 @@ void * mathBasement2reverse(const double ** matrix_array, const int mode, const 
 
     switch (mode)
     {
-        case 0: MATCH3(matrix_array, pow, new, column, row);
-        case 1: MATCH3(matrix_array, atan2, new, column, row);
+        case 0: MATCH3(data, pow, new, column, row);
+        case 1: MATCH3(data, atan2, new, column, row);
         default:break;
     }
     #undef MATCH3
-    return returnArray ? (void*)new : __init__point__data__(row, column, new, NULL);
+    return new;
 }
 
-Matrix * sigmoid(const Matrix * matrix)
+double ** sigmoid( int row,  int column,  double ** data)
 {
-    Matrix * new = __new__(matrix->row, matrix->column);
-    for (int r=0;r < matrix->row;r ++)
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r=0;r < row;r ++)
     {
-        for (int c = 0;c < matrix->column;c ++)
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
         {
-            new->data[r][c] = 1.0 / (1.0 + exp(-matrix->data[r][c]));
+            new[r][c] = 1.0 / (1.0 + exp(-data[r][c]));
         }
     }
     return new;
 }
 
-Matrix * softmax(const Matrix * matrix, const int dim, const double mask_nan, const double mask_inf, const double mask_neginf)
+double ** softmax( int row,  int column,  double ** data,  int dim,  double mask_nan,  double mask_inf,  double mask_neginf)
 {
-    Matrix * new = __new__(matrix->row, matrix->column);
-    double data = 0.;
-    for (int r = 0;r < matrix->row;r ++)
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    double dat = 0.;
+    for (int r = 0;r < row;r ++)
     {
-        for (int c = 0;c <matrix->column;c ++)
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c <column;c ++)
         {
-            data = matrix->data[r][c ];
-            if (!isnan(data) && !isinf(data))
-                new->data[r][c ] = exp(data);
+            dat = data[r][c ];
+            if (!isnan(dat) && !isinf(dat))
+                new[r][c ] = exp(dat);
             else
             {
-                if (isnan(data))
-                    new->data[r][c] = exp(mask_nan);
-                else if (isinf(data) && data > 0)
-                    new->data[r][c] = exp(mask_inf);
+                if (isnan(dat))
+                    new[r][c] = exp(mask_nan);
+                else if (isinf(dat) && dat > 0)
+                    new[r][c] = exp(mask_inf);
                 else
-                    new->data[r][c] = exp(mask_neginf);
+                    new[r][c] = exp(mask_neginf);
             }
         }
     }
@@ -1181,12 +1263,12 @@ Matrix * softmax(const Matrix * matrix, const int dim, const double mask_nan, co
     {
     case 0:
         {
-            double * sums = sum(new, 0);
-            for(int r=0;r < matrix->row;r ++)
+            double * sums = sum(row, column, new, 0);
+            for(int r=0;r < row;r ++)
             {
-                for (int c = 0;c < matrix->column;c ++)
+                for (int c = 0;c < column;c ++)
                 {
-                    new->data[r][c] /= sums[r];
+                    new[r][c] /= sums[r];
                 }
             }
             free(sums);
@@ -1194,12 +1276,12 @@ Matrix * softmax(const Matrix * matrix, const int dim, const double mask_nan, co
         }
     case 1:
         {
-            double * sums = sum(new, 1);
-            for(int r=0;r < matrix->row;r ++)
+            double * sums = sum(row, column, new, 1);
+            for(int r=0;r < row;r ++)
             {
-                for (int c = 0;c < matrix->column;c ++)
+                for (int c = 0;c < column;c ++)
                 {
-                    new->data[r][c] /= sums[c];
+                    new[r][c] /= sums[c];
                 }
             }
             free(sums);
@@ -1207,12 +1289,12 @@ Matrix * softmax(const Matrix * matrix, const int dim, const double mask_nan, co
         }
     default:
         {
-            double * sums = sum(new, -1);
-            for(int r=0;r < matrix->row;r ++)
+            double * sums = sum(row, column, new, -1);
+            for(int r=0;r < row;r ++)
             {
-                for (int c = 0;c < matrix->column;c ++)
+                for (int c = 0;c < column;c ++)
                 {
-                    new->data[r][c] /= *sums;
+                    new[r][c] /= *sums;
                 }
             }
             free(sums);
@@ -1222,37 +1304,39 @@ Matrix * softmax(const Matrix * matrix, const int dim, const double mask_nan, co
     return new;
 }
 
-void shuffle(double ** array, const int row, const int column)
+void shuffle(  int row,  int column, double ** data)
 {
+    srand(time(NULL));
     int ri = 0, rj = 0, temp = 0;
     for (int r = row - 1; r > 0; r--) {
         for (int c = column - 1; c > 0; c--) {
             ri = rand() % (r + 1);
             rj = rand() % (c + 1);
-            temp = array[r][c];
-            array[r][c] = array[ri][rj];
-            array[ri][rj] = temp;
+            temp = data[r][c];
+            data[r][c] = data[ri][rj];
+            data[ri][rj] = temp;
         }
     }
 }
 
 int __compare(const void* a, const void* b) {
-    const double diff = *(double*)a - *(double*)b;
+    double diff = *(double*)a - *(double*)b;
     return (diff > 0) - (diff < 0);
 }
 
 int __reverse_compare(const void* a, const void* b) {
-    const double diff = *(double*)b - *(double*)a;
+     double diff = *(double*)b - *(double*)a;
     return (diff > 0) - (diff < 0);
 }
 
-void sortNoReturned(double** array, const int row, const int column, const bool reverse, const int dim, const double mask_nan) {
+void sortNoReturned( int row,  int column, double ** data,  bool reverse,  int dim,  double mask_nan)
+{
     for (int r = 0;r < row;r ++)
     {
         for(int c = 0;c < column;c ++)
         {
-            if (isnan(array[r][c]))
-                array[r][c] = mask_nan;
+            if (isnan(data[r][c]))
+                data[r][c] = mask_nan;
         }
     }
     switch (dim) {
@@ -1260,9 +1344,9 @@ void sortNoReturned(double** array, const int row, const int column, const bool 
             {
                 for (int r = 0; r < row;r++) {
                     if (reverse) {
-                        qsort(array[r], column, sizeof(double), __reverse_compare);
+                        qsort(data[r], column, sizeof(double), __reverse_compare);
                     } else {
-                        qsort(array[r], column, sizeof(double), __compare);
+                        qsort(data[r], column, sizeof(double), __compare);
                     }
                 }
                 break;
@@ -1272,7 +1356,7 @@ void sortNoReturned(double** array, const int row, const int column, const bool 
                 for (int c = 0; c < column;c ++) {
                     double* col = (double*)malloc(row * sizeof(double));
                     for (int r = 0; r < row;r++) {
-                        col[r] = array[r][c];
+                        col[r] = data[r][c];
                     }
                     if (reverse) {
                         qsort(col, row, sizeof(double), __reverse_compare);
@@ -1280,7 +1364,7 @@ void sortNoReturned(double** array, const int row, const int column, const bool 
                         qsort(col, row, sizeof(double), __compare);
                     }
                     for (int r = 0; r< row;r++) {
-                        array[r][c] = col[r];
+                        data[r][c] = col[r];
                     }
                     free(col);
                 }
@@ -1292,7 +1376,7 @@ void sortNoReturned(double** array, const int row, const int column, const bool 
                 int index = 0;
                 for (int r= 0; r < row; r++) {
                     for (int c = 0; c < column; c ++) {
-                        flat[index++] = array[r][c];
+                        flat[index++] = data[r][c];
                     }
                 }
                 if (reverse) {
@@ -1303,7 +1387,7 @@ void sortNoReturned(double** array, const int row, const int column, const bool 
                 index = 0;
                 for (int r = 0; r < row; r ++) {
                     for (int c= 0; c < column;c++) {
-                        array[r][c] = flat[index++];
+                        data[r][c] = flat[index++];
                     }
                 }
                 free(flat);
@@ -1312,49 +1396,55 @@ void sortNoReturned(double** array, const int row, const int column, const bool 
     }
 }
 
-Matrix * sort(const Matrix * matrix, const bool reverse, const int dim, const double mask_nan)
+double ** sort( int row,  int column, double ** data,  bool reverse,  int dim,  double mask_nan)
 {
-    Matrix * new = deepcopy(matrix);
-    sortNoReturned(new->data, matrix->row, matrix->column, reverse, dim, mask_nan);
+    double ** new = deepcopy(row, column, data);
+    sortNoReturned(row, column, data, reverse, dim, mask_nan);
     return new;
 }
 
-Matrix * uniform(const double start, const double end, const int row, const int column, const int seed, const bool use)
+double ** uniform( int row,  int column,  double start,  double end,  int seed,  bool use)
 {
+    srand(time(NULL));
     if (use)
         srand(seed);
-    Matrix * new = __new__(row, column);
+    double ** new = (double **)malloc(sizeof(double *) *row);
     for (int r=0;r < row;r ++)
     {
+        new[r] = (double *)malloc(sizeof(double) * column);
         for(int c = 0;c < column;c ++)
         {
-            new->data[r][c] = start + (end - start) * ((double)rand() / RAND_MAX);
+            new[r][c] = start + (end - start) * ((double)rand() / RAND_MAX);
         }
     }
     return new;
 }
 
-Matrix * normal(const double mu, const double sigma, const int row, const int column, const int seed, const bool use)
+double ** normal( int row,  int column,  double mu,  double sigma,  int seed,  bool use )
 {
+    srand(time(NULL));
     if(use)
         srand(seed);
-    Matrix* new = __new__(row, column);
+    double ** new = (double **)malloc(sizeof(double *) *row);
     for(int r = 0; r < row; ++r){
+        new[r] = (double *)malloc(sizeof(double) * column);
         for(int c = 0; c < column; ++c){
-            new->data[r][c] = sqrt(-2 * log((double)rand() / RAND_MAX)) * cos(M_PI * 2 * (double)rand() / RAND_MAX) * sigma + mu;
+            new[r][c] = sqrt(-2 * log((double)rand() / RAND_MAX)) * cos(M_PI * 2 * (double)rand() / RAND_MAX) * sigma + mu;
         }
     }
     return new;
 }
 
-Matrix * poisson(const double lambda, const int row, const int column, const int seed, const bool use){
+double ** poisson( int row,  int column,  double lambda,  int seed,  bool use){
+    srand(time(NULL));
     if(use)
         srand(seed);
-    Matrix * new = __new__(row, column);
+    double ** new = (double **)malloc(sizeof(double *) *row);
     double p = 1.0;
     int k = 0;
-    const double L  = exp(-lambda);
+     double L  = exp(-lambda);
     for(int r = 0; r < row; ++r){
+        new[r] = (double *)malloc(sizeof(double) * column);
         for(int c = 0; c < column; ++c){
             p = 1.0;
             k = 0;
@@ -1362,24 +1452,31 @@ Matrix * poisson(const double lambda, const int row, const int column, const int
                 ++k;
                 p *= (double)rand() / RAND_MAX;
             }
-            new->data[r][c] = k;
+            new[r][c] = k;
         }
     }
     return new;
 }
 
-Matrix* rref( double **array, const int row, const int column)
+double ** rref( int row,  int column,  double ** data)
 {
-    Matrix *new = __init__(row, column, array, NULL);
+    double ** new = (double **)malloc(sizeof(double *) *row);
+    for (int r = 0;r < row;r ++)
+    {
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
+        {
+            new[r][c] = data[r][c];
+        }
+    }
     int lead = 0;
-    
     for (int r = 0; r < row; r++) {
         if (lead >= column) {
             return new;
         }
-        
+
         int i = r;
-        while (fabs(new->data[i][lead]) < DROUND) { // 这里不能设置!=0，因为计算精度问题
+        while (fabs(new[i][lead]) < DROUND) { // 这里不能设置!=0，因为计算精度问题
             i++;
             if (i == row) {
                 i = r;
@@ -1389,26 +1486,26 @@ Matrix* rref( double **array, const int row, const int column)
                 }
             }
         }
-        
+
         if (i != r) {
             double temp = 0.;
             for (int c= 0;c< column; c ++) {
-                temp = new->data[i][c];
-                new->data[i][c] = new->data[r][c];
-                new->data[r][c] = temp;
+                temp = new[i][c];
+                new[i][c] = new[r][c];
+                new[r][c] = temp;
             }
         }
-        
-        double lv = new->data[r][lead];
+
+        double lv = new[r][lead];
         for (int c= 0; c < column; c ++) {
-            new->data[r][c] /= lv;
+            new[r][c] /= lv;
         }
-        
+
         for (int r1= 0; r1 < row; r1++) {
             if (r1!= r) {
-                lv = new->data[r1][lead];
+                lv = new[r1][lead];
                 for (int c = 0; c< column; c ++) {
-                    new->data[r1][c] -= lv * new->data[r][c];
+                    new[r1][c] -= lv * new[r][c];
                 }
             }
         }
@@ -1417,43 +1514,44 @@ Matrix* rref( double **array, const int row, const int column)
     return new;
 }
 
-void set_mask_nan(const Matrix * matrix, const double number)
+void set_mask_nan( int row,  int column, double ** data,  double number)
 {
-    for(int r = 0;r < matrix->row;r ++)
+    for(int r = 0;r < row;r ++)
     {
-        for (int c = 0;c < matrix->column;c ++)
+        for (int c = 0;c < column;c ++)
         {
-            if (isnan(matrix->data[r][c]))
-                matrix->data[r][c] = number;
+            if (isnan(data[r][c]))
+                data[r][c] = number;
         }
     }
 }
 
-void set_mask_inf(const Matrix * matrix, const double number, const bool isNegativeInf)
+void set_mask_inf( int row,  int column, double ** data,  double number,  bool isNegativeInf)
 {
-    double data = 0.;
-    for(int r = 0;r < matrix->row;r ++)
+    double dat = 0.;
+    for(int r = 0;r <  row;r ++)
     {
-        for (int c = 0;c < matrix->column;c ++)
+        for (int c = 0;c < column;c ++)
         {
-            data = matrix->data[r][c];
-            if (isinf(data) && data > 0 && !isNegativeInf)
-                matrix->data[r][c] = number;
-            else if (isinf(data) && data < 0 && isNegativeInf)
-                matrix->data[r][c] = number;
+            dat = data[r][c];
+            if (isinf(dat) && dat > 0 && !isNegativeInf)
+                data[r][c] = number;
+            else if (isinf(dat) && dat < 0 && isNegativeInf)
+                data[r][c] = number;
+            else {}
         }
     }
 }
 
-int rank(const Matrix * matrix)
+int rank( int row,  int column,  double ** data)
 {
-    Matrix *newMatrix = rref(matrix->data, matrix->row, matrix->column);
+    double  **new = rref(row, column, data);
     int counter = 0;
-    const int n = matrix->row > matrix->column ? matrix->column : matrix->row;
+     int n = row > column ?column : row;
     for (int r = 0; r < n; r++) {
         int isZeroRow = 1;
-        for (int c = 0; c < matrix->column; c ++) {
-            if (fabs(newMatrix->data[r][c]) > DROUND)
+        for (int c = 0; c < column; c ++) {
+            if (fabs(new[r][c]) > DROUND)
             {
                 isZeroRow = 0;
                 break;
@@ -1462,7 +1560,293 @@ int rank(const Matrix * matrix)
         if (!isZeroRow)
             counter++;
     }
-    __delete__(newMatrix);
+    __delete__data__(new, row);
     return counter;
 }
 
+double ** testArray( int row,  int column)
+{
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r = 0;r < row ;r ++)
+    {
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
+            new[r][c] = r + c;
+    }
+    return new;
+}
+
+// 函数实现
+double* variance(int row, int column, double** data, bool sample, int dim, bool std) {
+    double* number = NULL;
+    double* means = NULL;
+    double diff, _mean;
+    int size = sample ? column * row - 1 : column * row;
+
+    switch (dim) {
+    case 0:
+        {
+            number = (double*)calloc(row, sizeof(double));
+            means = mean(row, column, data, 0);
+            for (int r = 0; r < row; ++r) {
+                _mean = means[r];
+                for (int c = 0; c < column; ++c) {
+                    diff = data[r][c] - _mean;
+                    number[r] += diff * diff;
+                }
+                number[r] /= size;
+                if (std)
+                    number[r] = sqrt(number[r]);
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double*)calloc(column, sizeof(double));
+            means = mean(row, column, data, 1);
+            for (int c = 0; c < column; ++c) {
+                _mean = means[c];
+                for (int r = 0; r < row; ++r) {
+                    diff = data[r][c] - _mean;
+                    number[c] += diff * diff;
+                }
+                number[c] /= size;
+                if (std)
+                    number[c] = sqrt(number[c]);
+            }
+            break;
+        }
+    default:
+        {
+            number = (double*)calloc(1, sizeof(double));
+            means = mean(row, column, data, -1);
+            _mean = *means;
+            for (int r = 0; r < row; ++r) {
+                for (int c = 0; c < column; ++c) {
+                    diff = data[r][c] - _mean;
+                    *number += diff * diff;
+                }
+            }
+            *number /= size;
+            if (std)
+                *number = sqrt(*number);
+            break;
+        }
+    }
+    free(means);
+    return number;
+}
+
+double * median(int row, int column, double ** data, int dim)
+{
+    double * number = NULL;
+    double * tempArr = NULL;
+    switch (dim)
+    {
+    case 0:
+        {
+            number = (double*)malloc(sizeof(double) * row);
+            for(int r = 0;r < row;r ++)
+            {
+                tempArr = (double *)malloc(sizeof(double) * column);
+                for (int c = 0;c  < column;c ++)
+                    insertSorted(tempArr, c , data[r][c]);
+                if (column % 2 == 0)
+                    number[r] = (tempArr[(column - 1) / 2] + tempArr[column / 2]) / 2.0;
+                else
+                    number[r] = tempArr[column / 2];
+                free(tempArr);
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double *)malloc(sizeof(double) * column);
+            for(int c=0;c < column;c ++)
+            {
+                tempArr = (double *)malloc(sizeof(double) * row);
+                for(int r = 0;r < row;r ++)
+                    insertSorted(tempArr, r, data[r][c]);
+                if (column % 2 == 0)
+                    number[c] = (tempArr[(row - 1) / 2] + tempArr[row / 2]) / 2.0;
+                else
+                    number[c] = tempArr[row / 2];
+                free(tempArr);
+            }
+            break;
+        }
+    default:
+        number = (double*)malloc(sizeof(double  ));
+        int size = row * column;
+        tempArr = (double*)malloc(sizeof(double  ) * size);
+        int counter = 0;
+        for (int r = 0;r < row;r ++)
+        {
+            for (int c= 0;c < column;c ++)
+            {
+                insertSorted(tempArr, counter++, data[r][c]);
+            }
+        }
+        if (column % 2 == 0)
+            *number = (tempArr[(size - 1) / 2] + tempArr[size / 2]) / 2.0;
+        else
+            *number = tempArr[size / 2];
+        free(tempArr);
+        break;
+    }
+    return number;
+}
+
+double norm_negainf(int row, int column, double ** data)
+{
+    double * number = (double*)calloc(row, sizeof(double));
+    for(int r=  0;r < row;r ++)
+    {
+        for(int c = 0;c < column;c ++)
+        {
+            number[r] += fabs(data[r][c]);
+        }
+    }
+    double value = number[0 ];
+    for (int r = 1;r < row;r ++)
+    {
+        if (value > number[r])
+            value = number[r];
+    }
+    free(number);
+    return value;
+}
+
+double norm_inf(int row, int column, double ** data)
+{
+    double * number = (double*)calloc(row, sizeof(double));
+    double value = 0.;
+    for(int r=  0;r < row;r ++)
+    {
+        for(int c = 0;c < column;c ++)
+        {
+            number[r] += fabs(data[r][c]);
+        }
+        if (number[r] > value)
+            value = number[r];
+    }
+    free(number);
+    return value;
+}
+
+double * norm_zero(int row, int column, double ** data, int dim)
+{
+    double * number = NULL;
+    double value = .0;
+    switch (dim)
+    {
+    case 0:
+        {
+            number = (double * )calloc(row, sizeof(double) );
+            for(int r = 0;r < row;r ++)
+            {
+                for (int c = 0;c < column;c ++)
+                {
+                    value = fabs(data[r][c]);
+                    if (value < DROUND)
+                        number[r]++;
+                }
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double *)calloc(column, sizeof(double));
+            for (int c = 0;c < column ;c ++)
+            {
+                for (int r =0;r < row;r++)
+                {
+                    value = fabs(data[r][c]);
+                    if (value < DROUND)
+                        number[c]++;
+                }
+            }
+            break;
+        }
+    default:
+        {
+            number = (double *)calloc(1, sizeof(double));
+            for (int r= 0;r < row;r ++)
+            {
+                for(int c=0;c < column;c ++)
+                {
+                    value = fabs(data[r][c]);
+                    if (value < DROUND)
+                        number[0]++;
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+double norm_one(int row, int column, double ** data)
+{
+    double * number = (double *)calloc(column, sizeof(double));
+    double value = 0.;
+    for (int c=0;c < column;c ++)
+    {
+        for(int r=0;r < row;r++)
+        {
+            number[c] += fabs(data[r][c]);
+        }
+        if (value < number[c])
+            value = number[c];
+    }
+    free(number);
+    return value;
+}
+
+double * norm(int row, int column, double ** data, int n, int dim)
+{
+    double * number = NULL;
+    switch (dim)
+    {
+    case 0:
+        {
+            number = (double *)calloc(row, sizeof(double));
+            for (int r = 0;r <row;r ++)
+            {
+                for(int c= 0;c < column;c ++)
+                {
+                    number[r] += pow(fabs(data[r][c]), n);
+                }
+                number[r] = pow(number[r], 1. / n);
+            }
+            break;
+        }
+    case 1:
+        {
+            number = (double *)calloc(column, sizeof(double));
+            for (int c=0;c<column;c ++)
+            {
+                for(int r= 0;r <row;r ++)
+                {
+                    number[c] += pow(fabs(data[r][c]), n);
+                }
+                number[c] = pow(number[c], 1. / n);
+            }
+            break;
+        }
+    default:
+        {
+            number = (double *)calloc(1, sizeof(double));
+            for (int r = 0;r < row;r ++)
+            {
+                for(int c = 0;c <column;c ++)
+                {
+                    number[0] += pow(fabs(data[r][c]), n);
+                }
+                number[0] = pow(number[0], 1. / n);
+            }
+            break;
+        }
+    }
+    return number;
+}

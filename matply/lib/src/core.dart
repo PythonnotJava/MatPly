@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 import 'package:ffi/ffi.dart';
 import 'dart:io' show Directory;
 import 'package:path/path.dart' as path;

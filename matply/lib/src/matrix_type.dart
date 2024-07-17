@@ -3,7 +3,6 @@ part of 'core.dart';
 class MatrixType{
   /// Attributes
   late Pointer<Matrix> self;
-  late List<int> shape;
 
   /// Constructors
   // 一般构造
@@ -16,8 +15,7 @@ class MatrixType{
         bool lowerTriangularMatrix = false,
         bool singularMatrix  = false
       }){
-    this.shape = [data.length, data[0].length];
-    this.self = matply__new__(this.shape[0], this.shape[1]);  // 已经对data和spc分配了内存，并且对spc初始化了
+    this.self = matply__new__(data.length, data[0].length);  // 已经对data和spc分配了内存，并且对spc初始化了
     for (int r = 0;r < this.shape[0];r++){
       for (int c = 0;c < this.shape[1];c ++){
         this.self.ref.data[r][c] = data[r][c];
@@ -39,9 +37,7 @@ class MatrixType{
     required int row,
     required int column
   }) :assert(row > 0 && column > 0){
-    shape = [row, column];
-    this.self = matply__filled(row, column, number);
-    defaultSpc(this);
+    this.self = matply__init__point__data__(row, column, matply__filled(row, column, number), nullptr);
   }
 
   // 全1矩阵
@@ -49,9 +45,7 @@ class MatrixType{
     required int row,
     required int column
   }) :assert(row > 0 && column > 0) {
-    shape = [row, column];
-    this.self = matply__ones(row, column);
-    defaultSpc(this);
+    this.self = matply__init__point__data__(row, column, matply__ones(row, column), nullptr);
   }
 
   // 全0矩阵
@@ -59,9 +53,7 @@ class MatrixType{
     required int row,
     required int column
   }):assert(row > 0 && column > 0){
-    shape = [row, column];
-    this.self = matply__zeros(row, column);
-    defaultSpc(this);
+    this.self = matply__init__point__data__(row, column, matply__zeros(row, column), nullptr);
   }
 
   // 连续创建
@@ -70,10 +62,8 @@ class MatrixType{
     required int row,
     required int column
   }):assert(row > 0 && column > 0){
-    shape = [row, column];
     start = start ?? 0.0;
-    this.self = matply__arrange(start, row, column);
-    defaultSpc(this);
+    this.self = matply__init__point__data__(row, column, matply__arrange(start, row, column), nullptr);
   }
 
   // 等差创建
@@ -85,15 +75,12 @@ class MatrixType{
     bool keep = true
   }) : assert(start < end && row > 0 && column > 0)
   {
-    shape = [row, column];
-    this.self = matply__linspace(start, end, row, column, keep);
-    defaultSpc(this);
+    this.self = matply__init__point__data__(row, column, matply__linspace(start, end, row, column, keep), nullptr);
   }
 
   // n阶单位矩阵
   MatrixType.E({required int n}) : assert(n > 0){
-    self = matply__E(n);
-    shape = [n, n];
+    self = matply__init__point__data__(n, n, matply__E(n), nullptr);
     this.identityMatrix = true;
   }
 
@@ -105,8 +92,9 @@ class MatrixType{
     required int column,
     int? seed
   }) : assert(start < end && row > 0 && column > 0){
-    this.shape = [row, column];
-    this.self = matply__uniform(start, end, row, column, seed ?? 0, seed != null);
+    this.self = matply__init__point__data__(
+        row, column, matply__uniform(row, column, start, end, seed ?? 0, seed != 0), nullptr
+    );
   }
 
   // 正态分布
@@ -117,8 +105,9 @@ class MatrixType{
     required int column,
     int? seed
   }):assert(sigma >= 0 && row > 0 && column > 0 && row > 0 && column > 0){
-    this.shape = [row, column];
-    this.self = matply__normal(mu, sigma, row, column, seed ?? 0, seed != null);
+    this.self = matply__init__point__data__(
+      row, column, matply__normal(row, column, mu, sigma, seed ?? 0, seed != 0), nullptr
+    );
   }
 
   // 泊松分布
@@ -128,15 +117,22 @@ class MatrixType{
     required int column,
     int? seed
   }):assert(lambda >= 0 && row > 0 && column > 0){
-    this.shape = [row, column];
-    this.self = matply__poisson(lambda, row, column, seed ?? 0, seed != null);
+    this.self = matply__init__point__data__(
+      row, column, matply__poisson(row, column, lambda, seed ?? 0, seed != null), nullptr
+    );
   }
 
   // 根据已经建立好的Matrix指针初始化
-  MatrixType.__fromPointer(this.self, this.shape);
+  MatrixType.__fromPointer(this.self);
+  // 根据已经设置完毕的数据指针引用并且初始化
+  MatrixType.__fromDataPointer(Pointer<Pointer<Double>> data, List<int> shape) :
+        this.self = matply__init__point__data__(shape[0], shape[1], data, nullptr);
 
   // 深拷贝矩阵
-  factory MatrixType.deepCopy(MatrixType other) => MatrixType.__fromPointer(matply__deepcopy(other.self), other.shape);
+  factory MatrixType.deepCopy(MatrixType other) {
+    Pointer<Pointer<Double>> data = matply__deepcopy(other.shape[0], other.shape[1], other.self.ref.data);
+    return MatrixType.__fromDataPointer(data, other.shape);
+  }
 
   /// setter && getter
   bool get identityMatrix => this.self.ref.spc.ref.identityMatrix;
@@ -157,13 +153,14 @@ class MatrixType{
   bool get singularMatrix => this.self.ref.spc.ref.singularMatrix;
   set singularMatrix(bool value) => this.self.ref.spc.ref.singularMatrix = value;
 
+  List<int> get shape => [this.self.ref.row, this.self.ref.column];
   int get size => shape[0] * shape[1];
   bool get isSquare => shape[0] == shape[1];
   MatrixType get T_ => transpose();
-  double get trace => matply__trace(self);
+  double get trace => matply__trace(shape[0], shape[1], self.ref.data);
   double get det{
     if (isSquare)
-      return matply__det(self);
+      return matply__det(shape[0], shape[1], self.ref.data);
     else
       throw not_a_square;
   }
@@ -172,27 +169,27 @@ class MatrixType{
     if (value == 0)
       throw UnsupportedError('The matrix is not invertible.');
     else
-      return MatrixType.__fromPointer(matply__inverse(self, det), shape);
+      return MatrixType.__fromDataPointer(matply__inverse(shape[0], shape[1], self.ref.data), shape);
   }
-  MatrixType get adj => MatrixType.__fromPointer(matply__adjugate(self), shape);
-  int get rank => matply__rank(self);
+  MatrixType get adj => MatrixType.__fromDataPointer(matply__adjugate(shape[0], shape[1], self.ref.data), shape);
+  int get rank => matply__rank(shape[0], shape[1], self.ref.data);
 
-  MatrixType get acos => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 0, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get asin => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 1, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get atan => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 2, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get cos => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 3, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get sin => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 4, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get tan => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 5, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get cosh => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 6, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get sinh => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 7, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get tanh => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 8, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get exp => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 9, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get log => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 10, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get log10 => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 11, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get sqrt => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 12, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get ceil => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 13, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get floor => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 14, shape[0], shape[1], false).cast<Matrix>(), shape);
-  MatrixType get fabs => MatrixType.__fromPointer(matply_mathBasement1(self.ref.data, 15, shape[0], shape[1], false).cast<Matrix>(), shape);
+  MatrixType get acos => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 0), shape);
+  MatrixType get asin => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 1), shape);
+  MatrixType get atan => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 2), shape);
+  MatrixType get cos => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 3), shape);
+  MatrixType get sin => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 4), shape);
+  MatrixType get tan => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 5), shape);
+  MatrixType get cosh => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 6), shape);
+  MatrixType get sinh => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 7), shape);
+  MatrixType get tanh => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 8), shape);
+  MatrixType get exp => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 9), shape);
+  MatrixType get log => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 10), shape);
+  MatrixType get log10 => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 11), shape);
+  MatrixType get sqrt => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 12), shape);
+  MatrixType get ceil => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 13), shape);
+  MatrixType get floor => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 14), shape);
+  MatrixType get fabs => MatrixType.__fromDataPointer(matply_mathBasement1(shape[0], shape[1], self.ref.data, 15), shape);
 
   /// Overloading Operators
   @Alert('Just return a List?, do not support pointer type.')
@@ -200,7 +197,7 @@ class MatrixType{
     if (row < 0 || row >= shape[0]) {
       throw row_outRange;
     } else {
-      return matply__row_(row, self).asTypedList(shape[1]).toList();
+      return matply__row_(row, shape[1], self.ref.data).asTypedList(shape[1]).toList();
     }
   }
 
@@ -247,7 +244,7 @@ class MatrixType{
     if (other is! MatrixType) return false;
     final MatrixType otherMatrix = other;
     return hasSameShape(otherMatrix) &&
-        matply__data__isSame(self.ref.data, otherMatrix.self.ref.data, shape[0], shape[1]) &&
+        matply__data__isSame(shape[0], shape[1], self.ref.data, otherMatrix.self.ref.data) &&
         matply__spc__isSame(self.ref.spc, otherMatrix.self.ref.spc);
   }
 
@@ -268,9 +265,9 @@ class MatrixType{
       throw row_outRange;
     } else {
       if (T == Pointer) {
-        return matply__row_(row, self);
+        return matply__row_(row, shape[1], self.ref.data);
       } else if (T == List || T == dynamic) {
-        return matply__row_(row, self).asTypedList(shape[1]).toList();
+        return matply__row_(row, shape[1], self.ref.data).asTypedList(shape[1]).toList();
       } else {
         throw UnsupportedError('T must be Pointer or List');
       }
@@ -284,9 +281,9 @@ class MatrixType{
       throw column_outRange;
     } else {
       if (T == Pointer) {
-        return matply__column_(column, self);
-      } else if (T == List) {
-        return matply__column_(column, self).asTypedList(shape[1]).toList();
+        return matply__column_(shape[0], column, self.ref.data);
+      } else if (T == List || T == dynamic) {
+        return matply__column_(shape[0], column, self.ref.data).asTypedList(shape[1]).toList();
       } else {
         throw UnsupportedError('T must be Pointer or List');
       }
@@ -297,47 +294,47 @@ class MatrixType{
     if (column < 0 || column >= shape[1] || row < 0 || row >= shape[0])
       throw random_outRange;
     else{
-      return matply__at(row, column, self);
+      return matply__at(row, column, self.ref.data);
     }
   }
 
-  MatrixType transpose() => MatrixType.__fromPointer(matply__transpose(self), [shape[1], shape[0]]);
+  MatrixType transpose() => MatrixType.__fromDataPointer(matply__transpose(shape[0], shape[1], self.ref.data), [shape[1], shape[0]]);
 
   void exchange_row(int row1, int row2){
     if (row1 < 0 || row1 >= shape[0] || row2 < 0 || row2 >= shape[0])
       throw row_outRange;
     else
-      matply__exchangeR(row1, row2, self);
+      matply__exchangeR(shape[1], self.ref.data, row1, row2);
   }
   void exchange_column(int column1, int column2){
     if (column1 < 0 || column1 >= shape[1] || column2 < 0 || column2 >= shape[1])
       throw column_outRange;
     else
-      matply__exchangeC(column1, column2, self);
+      matply__exchangeC(shape[0], self.ref.data, column1, column2);
   }
   void multiply_row(int row, double size) {
     if (row < 0 || row >= shape[0])
       throw row_outRange;
     else
-      matply__multiplyR(row, size, self);
+      matply__multiplyR(shape[0], shape[1], self.ref.data, size);
   }
   void multiply_column(int column, double size) {
     if (column < 0 || column >= shape[1])
       throw column_outRange;
     else
-      matply__multiplyC(column, size, self);
+      matply__multiplyC(shape[0], shape[1], self.ref.data, size);
   }
   void add_row(int row1, int row2, double size){
     if (row1 < 0 || row1 >= shape[0] || row2 < 0 || row2 >= shape[0])
       throw row_outRange;
     else
-      matply__addR(row1, row2, size, self);
+      matply__addR(shape[1], self.ref.data, row1, row2, size);
   }
   void add_column(int column1, int column2, double size) {
     if (column1 < 0 || column1 >= shape[1] || column2 < 0 || column2 >= shape[1])
       throw column_outRange;
     else
-      matply__addC(column1, column2, size, self);
+      matply__addC(shape[0], self.ref.data, column1, column2, size);
   }
 
   bool hasSameShape(MatrixType other){ return other.shape[0] == shape[0] && shape[1] == other.shape[1];}
@@ -345,10 +342,10 @@ class MatrixType{
   MatrixType add({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
-      return MatrixType.__fromPointer(matply__addNumber(number, self), shape);
+      return MatrixType.__fromDataPointer(matply__addNumber(shape[0], shape[1], self.ref.data, number), shape);
     else {
       if (hasSameShape(other!))
-        return MatrixType.__fromPointer(matply__addMatrix(other.self, self), shape);
+        return MatrixType.__fromDataPointer(matply__addMatrix(shape[0], shape[1], self.ref.data, other.self.ref.data), shape);
       else
         throw different_shape;
     }
@@ -357,10 +354,10 @@ class MatrixType{
   MatrixType minus({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
-      return MatrixType.__fromPointer(matply__addNumber(-number, self), shape);
+      return MatrixType.__fromDataPointer(matply__addNumber(shape[0], shape[1], self.ref.data, -number), shape);
     else {
       if (hasSameShape(other!))
-        return MatrixType.__fromPointer(matply__minusMatrix(self, other.self), shape);
+        return MatrixType.__fromDataPointer(matply__minusMatrix(shape[0], shape[1], self.ref.data, other.self.ref.data), shape);
       else
         throw different_shape;
     }
@@ -369,10 +366,10 @@ class MatrixType{
   void add_no_returned({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
-      matply__addNumberNoReturned(number, self);
+      matply__addNumberNoReturned(shape[0], shape[1], self.ref.data, number);
     else {
       if (hasSameShape(other!))
-        matply__addMatrixNoReturned(other.self, self);
+        matply__addMatrixNoReturned(shape[0], shape[1], self.ref.data, other.self.ref.data);
       else
         throw different_shape;
     }
@@ -381,10 +378,10 @@ class MatrixType{
   void minus_no_returned({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
-      matply__addNumberNoReturned(-number, self);
+      matply__addNumberNoReturned(shape[0], shape[1], self.ref.data, -number);
     else {
       if (hasSameShape(other!))
-        matply__minusMatrix(self, other.self);
+        matply__minusMatrixNoReturned(shape[0], shape[1], self.ref.data, other.self.ref.data);
       else
         throw different_shape;
     }
@@ -394,16 +391,16 @@ class MatrixType{
     if (shape[1] != other.shape[0])
       throw matmul_unsupport;
     else
-      return MatrixType.__fromPointer(matply_matmul(self, other.self), [shape[0], other.shape[1]]);
+      return MatrixType.__fromDataPointer(matply__matmul(shape[0], shape[1], self.ref.data, other.self.ref.data), shape);
   }
 
   void multiply_no_returned({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
-      matply__multiplyNumber(number, self);
+      matply__multiplyNumber(shape[0], shape[1], self.ref.data, number);
     else {
       if (hasSameShape(other!))
-        matply__multiplyMatrix(self, other.self);
+        matply__multiplyMatrix(shape[0], shape[1], self.ref.data, other.self.ref.data);
       else
         throw different_shape;
     }
@@ -412,48 +409,50 @@ class MatrixType{
   MatrixType multiply({double? number, MatrixType? other}){
     assert(number != null || other != null);
     if (number != null)
-      return MatrixType.__fromPointer(matply__multiplyNumber(number, self), shape);
+      return MatrixType.__fromDataPointer(matply__multiplyNumber(shape[0], shape[1], self.ref.data, number), shape);
     else {
       if (hasSameShape(other!))
-        return MatrixType.__fromPointer(matply__multiplyMatrix(self, other.self), shape);
+        return MatrixType.__fromDataPointer(matply__multiplyMatrix(shape[0], shape[1], self.ref.data, other.self.ref.data), shape);
       else
         throw different_shape;
     }
   }
 
-  MatrixType kronecker(MatrixType other) => MatrixType.__fromPointer(
-      matply__kronecker(self, other.self),
+  MatrixType kronecker(MatrixType other) => MatrixType.__fromDataPointer(
+      matply__kronecker(shape[0], shape[1], self.ref.data, other.shape[0], other.shape[1], other.self.ref.data),
       [shape[0] * other.shape[0], shape[1] * shape[1]]
   );
 
   MatrixType divide(double number){
     if (number != 0)
-      return MatrixType.__fromPointer(matply__divide(number, self), shape);
+      return MatrixType.__fromDataPointer(matply__divide(shape[0], shape[1], self.ref.data, number), shape);
     else
       throw UnsupportedError('Division by zero');
   }
 
   void divide_no_returned(double number) {
     if (number != 0)
-      matply__divideNoReturned(number, self);
+      matply__divideNoReturned(shape[0], shape[1], self.ref.data, number);
     else
       throw UnsupportedError('Division by zero');
   }
 
-  MatrixType cofactor(int row, int column){
+  MatrixType cofactor(int row, int column) {
     if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1])
       throw random_outRange;
-    else{
+    else {
       if (shape[0] == 1 || shape[1] == 1)
         throw cannot_be_splitt_more;
       else
-        return MatrixType.__fromPointer(matply__cofacto(row, column, self), [shape[0] - 1, shape[1] - 1]);
+        return MatrixType.__fromDataPointer(
+            matply__cofacto(shape[0], shape[1], self.ref.data, row, column),
+            [shape[0] - 1, shape[1] - 1]);
     }
   }
 
   List<List<bool>> compare(MatrixType other, {int mode = 0}){
     if (hasSameShape(other)){
-      Pointer<Pointer<Bool>> results = matply__compare(self, other.self, mode);
+      Pointer<Pointer<Bool>> results = matply__compare(shape[0], shape[1], self.ref.data, other.self.ref.data, mode);
       return List.generate(
           shape[0],
               (e) {
@@ -469,44 +468,44 @@ class MatrixType{
   Object sum({int dim = -1}){
     switch(dim){
       case 0:
-        return matply__sum(self, 0).asTypedList(shape[0]).toList();
+        return matply__sum(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]).toList();
       case 1:
-        return matply__sum(self, 1).asTypedList(shape[1]).toList();
+        return matply__sum(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]).toList();
       default:
-        return matply__sum(self, -1).value;
+        return matply__sum(shape[0], shape[1], self.ref.data, -1).value;
     }
   }
 
   Object mean({int dim = -1}){
     switch(dim){
       case 0:
-        return matply__mean(self, 0).asTypedList(shape[0]).toList();
+        return matply__mean(shape[0], shape[1], self.ref.data,  0).asTypedList(shape[0]).toList();
       case 1:
-        return matply__mean(self, 1).asTypedList(shape[1]).toList();
+        return matply__mean(shape[0], shape[1], self.ref.data,  1).asTypedList(shape[1]).toList();
       default:
-        return matply__mean(self, -1).value;
+        return matply__mean(shape[0], shape[1], self.ref.data,  -1).value;
     }
   }
 
   Object min({int dim = -1}){
     switch(dim){
       case 0:
-        return matply__min(self, 0).asTypedList(shape[0]).toList();
+        return matply__min(shape[0], shape[1], self.ref.data,  0).asTypedList(shape[0]).toList();
       case 1:
-        return matply__min(self, 1).asTypedList(shape[1]).toList();
+        return matply__min(shape[0], shape[1], self.ref.data,  1).asTypedList(shape[1]).toList();
       default:
-        return matply__min(self, -1).value;
+        return matply__min(shape[0], shape[1], self.ref.data,  -1).value;
     }
   }
 
   Object max({int dim = -1}){
     switch(dim){
       case 0:
-        return matply__max(self, 0).asTypedList(shape[0]).toList();
+        return matply__max(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]).toList();
       case 1:
-        return matply__max(self, 1).asTypedList(shape[1]).toList();
+        return matply__max(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]).toList();
       default:
-        return matply__max(self, -1).value;
+        return matply__max(shape[0], shape[1], self.ref.data,  -1).value;
     }
   }
 
@@ -515,7 +514,7 @@ class MatrixType{
     if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1] || column + width > shape[1] || row + height > shape[0])
       throw random_outRange;
     else
-      return MatrixType.__fromPointer(matply__cut(self, row, column, width, height), [width, height]);
+      return MatrixType.__fromDataPointer(matply__cut(shape[0], shape[1], self.ref.data, row, column, width, height), shape);
   }
 
   MatrixType cutfree({required int row, required int column, required int width, required int height, double number = .0}){
@@ -523,16 +522,19 @@ class MatrixType{
     if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1])
       throw random_outRange;
     else
-      return MatrixType.__fromPointer(matply__cutfree(self, row, column, width, height, number), [width, height]);
+      return MatrixType.__fromDataPointer(matply__cutfree(shape[0], shape[1], self.ref.data, row, column, width, height, number), shape);
   }
 
   MatrixType concat({required MatrixType other, required bool horizontal}) {
     if (horizontal ? other.shape[0] == shape[0] : other.shape[1] == shape[1]) {
-      return horizontal ? MatrixType.__fromPointer(
-          matply__concatR(self, other.self),
-          [shape[0], shape[1] + other.shape[1]])
-          : MatrixType.__fromPointer(
-          matply__concatC(self, other.self), [shape[0] + shape[1], shape[1]]);
+      return horizontal ? MatrixType.__fromDataPointer(
+          matply__concatR(shape[0], shape[1], other.shape[1], self.ref.data, other.self.ref.data),
+          [shape[0], shape[1] + other.shape[1]]
+      )
+          : MatrixType.__fromDataPointer(
+          matply__concatC(shape[0], other.shape[0], shape[1], self.ref.data, other.self.ref.data),
+          [shape[0] + other.shape[0], shape[1]]
+      );
     } else
       throw row_or_column_not_sampe;
   }
@@ -544,7 +546,7 @@ class MatrixType{
       if (row == shape[0])
         return MatrixType.deepCopy(this);
       assert (row > 0 && column > 0);
-      return MatrixType.__fromPointer(matply__reshape(self, row, column), [row, column]);
+      return MatrixType.__fromDataPointer(matply__reshape(row, column, self.ref.data, shape[1]), [row, column]);
     }
   }
 
@@ -555,68 +557,220 @@ class MatrixType{
       if (row == shape[0])
         return;
       assert(row > 0 && column > 0);
-      matply__reshapeNoReturned(self, row, column);
+      matply__reshapeNoReturned(row, column, self.ref.data, shape[0], shape[1]);
     }
   }
 
   MatrixType resize({required int row, required int column, double number = .0, bool horizontal = true}){
     assert(row > 0 && column > 0);
-    return horizontal ? MatrixType.__fromPointer(matply__resizeR(self, row, column, number), [row, column])
-        : MatrixType.__fromPointer(matply__resizeC(self, row, column, number), [row, column]);
+    return horizontal ?
+    MatrixType.__fromDataPointer(matply__resizeR(row, column, self.ref.data, shape[0], shape[1], number), [row, column]) :
+    MatrixType.__fromDataPointer(matply__resizeC(row, column, self.ref.data, shape[0], shape[1], number), [row, column]);
   }
 
   void resize_no_returned({required int row, required int column, double number = .0, bool horizontal = true}){
     assert(row > 0 && column > 0);
-    horizontal ? matply__resizeRNoReturned(self, row, column, number)
-        : matply__resizeCNoReturned(self, row, column, number);
+    horizontal ?
+    matply__resizeRNoReturned(row, column, self.ref.data, shape[0], shape[1], number) :
+    matply__resizeCNoReturned(row, column, self.ref.data, shape[0], shape[1], number);
   }
 
   MatrixType power({required double number, bool reverse = false})
-  => reverse ?
-  MatrixType.__fromPointer(matply_mathBasement2reverse(self.ref.data, 0, number, shape[0], shape[1], false).cast<Matrix>(), shape) :
-  MatrixType.__fromPointer(matply_mathBasement2(self.ref.data, 0, number, shape[0], shape[1], false).cast<Matrix>(), shape);
-
+    => reverse
+        ? MatrixType.__fromDataPointer(matply_mathBasement2reverse(shape[0], shape[1], self.ref.data, 0, number), shape)
+        : MatrixType.__fromDataPointer(matply_mathBasement2(shape[0], shape[1], self.ref.data, 0, number), shape);
 
   MatrixType atan2({required double number, bool reverse = true})
   => reverse
-      ? MatrixType.__fromPointer(matply_mathBasement2(self.ref.data, 1, number, shape[0], shape[1], false).cast<Matrix>(), shape)
-      : MatrixType.__fromPointer(matply_mathBasement2reverse(self.ref.data, 1, number,  shape[0], shape[1], false).cast<Matrix>(), shape);
+      ? MatrixType.__fromDataPointer(matply_mathBasement2reverse(shape[0], shape[1], self.ref.data, 1, number), shape)
+      : MatrixType.__fromDataPointer(matply_mathBasement2(shape[0], shape[1], self.ref.data, 1, number), shape);
 
-  MatrixType sigmoid() => MatrixType.__fromPointer(matply__sigmoid(self), shape);
+  MatrixType sigmoid() => MatrixType.__fromDataPointer(matply__sigmoid(shape[0], shape[1], self.ref.data), shape);
 
   MatrixType softmax({
     int dim = -1,
     double mask_nan = 0.0,
     double mask_inf = 0.0,
     double mask_neginf = 0.0
-  }) => MatrixType.__fromPointer(matply__softmax(self, dim, mask_nan, mask_inf, mask_neginf), shape);
+  }) => MatrixType.__fromDataPointer(matply__softmax(shape[0], shape[1], self.ref.data, dim, mask_nan, mask_nan, mask_neginf), shape);
 
-  void shuffle() => matply__shuffle(self.ref.data, shape[0], shape[1]);
+  void shuffle() => matply__shuffle(shape[0], shape[1], self.ref.data);
 
   void sort_no_returned({
     int dim = -1,
     bool reverse = false,
     double mask_nan = 0.0
-  }) => matply__sortNoReturned(self.ref.data, shape[0], shape[1], reverse, dim, mask_nan);
+  }) => matply__sortNoReturned(shape[0], shape[1], self.ref.data, reverse, dim, mask_nan);
 
   MatrixType sort({
     int dim = -1,
     bool reverse = false,
     double mask_nan = 0.0
-  }) => MatrixType.__fromPointer(matply__sort(self, reverse, dim, mask_nan), shape);
+  }) => MatrixType.__fromDataPointer(matply__sort(shape[0], shape[1], self.ref.data, reverse, dim, mask_nan), shape);
 
-  MatrixType rref() => MatrixType.__fromPointer(matply__rref(self.ref.data, shape[0], shape[1]), shape);
+  MatrixType rref() => MatrixType.__fromDataPointer(matply__rref(shape[0], shape[1], self.ref.data), shape);
 
   void setMask({double? mask_nan, double? mask_inf, bool isNegativeInf = true, bool both = false}){  // both表示正负无穷大都取值
     if (mask_nan == null && mask_inf == null)
       throw UnsupportedError('At least one of mask_nan or mask_inf cannot be empty.');
     if (mask_nan != null)
-      matply__set_mask_nan(self, mask_nan);
+      matply__set_mask_nan(shape[0], shape[1], self.ref.data, mask_nan);
     if (mask_inf != null) {
-      matply__set_mask_inf(self, mask_inf, isNegativeInf);
-      if (both)
-        matply__set_mask_inf(self, mask_inf, !isNegativeInf);
+      matply__set_mask_inf(shape[0], shape[1], self.ref.data, mask_inf, isNegativeInf);
+    if (both)
+      matply__set_mask_inf(shape[0], shape[1], self.ref.data, mask_inf, !isNegativeInf);
     }
   }
 
+  List<List<Object>> toList<T>() {
+    if (T == double) {
+      return List.generate(shape[0], (i) => matply__row_(shape[0], shape[1], self.ref.data).asTypedList(shape[1]));
+    } else if (T == int) {
+      return List.generate(shape[0], (i) => this[i].map<int>((e) => e.toInt()).toList());
+    } else if (T == String) {
+      return List.generate(shape[0], (i) => this[i].map<String>((e) => e.toString()).toList());
+    }else if (T == bool){
+      return List.generate(shape[0], (i) => this[i].map<bool>((e) => (e != 0) ).toList());
+    } else {
+      throw UnsupportedError('Unsupported type.');
+    }
+  }
+
+  Object __variance_std({int dim = -1, bool sample = false, required bool std}){
+    switch(dim){
+      case 0:
+        return matply__variance(shape[0], shape[1], self.ref.data, sample, 0, std).asTypedList(shape[0]);
+      case 1:
+        return matply__variance(shape[0], shape[1], self.ref.data, sample, 1, std).asTypedList(shape[1]);
+      default:
+        return matply__variance(shape[0], shape[1], self.ref.data, sample, -1, std).value;
+    }
+  }
+
+  Object std({int dim = -1, bool sample = false}) => __variance_std(dim: dim, sample: sample, std: true);
+  Object variance({int dim = -1, bool sample = false}) => __variance_std(dim: dim, sample: sample, std: false);
+
+  Object median({int dim = -1}){
+    switch (dim){
+      case 0:
+        return matply__median(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]);
+      case 1:
+        return matply__median(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]);
+      default:
+        return matply__median(shape[0], shape[1], self.ref.data, -1).value;
+    }
+  }
+
+  Object norm({int n = 2, int dim = -1}){
+    if (n < -2)
+      throw UnsupportedError('Integer n must be no less than -1.');
+    else{
+      switch(n){
+        case -2:
+          return matply__norm_negainf(shape[0], shape[1], self.ref.data);
+        case -1:
+          return matply__norm_inf(shape[0], shape[1], self.ref.data);
+        case 0:
+          switch (dim){
+            case 0:
+              return matply__norm_zero(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]);
+            case 1:
+              return matply__norm_zero(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]);
+            default:
+              return matply__norm_zero(shape[0], shape[1], self.ref.data, -1).value.toInt();
+          }
+        case 1:
+          return matply__norm_one(shape[0], shape[1], self.ref.data);
+        default:
+          switch (dim){
+            case 0:
+              return matply__norm(shape[0], shape[1], self.ref.data, n, 0).asTypedList(shape[0]);
+            case 1:
+              return matply__norm(shape[0], shape[1], self.ref.data, n, 1).asTypedList(shape[1]);
+            default:
+              return matply__norm(shape[0], shape[1], self.ref.data, n, -1).value;
+          }
+      }
+    }
+  }
+
+  Object norm2({int dim = -1}) => norm(dim: dim, n: 2);
+  double norm_inf() => matply__norm_inf(shape[0], shape[1], self.ref.data);
+  double norm_negainf() => matply__norm_negainf(shape[0], shape[1], self.ref.data);
+  double norm_one() => matply__norm_one(shape[0], shape[1], self.ref.data);
+  Object norm_zero({int dim = -1}) => norm(n: 0, dim: dim);
+
+  Object mode({int dim  = -1}){
+    Pointer<Pointer<Double>> data = self.ref.data;
+
+    double value;
+    switch(dim){
+      case 0:
+        List<double> list = [];
+        for (int r = 0;r < shape[0];r ++){
+        Map<double, int> hist = {};
+          for(int c=0;c < shape[1];c ++){
+            value = data[r][c];
+            if (!hist.containsKey(value))
+              hist[value] = 1;
+            else
+              hist[value] = hist[value]! + 1;
+          }
+          int maxCount = 0;
+          double _k = 0.0;
+          hist.forEach((k, v){
+            if (v > maxCount) {
+              maxCount = v;
+              _k = k;
+            }
+          });
+          list.add(_k);
+        }
+        return list;
+      case 1:
+        List<double> list = [];
+        for (int c = 0;c < shape[1];c ++){
+          Map<double, int> hist = {};
+          for(int r =0;r < shape[0];r++){
+            value = data[r][c];
+            if (!hist.containsKey(value))
+              hist[value] = 1;
+            else
+              hist[value] = hist[value]! + 1;
+          }
+          int maxCount = 0;
+          double _k = 0.0;
+          hist.forEach((k, v){
+            if (v > maxCount) {
+              maxCount = v;
+              _k = k;
+            }
+          });
+          list.add(_k);
+        }
+        return list;
+      default:
+        Map<double, int> hist = {};
+        for (int r= 0;r < shape[0];r++){
+          for (int c = 0;c < shape[1];c ++){
+            value = data[r][c];
+            if (hist.containsKey(value))
+              hist[value] = hist[value]! + 1;
+            else
+              hist[value] = 1;
+          }
+        }
+        int maxCount = 0;
+        double _k = 0.0;
+        hist.forEach((k, v){
+          if(maxCount < v){
+            _k = k;
+            maxCount = v;
+          }
+        });
+        return _k;
+    }
+  }
 }
+
+

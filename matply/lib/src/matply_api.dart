@@ -1,6 +1,18 @@
 part of 'core.dart';
+// final dylib = DynamicLibrary.open(path.join(Directory.current.path, 'C', 'matply.dll'));
 
-final dylib = DynamicLibrary.open(path.join(Directory.current.path, 'lib/src/C', 'matply.dll'));
+const VERSION = '1.0.2';
+
+String pubCacheDir = path.join(
+    Platform.environment['LOCALAPPDATA']!,
+    'Pub',
+    'Cache',
+    'hosted',
+    'pub.dev',
+    'matply-$VERSION'
+);  // 对1.0.0版本的路径问题的修复，查找pub下载cache路径，如果每个人不一样，可以通过设置pubCacheDir即可
+
+final dylib = DynamicLibrary.open(path.join(pubCacheDir, 'lib/src/C', 'matply.dll'));
 
 Pointer<Double> _Pi = dylib.lookup('PI').cast<Double>();
 Pointer<Double> _e = dylib.lookup('e').cast<Double>();
@@ -71,218 +83,221 @@ typedef VisibleMatrix__base = void Function(Pointer<Matrix> matrix);
 typedef __delete__base__ffi = Void Function(Pointer<Matrix> matrix);
 typedef __delete__base = void Function(Pointer<Matrix> matrix);
 
-typedef filled__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column, Double number);
-typedef filled__base = Pointer<Matrix> Function(int row, int column, double number);
+typedef __delete__data__base__ffi = Void Function(Pointer<Pointer<Double>> data, Int32 row);
+typedef __delete__data__base = void Function(Pointer<Pointer<Double>> data, int row);
 
-typedef zeros__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column);
-typedef zeros__base = Pointer<Matrix> Function(int row, int column);
+typedef filled__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double number);
+typedef filled__base = Pointer<Pointer<Double>> Function(int row, int column, double number);
 
-typedef ones__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column);
-typedef ones__base = Pointer<Matrix> Function(int row, int column);
+typedef zeros__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
+typedef zeros__base = Pointer<Pointer<Double>>Function(int row, int column);
+
+typedef ones__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
+typedef ones__base = Pointer<Pointer<Double>> Function(int row, int column);
 
 typedef VisibleMatrixSpc__base__ffi = Void Function(Pointer<Matrix> matrix);
 typedef VisibleMatrixSpc__base = void Function(Pointer<Matrix> matrix);
 
-typedef row__base__ffi = Pointer<Double> Function(Int32 row, Pointer<Matrix> matrix);
-typedef row__base = Pointer<Double> Function(int row, Pointer<Matrix> matrix);
+typedef row__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data);
+typedef row__base = Pointer<Double> Function( int row,  int column, Pointer<Pointer<Double>> data);
 
-typedef column__base__ffi = Pointer<Double> Function(Int32 column, Pointer<Matrix> matrix);
-typedef column__base = Pointer<Double> Function(int column, Pointer<Matrix> matrix);
+typedef column__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data);
+typedef column__base = Pointer<Double> Function( int row,  int column, Pointer<Pointer<Double>> data);
 
-typedef at__base__ffi = Double Function(Int32 row, Int32 column, Pointer<Matrix> matrix);
-typedef at__base = double Function(int row, int column, Pointer<Matrix> matrix);
+typedef at__base__ffi = Double Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data);
+typedef at__base = double Function(int row, int column, Pointer<Pointer<Double>> data);
 
-typedef transpose__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
-typedef transpose__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef transpose__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data);
+typedef transpose__base = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data);
 
-typedef exchangeR__base__ffi = Void Function(Int32 row1, Int32 row2, Pointer<Matrix> matrix);
-typedef exchangeR__base = void Function(int row1, int row2, Pointer<Matrix> matrix);
+typedef exchangeR__base__ffi = Void Function(Int32 column, Pointer<Pointer<Double>> data, Int32 row1, Int32 row2);
+typedef exchangeR__base = void Function(int column, Pointer<Pointer<Double>> data, int row1, int row2);
 
-typedef multiplyR__base__ffi = Void Function(Int32 row, Double size, Pointer<Matrix> matrix);
-typedef multiplyR__base = void Function(int row, double size, Pointer<Matrix> matrix);
+typedef multiplyR__base__ffi = Void Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double size);
+typedef multiplyR__base = void Function(int row, int column, Pointer<Pointer<Double>> data, double size);
 
-typedef addR__base__ffi = Void Function(Int32 row1, Int32 row2, Double size, Pointer<Matrix> matrix);
-typedef addR__base = void Function(int row1, int row2, double size, Pointer<Matrix> matrix);
+typedef addR__base__ffi = Void Function( Int32 column, Pointer<Pointer<Double>> data, Int32 row1, Int32 row2, Double size);
+typedef addR__base = void Function( int column, Pointer<Pointer<Double>> data, int row1, int row2, double size);
 
-typedef exchangeC__base__ffi = Void Function(Int32 column1, Int32 column2, Pointer<Matrix> matrix);
-typedef exchangeC__base = void Function(int column1, int column2, Pointer<Matrix> matrix);
+typedef exchangeC__base__ffi = Void Function( Int32 row, Pointer<Pointer<Double>> data, Int32 column1,Int32 column2);
+typedef exchangeC__base = void Function( int row, Pointer<Pointer<Double>> data, int column1, int column2);
 
-typedef multiplyC__base__ffi = Void Function(Int32 column, Double size, Pointer<Matrix> matrix);
-typedef multiplyC__base = void Function(int column, double size, Pointer<Matrix> matrix);
+typedef multiplyC__base__ffi = Void Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double size);
+typedef multiplyC__base = void Function( int row, int column, Pointer<Pointer<Double>> data, double size);
 
-typedef addC__base__ffi = Void Function(Int32 column1, Int32 column2, Double size, Pointer<Matrix> matrix);
-typedef addC__base = void Function(int column1, int column2, double size, Pointer<Matrix> matrix);
+typedef addC__base__ffi = Void Function(Int32 row, Pointer<Pointer<Double>> data, Int32 column1, Int32 column2, Double size);
+typedef addC__base = void Function( int row, Pointer<Pointer<Double>> data, int column1, int column2, double size);
 
-typedef addNumber__base__ffi = Pointer<Matrix> Function(Double number, Pointer<Matrix> matrix);
-typedef addNumber__base = Pointer<Matrix> Function(double number, Pointer<Matrix> matrix);
+typedef addNumber__base__ffi = Pointer<Pointer<Double>> Function( Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double number);
+typedef addNumber__base = Pointer<Pointer<Double>> Function( int row, int column,  Pointer<Pointer<Double>> data, double number);
 
-typedef addNumberNoReturned__base__ffi = Void Function(Double number, Pointer<Matrix> matrix);
-typedef addNumberNoReturned__base = void Function(double number, Pointer<Matrix> matrix);
+typedef addNumberNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data, Double number);
+typedef addNumberNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data, double number);
 
-typedef addMatrix__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef addMatrix__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef addMatrix__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
+typedef addMatrix__base = Pointer<Pointer<Double>> Function( int row, int column, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
 
-typedef addMatrixNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef addMatrixNoReturned__base = void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef addMatrixNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
+typedef addMatrixNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
 
-typedef minusMatrix__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef minusMatrix__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef minusMatrix__base__ffi = Pointer<Pointer<Double>> Function( Int32 row, Int32, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
+typedef minusMatrix__base = Pointer<Pointer<Double>> Function( int row, int column, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
 
-typedef minusMatrixNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef minusMatrixNoReturned__base = void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef minusMatrixNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
+typedef minusMatrixNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
 
-typedef matmul__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef matmul__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef matmul__base__ffi = Pointer<Pointer<Double>> Function( Int32 row, Int32 column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
+typedef matmul__base = Pointer<Pointer<Double>> Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
 
-typedef multiplyMatrixNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef multiplyMatrixNoReturned__base = void Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef multiplyMatrixNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
+typedef multiplyMatrixNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
 
-typedef multiplyMatrix__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef multiplyMatrix__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef multiplyMatrix__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
+typedef multiplyMatrix__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
 
-typedef multiplyNumberNoReturned__base__ffi = Void Function(Double number, Pointer<Matrix> matrix);
-typedef multiplyNumberNoReturned__base = void Function(double number, Pointer<Matrix> matrix);
+typedef multiplyNumberNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data,  Double number);
+typedef multiplyNumberNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data,  double number);
 
-typedef multiplyNumber__base__ffi = Pointer<Matrix> Function(Double number, Pointer<Matrix> matrix);
-typedef multiplyNumber__base = Pointer<Matrix> Function(double number, Pointer<Matrix> matrix);
+typedef multiplyNumber__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data,  Double number);
+typedef multiplyNumber__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>> data,  double number);
 
-typedef kronecker__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef kronecker__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef kronecker__base__ffi = Pointer<Pointer<Double>> Function( Int32 row1,  Int32 column1,  Pointer<Pointer<Double>> data1,  Int32 row2,  Int32 column2,  Pointer<Pointer<Double>> data2);
+typedef kronecker__base = Pointer<Pointer<Double>> Function( int row1,  int column1,  Pointer<Pointer<Double>> data1,  int row2,  int column2,  Pointer<Pointer<Double>> data2);
 
-typedef divide__base__ffi = Pointer<Matrix> Function(Double number, Pointer<Matrix> matrix);
-typedef divide__base = Pointer<Matrix> Function(double number, Pointer<Matrix> matrix);
+typedef divide__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data,  Double number);
+typedef divide__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>> data,  double number);
 
-typedef divideNoReturned__base__ffi = Void Function(Double number, Pointer<Matrix> matrix);
-typedef divideNoReturned__base = void Function(double number, Pointer<Matrix> matrix);
+typedef divideNoReturned__base__ffi = Void Function( Int32 row,  Int32, Pointer<Pointer<Double>> data,  Double number);
+typedef divideNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data,  double number);
 
-typedef arrange__base__ffi = Pointer<Matrix> Function(Double start, Int32 row, Int32 column);
-typedef arrange__base = Pointer<Matrix> Function(double start, int row, int column);
+typedef arrange__base__ffi = Pointer<Pointer<Double>> Function(Double start, Int32 row, Int32 column);
+typedef arrange__base = Pointer<Pointer<Double>> Function(double start, int row, int column);
 
-typedef linspace__base__ffi = Pointer<Matrix> Function(Double start, Double end, Int32 row, Int32 column, Bool keep);
-typedef linspace__base = Pointer<Matrix> Function(double start, double end, int row, int column, bool keep);
+typedef linspace__base__ffi = Pointer<Pointer<Double>> Function(Double start, Double end, Int32 row, Int32 column, Bool keep);
+typedef linspace__base = Pointer<Pointer<Double>> Function(double start, double end, int row, int column, bool keep);
 
-typedef trace__base__ffi = Double Function(Pointer<Matrix> matrix);
-typedef trace__base = double Function(Pointer<Matrix> matrix);
+typedef trace__base__ffi = Double Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data);
+typedef trace__base = double Function( int row,  int column,  Pointer<Pointer<Double>> data);
 
-typedef det__base__ffi = Double Function(Pointer<Matrix> matrix);
-typedef det__base = double Function(Pointer<Matrix> matrix);
+typedef det__base__ffi = Double Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data);
+typedef det__base = double Function( int row,  int column,  Pointer<Pointer<Double>> data);
 
-typedef E__base__ffi = Pointer<Matrix> Function(Int32 n);
-typedef E__base = Pointer<Matrix> Function(int n);
+typedef E__base__ffi = Pointer<Pointer<Double>> Function(Int32 n);
+typedef E__base = Pointer<Pointer<Double>> Function(int n);
 
-typedef cofactor__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column, Pointer<Matrix> matrix);
-typedef cofactor__base = Pointer<Matrix> Function(int row, int column, Pointer<Matrix> matrix);
+typedef cofactor__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 prow,  Int32 pcolumn);
+typedef cofactor__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int prow,  int pcolumn);
 
-typedef inverse__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Double det);
-typedef inverse__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, double det);
+typedef inverse__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef inverse__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data);
 
-typedef adjugate__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
-typedef adjugate__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef adjugate__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef adjugate__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data);
 
-typedef deepcopy__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
-typedef deepcopy__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef deepcopy__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef deepcopy__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data);
 
-typedef compare__base__ffi = Pointer<Pointer<Bool>> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2, Int32 mode);
-typedef compare__base = Pointer<Pointer<Bool>> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2, int mode);
+typedef compare__base__ffi = Pointer<Pointer<Bool>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>>  data2,  Int32 mode);
+typedef compare__base = Pointer<Pointer<Bool>> Function(int row,  int column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>>  data2,  int mode);
 
-typedef sum__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
-typedef sum__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+typedef sum__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data,  Int32 dim);
+typedef sum__base = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>> data,  int dim);
 
-typedef mean__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
-typedef mean__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+typedef mean__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data,  Int32 dim);
+typedef mean__base = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>> data,  int dim);
 
-typedef min__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
-typedef min__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+typedef min__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data,  Int32 dim);
+typedef min__base = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>> data,  int dim);
 
-typedef max__base__ffi = Pointer<Double> Function(Pointer<Matrix> matrix, Int32 dim);
-typedef max__base = Pointer<Double> Function(Pointer<Matrix> matrix, int dim);
+typedef max__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>> data,  Int32 dim);
+typedef max__base = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>> data,  int dim);
 
-typedef data_isSame__base__ffi = Bool Function(Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2, Int32 row, Int32 column);
-typedef data_isSame__base = bool Function(Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2, int row, int column);
+typedef data_isSame__base__ffi = Bool Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2);
+typedef data_isSame__base = bool Function( int row,  int column,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2);
 
 typedef spc__isSame__base__ffi = Bool Function(Pointer<SpecialAttributes> spc1, Pointer<SpecialAttributes> spc2);
 typedef spc__isSame__base = bool Function(Pointer<SpecialAttributes> spc1, Pointer<SpecialAttributes> spc2);
 
-typedef cut__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Int32 width, Int32 height);
-typedef cut__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, int width, int height);
+typedef cut__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 prow,  Int32 pcolumn,  Int32 width,  Int32 height);
+typedef cut__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int prow,  int pcolumn,  int width,  int height);
 
-typedef cutfree__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Int32 width, Int32 height, Double number);
-typedef cutfree__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, int width, int height, double number);
+typedef cutfree__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 prow,  Int32 pcolumn, Int32 width,  Int32 height,  Double number);
+typedef cutfree__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int prow,  int pcolumn,  int width,  int height,  double number);
 
-typedef concatR__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef concatR__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef concatR__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column1,  Int32 column2,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2);
+typedef concatR__base = Pointer<Pointer<Double>> Function( int row,  int column1,  int column2,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2);
 
-typedef concatC__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
-typedef concatC__base = Pointer<Matrix> Function(Pointer<Matrix> matrix1, Pointer<Matrix> matrix2);
+typedef concatC__base__ffi = Pointer<Pointer<Double>> Function( Int32 row1,  Int32 row2,  Int32 column,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2);
+typedef concatC__base = Pointer<Pointer<Double>> Function( int row1,  int row2,  int column,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2);
 
-typedef resizeR__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
-typedef resizeR__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, double number);
+typedef resizeR__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column,  Double number);
+typedef resizeR__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column,  double number);
 
-typedef resizeC__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
-typedef resizeC__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column, double number);
+typedef resizeC__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column,  Double number);
+typedef resizeC__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column,  double number);
 
-typedef reshape__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 row, Int32 column);
-typedef reshape__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int row, int column);
+typedef reshape__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 origin_column);
+typedef reshape__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int origin_column);
 
-typedef resizeRNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
-typedef resizeRNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column, double number);
+typedef resizeRNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column,  Double number);
+typedef resizeRNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column,  double number);
 
-typedef resizeCNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column, Double number);
-typedef resizeCNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column, double number);
+typedef resizeCNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column,  Double number);
+typedef resizeCNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column,  double number);
 
-typedef reshapeNoReturned__base__ffi = Void Function(Pointer<Matrix> matrix, Int32 row, Int32 column);
-typedef reshapeNoReturned__base = void Function(Pointer<Matrix> matrix, int row, int column);
+typedef reshapeNoReturned__base__ffi = Void Function(Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column);
+typedef reshapeNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column);
 
 typedef setSeed__base__ffi = Void Function(Int32 seed);
 typedef setSeed__base = void Function(int seed);
 
-typedef mathBasement1__base__ffi = Pointer<Void> Function(Pointer<Pointer<Double>>, Int32 mode, Int32 row, Int32 column, Bool returnArray);
-typedef mathBasement1__base = Pointer<void> Function(Pointer<Pointer<Double>>, int mode, int row, int column, bool returnArray);
+typedef mathBasement1__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 mode);
+typedef mathBasement1__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int mode);
 
-typedef mathBasement2__base__ffi = Pointer<Void> Function(Pointer<Pointer<Double>>, Int32 mode, Double number, Int32 row, Int32 column, Bool returnArray);
-typedef mathBasement2__base = Pointer<void> Function(Pointer<Pointer<Double>>, int mode, double number, int row, int column, bool returnArray);
+typedef mathBasement2__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 mode, Double number);
+typedef mathBasement2__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int mode, double number);
 
-typedef mathBasement2reverse__base__ffi = Pointer<Void> Function(Pointer<Pointer<Double>>, Int32 mode, Double number, Int32 row, Int32 column, Bool returnArray);
-typedef mathBasement2reverse__base = Pointer<void> Function(Pointer<Pointer<Double>>, int mode, double number, int row, int column, bool returnArray);
+typedef mathBasement2reverse__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 mode, Double number);
+typedef mathBasement2reverse__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int mode, double number);
 
 typedef allocateButNoNumbers__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
 typedef allocateButNoNumbers__base = Pointer<Pointer<Double>> Function(int row, int column);
 
-typedef sigmoid__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix);
-typedef sigmoid__base = Pointer<Matrix> Function(Pointer<Matrix> matrix);
+typedef sigmoid__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef sigmoid__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data);
 
-typedef softmax__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Int32 dim, Double mask_nan, Double mask_inf, Double mask_neginf);
-typedef softmax__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, int dim, double mask_nan, double mask_inf, double mask_neginf);
+typedef softmax__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 dim,  Double mask_nan,  Double mask_inf,  Double mask_neginf);
+typedef softmax__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int dim,  double mask_nan,  double mask_inf,  double mask_neginf);
 
-typedef shuffle__base__ffi = Void Function(Pointer<Pointer<Double>> array, Int32 row, Int32 column);
-typedef shuffle__base = void Function(Pointer<Pointer<Double>> array, int row, int column);
+typedef shuffle__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data);
+typedef shuffle__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data);
 
-typedef sortNoReturned__base__ffi = Void Function(Pointer<Pointer<Double>> array, Int32 row, Int32 column, Bool reverse, Int32 dim, Double mask_nan);
-typedef sortNoReturned__base = void Function(Pointer<Pointer<Double>> array, int row, int column, bool reverse, int dim, double mask_nan);
+typedef sortNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Bool reverse,  Int32 dim,  Double mask_nan);
+typedef sortNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  bool reverse,  int dim,  double mask_nan);
 
-typedef sort__base__ffi = Pointer<Matrix> Function(Pointer<Matrix> matrix, Bool reverse, Int32 dim, Double mask_nan);
-typedef sort__base = Pointer<Matrix> Function(Pointer<Matrix> matrix, bool reverse, int dim, double mask_nan);
+typedef sort__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Bool reverse,  Int32 dim,  Double mask_nan);
+typedef sort__base = Pointer<Pointer<Double>> Function(int row,  int column, Pointer<Pointer<Double>>  data,  bool reverse,  int dim,  double mask_nan);
 
-typedef uniform__base__ffi = Pointer<Matrix> Function(Double start, Double end, Int32 row, Int32 column, Int32 seed, Bool use);
-typedef uniform__base = Pointer<Matrix> Function(double start, double end, int row, int column, int seed, bool use);
+typedef uniform__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Double start,  Double end,  Int32 seed,  Bool use);
+typedef uniform__base = Pointer<Pointer<Double>> Function( int row,  int column,  double start,  double end,  int seed,  bool use);
 
-typedef normal__base__ffi = Pointer<Matrix> Function(Double mu, Double sigma, Int32 row, Int32 column, Int32 seed, Bool use);
-typedef normal__base = Pointer<Matrix> Function(double mu, double sigma, int row, int column, int seed, bool use);
+typedef normal__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Double mu,  Double sigma,  Int32 seed,  Bool use);
+typedef normal__base = Pointer<Pointer<Double>> Function( int row,  int column,  double mu,  double sigma,  int seed,  bool use);
 
-typedef poisson__base__ffi = Pointer<Matrix> Function(Double lambda, Int32 row, Int32 column, Int32 seed, Bool use);
-typedef poisson__base = Pointer<Matrix> Function(double lambda, int row, int column, int seed, bool use);
+typedef poisson__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Double lambda,  Int32 seed,  Bool use);
+typedef poisson__base = Pointer<Pointer<Double>> Function( int row,  int column,  double lambda,  int seed,  bool use);
 
-typedef rref__base__ffi = Pointer<Matrix> Function(Pointer<Pointer<Double>> matrix, Int32 row, Int32 column);
-typedef rref__base = Pointer<Matrix> Function(Pointer<Pointer<Double>> matrix, int row, int column);
+typedef rref__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef rref__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data);
 
-typedef set_mask_nan__base__ffi = Void Function(Pointer<Matrix> matrix, Double number);
-typedef set_mask_nan__base  = void Function(Pointer<Matrix> matrix, double number);
+typedef set_mask_nan__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Double number);
+typedef set_mask_nan__base  = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  double number);
 
-typedef set_mask_inf__base__ffi = Void Function(Pointer<Matrix> matrix, Double number, Bool isNegativeInf);
-typedef set_mask_inf__base  = void Function(Pointer<Matrix> matrix, double number, bool isNegativeInf);
+typedef set_mask_inf__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Double number,  Bool isNegativeInf);
+typedef set_mask_inf__base  = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  double number,  bool isNegativeInf);
 
-typedef rank__base__ffi = Int32 Function(Pointer<Matrix> matrix);
-typedef rank__base  = int Function(Pointer<Matrix> matrix);
+typedef rank__base__ffi = Int32 Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef rank__base  = int Function( int row,  int column,  Pointer<Pointer<Double>>  data);
 
 typedef oneTotwoArray__base__ffi = Pointer<Pointer<Double>> Function(Pointer<Double> array, Int32 row, Int32 column);
 typedef oneTotwoArray__base = Pointer<Pointer<Double>> Function(Pointer<Double> array, int row, int column);
@@ -290,10 +305,32 @@ typedef oneTotwoArray__base = Pointer<Pointer<Double>> Function(Pointer<Double> 
 typedef __init__point__data__base__ffi = Pointer<Matrix> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Pointer<SpecialAttributes> spc);
 typedef __init__point__data__base = Pointer<Matrix> Function(int row, int column, Pointer<Pointer<Double>> data, Pointer<SpecialAttributes> spc);
 
+typedef variance__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Bool sample, Int32 dim, Bool std);
+typedef variance__base  = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>>  data, bool sample, int dim, bool std);
+
+typedef median__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 dim);
+typedef median__base  = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef norm_negainf__base__ffi = Double Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef norm_negainf__base  = double Function( int row,  int column,  Pointer<Pointer<Double>>  data);
+
+typedef norm_inf__base__ffi = Double Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef norm_inf__base  = double Function( int row,  int column,  Pointer<Pointer<Double>>  data);
+
+typedef norm_zero__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 dim);
+typedef norm_zero__base  = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef norm_one__base__ffi = Double Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data);
+typedef norm_one__base  = double Function( int row,  int column,  Pointer<Pointer<Double>>  data);
+
+typedef norm__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 n, Int32 dim);
+typedef norm__base  = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int n, int dim);
+
 final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
 final __delete__base matply__delete__ = dylib.lookupFunction<__delete__base__ffi, __delete__base>('__delete__');
+final __delete__data__base matply__delete__data__ = dylib.lookupFunction<__delete__data__base__ffi, __delete__data__base>('__delete__data__');
 final filled__base matply__filled = dylib.lookupFunction<filled__base__ffi, filled__base>('filled');
 final zeros__base matply__zeros = dylib.lookupFunction<zeros__base__ffi, zeros__base>('zeros');
 final ones__base matply__ones = dylib.lookupFunction<ones__base__ffi, ones__base>('ones');
@@ -314,7 +351,7 @@ final addMatrix__base matply__addMatrix = dylib.lookupFunction<addMatrix__base__
 final addMatrixNoReturned__base matply__addMatrixNoReturned = dylib.lookupFunction<addMatrixNoReturned__base__ffi, addMatrixNoReturned__base>('addMatrixNoReturned');
 final minusMatrix__base matply__minusMatrix = dylib.lookupFunction<minusMatrix__base__ffi, minusMatrix__base>('minusMatrix');
 final minusMatrixNoReturned__base matply__minusMatrixNoReturned = dylib.lookupFunction<minusMatrixNoReturned__base__ffi, minusMatrixNoReturned__base>('minusMatrixNoReturned');
-final matmul__base matply_matmul = dylib.lookupFunction<matmul__base__ffi, matmul__base>('matmul');
+final matmul__base matply__matmul = dylib.lookupFunction<matmul__base__ffi, matmul__base>('matmul');
 final multiplyMatrixNoReturned__base matply__multiplyMatrixNoReturned = dylib.lookupFunction<multiplyMatrixNoReturned__base__ffi, multiplyMatrixNoReturned__base>('multiplyMatrixNoReturned');
 final multiplyMatrix__base matply__multiplyMatrix = dylib.lookupFunction<multiplyMatrix__base__ffi, multiplyMatrix__base>('multiplyMatrix');
 final multiplyNumberNoReturned__base matply__multiplyNumberNoReturned = dylib.lookupFunction<multiplyNumberNoReturned__base__ffi, multiplyNumberNoReturned__base>('multiplyNumberNoReturned');
@@ -367,6 +404,14 @@ final set_mask_inf__base matply__set_mask_inf = dylib.lookupFunction<set_mask_in
 final __init__point__data__base matply__init__point__data__ = dylib.lookupFunction<__init__point__data__base__ffi, __init__point__data__base>('__init__point__data__');
 final rank__base matply__rank = dylib.lookupFunction<rank__base__ffi, rank__base>('rank');
 final oneTotwoArray__base matply__oneTotwoArray = dylib.lookupFunction<oneTotwoArray__base__ffi, oneTotwoArray__base>('oneTotwoArray');
+final variance__base matply__variance = dylib.lookupFunction<variance__base__ffi, variance__base>('variance');
+final median__base matply__median = dylib.lookupFunction<median__base__ffi, median__base>('median');
+final norm_negainf__base matply__norm_negainf = dylib.lookupFunction<norm_negainf__base__ffi, norm_negainf__base>('norm_negainf');
+final norm_inf__base matply__norm_inf = dylib.lookupFunction<norm_inf__base__ffi, norm_inf__base>('norm_inf');
+final norm_zero__base matply__norm_zero = dylib.lookupFunction<norm_zero__base__ffi, norm_zero__base>('norm_zero');
+final norm_one__base matply__norm_one = dylib.lookupFunction<norm_one__base__ffi, norm_one__base>('norm_one');
+final norm__base matply__norm = dylib.lookupFunction<norm__base__ffi, norm__base>('norm');
+
 
 dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
@@ -376,16 +421,13 @@ dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   }
 }
 
-// 将二维数组转为二级指针
-Pointer<Pointer<Double>> toMatrixPPointerData(List<List<double>> data, int row, int column){
-  final dataPointer = malloc<Pointer<Double>>(row);
-  for (int r = 0; r < row; r++) {
-    dataPointer[r] = malloc<Double>(column);
-    for (int j = 0; j < column; j++) {
-      dataPointer[r][j] = data[r][j];
+// 测试一个二维数组指针
+void TestArrayPointer(int row, int column, Pointer<Pointer<Double>> data){
+  for (int r = 0;r < row;r++){
+    for (int c = 0;c < column;c ++){
+      print(data[r][c]);
     }
   }
-  return dataPointer;
 }
 
 final double Pi = _Pi.value;
@@ -394,4 +436,15 @@ final double inf = _inf.value;  // 正无穷大，和Dart的内置相通，下�
 final double negativeinf = -inf;  // 负无穷大
 final double nan = _nan.value;  // 非法数据
 
-
+/// 全局的内存管理单例
+/// 该内存单例允许：凡是创建一个新Matrix实例，都会主动被检测并添加到内存池中，在程序执行完毕后，可以一键释放。
+// void initMp(Matrix * matrix);
+// void addToMp(Matrix * matrix);
+// void freeMp();
+// int getInstances();
+final void Function(Pointer<Matrix> matrix) __initMp = dylib.lookupFunction<Void Function(Pointer<Matrix> matrix), void Function(Pointer<Matrix> matrix)>('initMp');
+final void Function(Pointer<Matrix> matrix) Signal = dylib.lookupFunction<Void Function(Pointer<Matrix> matrix), void Function(Pointer<Matrix> matrix)>('addToMp');
+final void Function(bool) __freeMp = dylib.lookupFunction<Void Function(Bool), void Function(bool)>('freeMp');
+final int Function() getInstances = dylib.lookupFunction<Int32 Function(), int Function()>('getInstances');
+void initMp({Pointer<Matrix>? matrix}) => __initMp(matrix?? nullptr);
+void freeMp({bool visible = false}) => __freeMp(visible);

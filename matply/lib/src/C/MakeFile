@@ -1,10 +1,9 @@
-# Makefile for building matply.dll
-
 # Compiler
 CC = gcc
 
 # Compiler flags
-CFLAGS = -shared
+CFLAGS = -fPIC
+LDFLAGS = -shared
 
 # Source files
 SRCS = matply.c Auxiliary.c
@@ -12,15 +11,25 @@ SRCS = matply.c Auxiliary.c
 # Object files
 OBJS = $(SRCS:.c=.o)
 
-# Output library
-OUTPUT = matply.dll
+# Detect platform
+ifeq ($(OS),Windows_NT)
+    OUTPUT = matply.dll
+    LDFLAGS += -Wl,--out-implib,libmatply.a
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        OUTPUT = libmatply.so
+    else ifeq ($(UNAME_S),Darwin)
+        OUTPUT = libmatply.dylib
+    endif
+endif
 
 # Default target
 all: $(OUTPUT)
 
 # Rule to build the output library
 $(OUTPUT): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 # Rule to compile source files into object files
 %.o: %.c

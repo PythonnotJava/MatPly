@@ -149,3 +149,60 @@ L0范数
 ## mode[new from V1.0.2]
 求解众数（此方法没有基于C-API）
 
+## argmax[new from V1.0.5]
+获取最大值索引
+
+## argmin[new from V1.0.5]
+获取最小值索引
+
+## flatten[new from V1.0.5]
+返回一个1 * size的扁平化矩阵，mode参数决定了从横向开始还是纵向
+
+## flatten_list[new from V1.0.5]
+返回一个扁平化后的一维列表
+
+## replace[new from V1.0.5]
+获取替换不符合条件的值后的矩阵
+
+## replace_no_returned[new from V1.0.5]
+替换矩阵不符合条件的值
+
+## normalization[new from V1.0.5]
+获取归一化后的矩阵，0、1、其他值分别对应线性归一化、均值归一化、z-score归一化
+
+## slice[new from V1.0.5]
+获取矩阵切片切出的矩阵，如果不指定切到哪，则切至终点行（列）
+
+## clip[new from V1.0.5]
+获取一个框住范围的矩阵，矩阵数据满足lb <= x <= ub，小于则变成lb，大于变成ub
+
+## clip_no_returned[new from V1.0.5]
+框住矩阵本身范围
+
+## all[new from V1.0.5]
+矩阵所有值全满足条件返回true，反之
+
+## any[new from V1.0.5]
+矩阵任意值满足条件返回true，反之
+
+## counter[new from V1.0.5]
+对矩阵中满足条件的值计数
+
+## reduce[new from V1.0.5]
+对矩阵相邻的两个值累计操作
+
+## where[new from V1.0.5]
+[condition] 是必须传入的条件函数，也同时添加另一个约束 [any]，但这时候 [obj] 不能为空。只操作满足条件的值
+若不传入 [cpl] 参数，则默认返回满足条件的值到一个一维列表；否则，则按照cpl函数更新的值与未满足条件的值一起写入原来矩阵，返回一个矩阵对象
+
+## qr[new from V1.0.5]
+获取矩阵QR分解得到的两个矩阵组成的列表
+
+## Hist[new from V1.0.5]
+获取未可视化、统计出来的值计数
+
+## Bar[new from V1.0.5]
+获取未可视化、根据条件约束分类并且符合生成标签的值计数
+
+## magic[new from V1.0.5] **_!!!_**
+[@alert]高自由度地使用抽象出来的方式来自定义抽象地反射矩阵数据

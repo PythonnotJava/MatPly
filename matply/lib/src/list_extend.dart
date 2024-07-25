@@ -20,17 +20,6 @@ extension OneDimListExtend on List<double> {
     }else
       throw different_shape;
   }
-
-  // 仅提供横向重塑
-  MatrixType resize({required int row, required int column, double number = .0}){
-    assert(row > 0 && column > 0);
-    var op = getOnePointer();
-    var data = matply__oneTotwoArray(op, 1, length);
-    matply__resizeCNoReturned(row, column, data, 1, length, number);
-    MatrixType mt = MatrixType.__fromDataPointer(data, [1, length]);
-    malloc.free(op);
-    return mt;
-  }
 }
 
 // 数据源为二维列表
@@ -60,7 +49,7 @@ extension TwoDimListExtend on List<List<double>>{
       var tp1 = getTwoPointer();
       var tp2 = list.getTwoPointer();
       MatrixType _mt = MatrixType.__fromDataPointer(
-          matply__matmul(row, column, tp1, tp2),
+          matply__matmul(row, column, tp1, tp2, list.column),
           [row, list.column]
       );
       matply__delete__data__(tp1, row);
@@ -71,7 +60,7 @@ extension TwoDimListExtend on List<List<double>>{
         throw matmul_unsupport;
       var tp = getTwoPointer();
       MatrixType _mt = MatrixType.__fromDataPointer(
-          matply__matmul(row, column, tp, mt.self.ref.data),
+          matply__matmul(row, column, tp, mt.self.ref.data, mt.shape[1]),
           [row, mt.shape[1]]
       );
       matply__delete__data__(tp, row);

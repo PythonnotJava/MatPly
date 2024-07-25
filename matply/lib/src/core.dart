@@ -1,13 +1,17 @@
 import 'dart:ffi';
-import 'dart:math';
 import 'package:ffi/ffi.dart';
-import 'dart:io' show Directory;
+import 'dart:io' show Platform, Directory;
 import 'package:path/path.dart' as path;
 
 part 'matply_api.dart';
 part 'matrix_type.dart';
 part 'list_extend.dart';
 part 'errors.dart';
+part 'matrix_type_linalg.dart';
+part 'matrix_type_pure_math.dart';
+part 'matrix_type_random.dart';
+part 'matrix_type_visualization.dart';
+part 'matrix_type_func_condition.dart';
 
 /// Global functions
 void set_visible_round(String format) => matply__set__visible__round(format.toNativeUtf8());

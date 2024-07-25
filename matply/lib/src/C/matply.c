@@ -371,10 +371,11 @@ void minusMatrixNoReturned( int row,  int column, double **data1,  double **data
     }
 }
 
-double ** matmul( int row,  int column,  double **data1,  double **data2)
+double ** matmul( int row,  int column,  double **data1,  double **data2, int column2)
 {
     double ** new = (double **)malloc(sizeof(double*) * row);
     for (int r = 0; r < row; r++) {
+        new[r] = (double *) malloc(sizeof (double ) * column2);
         for (int c = 0; c < column;c ++) {
             new[r][c] = 0.0;
             for (int k = 0; k < column;k++) {
@@ -995,91 +996,6 @@ double ** resizeC( int row,  int column,  double ** data,  int origin_row,  int 
         }
     }
     return new;
-}
-
-void resizeRNoReturned( int row,  int column, double ** data,  int origin_row,  int origin_column,  double number)
-{
-     int origin_size = origin_column * origin_column;
-     int new_size = row * column;
-    double ** newdata = (double **)malloc(sizeof(double*) * row);
-    for(int r =0;r<row;r++)
-        newdata[r] = (double*)malloc(sizeof(double) *column);
-    int counter = 0;
-    if (origin_size >= new_size)
-    {
-        for (int r = 0;r < row;r++)
-        {
-            for (int c = 0;c < column;c ++)
-            {
-                newdata[r][c] = data[counter / origin_column][counter % origin_column];
-                counter++;
-            }
-        }
-    }else
-    {
-        for (int r = 0;r < origin_row;r++)
-        {
-            for (int c = 0;c < origin_column;c ++)
-            {
-                newdata[counter / column][counter % column] = data[r][c];
-                counter++;
-            }
-        }
-        while (counter < new_size) {
-            newdata[counter / column][counter % column] = number;
-            counter++;
-        }
-    }
-    __delete__data__(data, origin_row);
-    data = newdata;
-}
-
-void resizeCNoReturned( int row,  int column, double ** data,  int origin_row,  int origin_column,  double number)
-{
-     int origin_size = origin_column * origin_row;
-     int new_size = row * column;
-    double ** newdata = (double **)malloc(sizeof(double*) * row);
-    for(int r =0;r<row;r++)
-        newdata[r] = (double*)malloc(sizeof(double) *column);
-    int counter = 0;
-    if (origin_size >= new_size) {
-        for (int c = 0; c < column; c ++) {
-            for (int r = 0; r < row; r++){
-                newdata[r][c] = data[counter % origin_row][counter / origin_row];
-                counter++;
-            }
-        }
-    } else {
-        for (int c = 0; c < origin_column; c ++) {
-            for (int r = 0; r < origin_row; r++) {
-                newdata[counter % row][counter / row] = data[r][c];
-                counter++;
-            }
-        }
-        while (counter < new_size) {
-            newdata[counter % row][counter / row] = number;
-            counter++;
-        }
-    }
-    __delete__data__(data, origin_row);
-    data = newdata;
-}
-
-void reshapeNoReturned( int row,  int column, double ** data,  int origin_row,  int origin_column)
-{
-    double **newdata = (double**)malloc(sizeof(double *) * row);
-    int counter = 0;
-    for (int r=0;r < row;r ++)
-    {
-        newdata[r] = (double*)malloc(sizeof(double) * column);
-        for(int c = 0;c <column;c ++)
-        {
-            newdata[r][c] = data[counter / origin_column][counter % origin_column];
-            counter++;
-        }
-    }
-    __delete__data__(data, origin_row);
-    data = newdata;
 }
 
 double ** reshape( int row,  int column,  double ** data,  int origin_column)
@@ -1849,4 +1765,464 @@ double * norm(int row, int column, double ** data, int n, int dim)
         }
     }
     return number;
+}
+
+int * argmax(int row, int column, double  **data, int dim){
+    int * number = NULL;
+    double value;
+    switch (dim) {
+        case 0:{
+            number = (int *) calloc(row,  sizeof (int ) );
+            for(int r = 0;r < row;r++){
+                value = data[r][0];
+                for(int c = 1;c < column;c ++){
+                    if (value < data[r][c]) {
+                        value = data[r][c];
+                        number[r] = c;
+                    }
+                }
+            }
+            break;
+        }
+        case 1:{
+            number = (int *) calloc(column, sizeof (int ));
+            for (int c = 0;c < column;c ++){
+                value = data[0][c];
+                for(int r = 0;r < row;r ++){
+                    if (value < data[r][c]){
+                        value = data[r][c];
+                        number[c] = r;
+                    }
+                }
+            }
+            break;
+        }
+        default:{
+            number = (int *) calloc(1, sizeof (int ));
+            value = data[0][0];
+            for(int r =0;r < row;r++){
+                for(int  c=0;c < column;c ++){
+                    if (value < data[r][c]){
+                        value = data[r][c];
+                        *number = column * r + c;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+int * argmin(int row, int column, double  **data, int dim){
+    int * number = NULL;
+    double value;
+    switch (dim) {
+        case 0:{
+            number = (int *) calloc(row,  sizeof (int ) );
+            for(int r = 0;r < row;r++){
+                value = data[r][0];
+                for(int c = 1;c < column;c ++){
+                    if (value > data[r][c]) {
+                        value = data[r][c];
+                        number[r] = c;
+                    }
+                }
+            }
+            break;
+        }
+        case 1:{
+            number = (int *) calloc(column, sizeof (int ));
+            for (int c = 0;c < column;c ++){
+                value = data[0][c];
+                for(int r = 0;r < row;r ++){
+                    if (value > data[r][c]){
+                        value = data[r][c];
+                        number[c] = r;
+                    }
+                }
+            }
+            break;
+        }
+        default:{
+            number = (int *) calloc(1, sizeof (int ));
+            value = data[0][0];
+            for(int r =0;r < row;r++){
+                for(int  c=0;c < column;c ++){
+                    if (value > data[r][c]){
+                        value = data[r][c];
+                        *number = column * r + c;
+                    }
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+double * flatten(int row, int column, double  **data, int mode){
+    double * new = (double  *) malloc(sizeof (double ) * (column * row));
+    int counter = 0;
+    if (mode == 1){
+        for(int c = 0;c < column;c ++){
+            for (int r = 0;r < row;r ++){
+                new[counter++] = data[r][c];
+            }
+        }
+    } else{
+        for(int r =0;r < row;r ++){
+            for(int c= 0;c < column;c ++){
+                new[counter++] = data[r][c];
+            }
+        }
+    }
+    return new;
+}
+
+double ** range(double start, double step, int row, int column){
+    double  **new = (double **) malloc(sizeof (double *  )*row);
+    int counter = 0;
+    for (int r = 0;r < row;r++){
+        new[r] = (double *) malloc(sizeof (double ) *column);
+        for(int c=0;c < column;c ++){
+            new[r][c] = start + step * counter++;
+        }
+    }
+    return new;
+}
+
+double ** replace(int row, int column, double ** data, double number,  bool (*condition)(double )){
+    double **new = (double  **) malloc(sizeof (double *) * row);
+    for (int r = 0;r < row;r ++){
+        new[r] = (double  *) malloc(sizeof (double ) * column);
+        for (int c = 0;c < column;c ++){
+            new[r][c] = (condition(data[r][c])) ? data[r][c] : number;
+        }
+    }
+    return new;
+}
+
+void replaceNoReturned(int row, int column, double ** data, double number, bool (*condition)(double )){
+    for (int r =0;r < row;r ++){
+        for(int c=0;c < column;c ++){
+            if (!condition(data[r][c]))
+                data[r][c] = number;
+        }
+    }
+}
+
+double ** normalization1(int row, int column, double  **data, int dim){
+    double ** new = allocateButNoNumbers(row, column);
+    double * mins = min(row, column, data, dim);
+    double * maxs = max(row, column, data, dim);
+    double value;
+    switch (dim) {
+        case 0:{
+            for (int r = 0;r <row;r++ ){
+                value = maxs[r] - mins[r];
+                for (int c = 0;c < column;c ++){
+                    new[r][c] = (data[r][c] - mins[r]) / value;
+                }
+            }
+            break;
+        }
+        case 1:{
+            for (int c = 0;c < column;c ++){
+                value = maxs[c] - mins[c];
+                for (int r = 0;c < row;r ++){
+                    new[r][c] = (data[r][c] - mins[c]) / value;
+                }
+            }
+            break;
+        }
+        default:{
+            value = *maxs - *mins;
+            for (int r = 0;r < row;r ++){
+                for (int c =0;c < column;c ++){
+                    new[r][c] = (data[r][c] - *mins) / value;
+                }
+            }
+            break;
+        }
+
+    }
+    free(mins);
+    free(maxs);
+    return new;
+}
+
+double ** normalization2(int row, int column, double  **data, int dim){
+    double ** new = allocateButNoNumbers(row, column);
+    double * mins = min(row, column, data, dim);
+    double * maxs = max(row, column, data, dim);
+    double * means = mean(row, column, data, dim);
+    double  value;
+    switch (dim) {
+        case 0:{
+            for (int r = 0;r < row;r++){
+                value = maxs[r] - mins[r];
+                for (int c = 0;c < column;c ++){
+                    new[r][c] = (data[r][c] - means[r]) / value;
+                }
+            }
+            break;
+        }
+        case 1:{
+            for (int c =0;c <column;c ++){
+                value = maxs[c] - mins[c];
+                for (int r = 0;r < row;r ++){
+                    new[r][c] = (data[r][c] - means[c]) / value;
+                }
+            }
+            break;
+        }
+        default:{
+            value = *maxs - *mins;
+            for (int r=0;r <row;r++){
+                for(int c = 0;c < column; c ++){
+                    new[r][c] = (data[r][c] - *means) / value;
+                }
+            }
+            break;
+        }
+    }
+    free(mins);
+    free(maxs);
+    free(means);
+    return new;
+}
+
+double ** normalization3(int row, int column, double  **data, int dim){
+    double * sigmas = variance(row, column, data, false, dim, true);
+    double * mus = mean(row, column, data, dim);
+    double ** new = allocateButNoNumbers(row , column);
+    switch (dim) {
+        case 0:{
+            for (int r = 0;r < row;r ++){
+                for (int c=0;c  <column;c ++){
+                    new[r][c] = (data[r][c] - mus[r]) / sigmas[r];
+                }
+            }
+            break;
+        }
+        case 1:{
+            for(int c=0;c < column;c ++){
+                for (int r = 0;r < row;r ++){
+                    new[r][c] = (data[r][c] - mus[c]) / sigmas[c];
+                }
+            }
+            break;
+        }
+        default:{
+            for (int r =0;r < row;r++){
+                for(int c = 0;c < column;c ++){
+                    new[r][c] = (data[r][c] - *mus) / *sigmas;
+                }
+            }
+            break;
+        }
+    }
+    free(sigmas);
+    free(mus);
+    return new;
+}
+
+double ** sliceR(int column, double ** data, int from, int to){
+    int row = to - from + 1;
+    double ** new = (double  **) malloc(sizeof (double *) * row);
+    for (int r = 0;r < row;r++){
+        new[r] = (double *) malloc(sizeof (double )* column);
+        for (int c = 0;c < column;c ++){
+            new[r][c] = data[r + from][c];
+        }
+    }
+    return new;
+}
+
+double ** sliceC(int row, double ** data, int from, int to){
+    int column = to - from + 1;
+    double ** new = allocateButNoNumbers(row, column);
+    for (int c = 0;c< column; c ++){
+        for(int r = 0; r< row;r ++){
+            new[r][c] = data[r][c + from];
+        }
+    }
+    return new;
+}
+
+double ** clip(int row, int column, double  **data, double lb, double ub){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    double value;
+    for (int r = 0;r < row; r++){
+        new[r] = (double *) malloc(sizeof (double )*column);
+        for (int c = 0;c < column;c ++){
+            value = data[r][c];
+            new[r][c] = (value < lb) ? lb : (value > ub) ? ub : value;
+        }
+    }
+    return new;
+}
+
+void clipNoReturned(int row, int column, double  **data, double lb, double ub){
+    double value;
+    for (int r = 0;r < row; r++){
+        for (int c = 0;c < column;c ++){
+            value = data[r][c];
+            if (value < lb)
+                data[r][c] = lb;
+            else if (value > ub)
+                data[r][c] = ub;
+            else{}
+        }
+    }
+}
+
+bool all(int row, int column, double  ** data, bool (*condition)(double )){
+    for (int r = 0;r < row;r ++){
+        for (int c =0;c < column;c ++){
+            if (!condition(data[r][c]))
+                return false;
+        }
+    }
+    return true;
+}
+
+bool any(int row, int column, double **data, bool (*condition)(double )){
+    for (int r = 0;r < row;r ++){
+        for (int c =0;c < column;c ++){
+            if (condition(data[r][c]))
+                return true;
+        }
+    }
+    return false;
+}
+
+int * counter(int row, int column, double  ** data, int dim, bool (*condition)(double )){
+    int * number = NULL;
+    switch (dim) {
+        case 0:{
+            number = (int *) calloc(row, sizeof (int ));
+            for (int r = 0;r < row;r ++){
+                for(int c =0;c < column;c ++){
+                    if (condition(data[r][c]))
+                        number[r]++;
+                }
+            }
+            break;
+        }
+        case 1:
+            number = (int *) calloc(column, sizeof (int ));
+            for (int c = 0;c < column;c ++){
+                for(int r=0;r< row;r++){
+                    if (condition(data[r][c]))
+                        number[c]++;
+                }
+            }
+            break;
+        default:{
+            number = (int *) calloc(1, sizeof (int ));
+            for (int r = 0;r < row;r ++){
+                for(int c =0;c < column;c ++){
+                    if (condition(data[r][c]))
+                        *number++;
+                }
+            }
+            break;
+        }
+    }
+    return number;
+}
+
+double * reduce(int row, int column, double ** data, int dim, double (*condition)(double , double ), double init){
+    double * number = NULL;
+    double value = init;
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double )*row);
+            for (int r = 0;r < row;r++){
+                for (int c = 0;c < column;c ++){
+                    value = condition(value, data[r][c]);  // 这里与condition(data[r][c], value)效果不一样
+                }
+                number[r] = value;
+                value = init;
+            }
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double )*column );
+            for (int c =0;c < column;c ++){
+                for(int r = 0;r < row;r++){
+                    value = condition(value, data[r][c]);
+                }
+                number[c] = value;
+                value = init;
+            }
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            for (int r = 0;r < row;r++){
+                for (int c = 0;c < column;c ++){
+                    value = condition(value, data[r][c]);
+                }
+            }
+            *number = value;
+        }
+    }
+    return number;
+}
+
+double ** E_like(int row, int column){
+    double ** new = (double **) calloc(row, sizeof (double *) );
+    for (int r = 0;r < row;r++)
+        new[r] = (double *)calloc(column, sizeof (double ) );
+    int n = row < column ? row : column;
+    for (int r = 0;r < n;r++)
+        new[r][r] = 1.0;
+    return new;
+}
+
+double *** qr(int row, int column, double** data) {
+    double *** new = (double***)malloc(2 * sizeof(double**));
+    new[0] = (double**)malloc(row * sizeof(double*));
+    new[1] = (double**)malloc(column * sizeof(double*));
+
+    for (int i = 0; i < row; ++i) {
+        new[0][i] = (double*)calloc(column, sizeof(double));
+    }
+    for (int i = 0; i < column; ++i) {
+        new[1][i] = (double*)calloc(column, sizeof(double));
+    }
+
+    double ** Q = new[0];
+    double ** R = new[1];
+
+    for (int j = 0; j < column; ++j) {
+        for (int i = 0; i < row; ++i) {
+            Q[i][j] = data[i][j];
+        }
+
+        for (int k = 0; k < j; ++k) {
+            double dotProduct = 0.0;
+            for (int i = 0; i < row; ++i) {
+                dotProduct += Q[i][j] * Q[i][k];
+            }
+
+            R[k][j] = dotProduct;
+            for (int i = 0; i < row; ++i) {
+                Q[i][j] -= dotProduct * Q[i][k];
+            }
+        }
+        R[j][j] = 0.0;
+        for (int i = 0; i < row; ++i) {
+            R[j][j] += Q[i][j] * Q[i][j];
+        }
+        R[j][j] = sqrt(R[j][j]);
+        for (int i = 0; i < row; ++i) {
+            Q[i][j] /= R[j][j];
+        }
+    }
+
+    return new;
 }

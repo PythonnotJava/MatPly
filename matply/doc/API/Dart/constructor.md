@@ -330,7 +330,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 ### 从数据点拟合的概率密度函数效果如下
 > 经计算，均值为0.97，与规定的1.0大差不差
-![normal.png](src/normal.jpg)
+![normal.png](src/normal.png)
 
 ## 生成符合泊松分布数据
 ```text
@@ -436,7 +436,7 @@ class _MyHomePageState extends State<MyHomePage> {
 ```
 
 ### 效果如下
-![possion.png](src/possion.jpg)
+![possion.png](src/possion.png)
 
 ## 指向C语言生成矩阵对象指针
 ```text
@@ -467,3 +467,55 @@ main() {
 false
  */
 ```
+
+## 生成最小维度下对角线上全是1，其他全是0的仿单位矩阵
+```text
+MatrixType.E_like({required int row, required int column})
+```
+
+### example
+```dart
+import 'matply.dart';
+
+main(){
+  MatrixType mt = MatrixType.E_like(row: 3, column: 5);
+  mt.visible();
+}
+
+/*output
+[
+ [1.00000	 0.00000	 0.00000	 0.00000	 0.00000	]
+ [0.00000	 1.00000	 0.00000	 0.00000	 0.00000	]
+ [0.00000	 0.00000	 1.00000	 0.00000	 0.00000	]
+]
+* */
+```
+
+## 指定步长后，从start开始生成数据
+```text
+MatrixType.range({
+    required double start,
+    double step = 1.0,
+    required int row,
+    required int column
+  })
+```
+
+### example
+```dart
+import 'matply.dart';
+
+main(){
+  MatrixType mt = MatrixType.range(row: 3, column: 5, start: 2.5, step: 0.5);
+  mt.visible();
+}
+
+/*output
+[
+ [2.50000	 3.00000	 3.50000	 4.00000	 4.50000	]
+ [5.00000	 5.50000	 6.00000	 6.50000	 7.00000	]
+ [7.50000	 8.00000	 8.50000	 9.00000	 9.50000	]
+]
+* */
+```
+

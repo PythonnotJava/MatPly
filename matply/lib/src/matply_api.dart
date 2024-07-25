@@ -1,7 +1,7 @@
 part of 'core.dart';
-// final dylib = DynamicLibrary.open(path.join(Directory.current.path, 'C', 'matply.dll'));
+// final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
 
-const VERSION = '1.0.2';
+const VERSION = '1.0.5';
 
 String pubCacheDir = path.join(
     Platform.environment['LOCALAPPDATA']!,
@@ -146,8 +146,8 @@ typedef minusMatrix__base = Pointer<Pointer<Double>> Function( int row, int colu
 typedef minusMatrixNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2);
 typedef minusMatrixNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
 
-typedef matmul__base__ffi = Pointer<Pointer<Double>> Function( Int32 row, Int32 column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
-typedef matmul__base = Pointer<Pointer<Double>> Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
+typedef matmul__base__ffi = Pointer<Pointer<Double>> Function( Int32 row, Int32 column,  Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2, Int32 column2);
+typedef matmul__base = Pointer<Pointer<Double>> Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2, int column2);
 
 typedef multiplyMatrixNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
 typedef multiplyMatrixNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>> data1,  Pointer<Pointer<Double>> data2);
@@ -239,15 +239,6 @@ typedef resizeC__base = Pointer<Pointer<Double>> Function( int row,  int column,
 typedef reshape__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 origin_column);
 typedef reshape__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int origin_column);
 
-typedef resizeRNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column,  Double number);
-typedef resizeRNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column,  double number);
-
-typedef resizeCNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column,  Double number);
-typedef resizeCNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column,  double number);
-
-typedef reshapeNoReturned__base__ffi = Void Function(Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Int32 origin_row,  Int32 origin_column);
-typedef reshapeNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  int origin_row,  int origin_column);
-
 typedef setSeed__base__ffi = Void Function(Int32 seed);
 typedef setSeed__base = void Function(int seed);
 
@@ -326,6 +317,64 @@ typedef norm_one__base  = double Function( int row,  int column,  Pointer<Pointe
 typedef norm__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 n, Int32 dim);
 typedef norm__base  = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int n, int dim);
 
+typedef argmax__base__ffi = Pointer<Int32> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 dim);
+typedef argmax__base  = Pointer<Int32> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef argmin__base__ffi = Pointer<Int32> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 dim);
+typedef argmin__base  = Pointer<Int32> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef flatten__base__ffi = Pointer<Double> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 mode);
+typedef flatten__base  = Pointer<Double> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int mode);
+
+typedef range__base__ffi = Pointer<Pointer<Double>> Function(Double start, Double step, Int32 row,  Int32 column);
+typedef range__base  = Pointer<Pointer<Double>> Function(double start, double step, int row,  int column);
+
+typedef _Cdt = Pointer<NativeFunction<Bool Function(Double)>>;
+typedef replace__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double number, _Cdt condition);
+typedef replace__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, double number, _Cdt condition);
+
+typedef replaceNoReturned__base__ffi = Void Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double number, Pointer<NativeFunction<Bool Function(Double)>> condition);
+typedef replaceNoReturned__base  = void Function(int row, int column, Pointer<Pointer<Double>> data, double number, Pointer<NativeFunction<Bool Function(Double)>> condition);
+
+typedef normalization1__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 dim);
+typedef normalization1__base  = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef normalization2__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 dim);
+typedef normalization2__base  = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef normalization3__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data, Int32 dim);
+typedef normalization3__base  = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data, int dim);
+
+typedef sliceR__base__ffi = Pointer<Pointer<Double>> Function(Int32 column,  Pointer<Pointer<Double>>  data, Int32 from, Int32 to);
+typedef sliceR__base  = Pointer<Pointer<Double>> Function(int column,  Pointer<Pointer<Double>>  data, int from, int to);
+
+typedef sliceC__base__ffi = Pointer<Pointer<Double>> Function( Int32 row, Pointer<Pointer<Double>>  data, Int32 from, Int32 to);
+typedef sliceC__base  = Pointer<Pointer<Double>> Function( int row,  Pointer<Pointer<Double>>  data, int from, int to);
+
+typedef clip__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double lb, Double ub);
+typedef clip__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, double lb, double ub);
+
+typedef clipNoReturned__base__ffi = Void Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double lb, Double ub);
+typedef clipNoReturned__base  = void Function(int row, int column, Pointer<Pointer<Double>> data, double lb, double ub);
+
+typedef all__base__ffi = Bool Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, _Cdt condition);
+typedef all__base  = bool Function(int row, int column, Pointer<Pointer<Double>> data, _Cdt condition);
+
+typedef any__base__ffi = Bool Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, _Cdt condition);
+typedef any__base  = bool Function(int row, int column, Pointer<Pointer<Double>> data, _Cdt condition);
+
+typedef counter__base__ffi = Pointer<Int32> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 dim, _Cdt condition);
+typedef counter__base  = Pointer<Int32> Function(int row, int column, Pointer<Pointer<Double>> data, int dim, _Cdt condition);
+
+typedef reduce__base__ffi = Pointer<Double> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 dim, Pointer<NativeFunction<Double Function(Double, Double)>> condition, Double init);
+typedef reduce__base = Pointer<Double> Function(int row, int column, Pointer<Pointer<Double>> data, int dim, Pointer<NativeFunction<Double Function(Double, Double)>> condition, double init);
+
+typedef qr__base__ffi = Pointer<Pointer<Pointer<Double>>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data);
+typedef qr__base = Pointer<Pointer<Pointer<Double>>> Function(int row, int column, Pointer<Pointer<Double>> data);
+
+typedef E_like__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
+typedef E_like__base = Pointer<Pointer<Double>> Function(int row, int column);
+
 final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
@@ -382,9 +431,6 @@ final concatC__base matply__concatC = dylib.lookupFunction<concatC__base__ffi, c
 final resizeR__base matply__resizeR = dylib.lookupFunction<resizeR__base__ffi, resizeR__base>('resizeR');
 final resizeC__base matply__resizeC = dylib.lookupFunction<resizeC__base__ffi, resizeC__base>('resizeC');
 final reshape__base matply__reshape = dylib.lookupFunction<reshape__base__ffi, reshape__base>('reshape');
-final resizeRNoReturned__base matply__resizeRNoReturned = dylib.lookupFunction<resizeRNoReturned__base__ffi, resizeRNoReturned__base>('resizeRNoReturned');
-final resizeCNoReturned__base matply__resizeCNoReturned = dylib.lookupFunction<resizeCNoReturned__base__ffi, resizeCNoReturned__base>('resizeCNoReturned');
-final reshapeNoReturned__base matply__reshapeNoReturned = dylib.lookupFunction<reshapeNoReturned__base__ffi, reshapeNoReturned__base>('reshapeNoReturned');
 final setSeed__base matply__setSeed = dylib.lookupFunction<setSeed__base__ffi, setSeed__base>('setSeed');
 final mathBasement1__base matply_mathBasement1 = dylib.lookupFunction<mathBasement1__base__ffi, mathBasement1__base>('mathBasement1');
 final mathBasement2__base matply_mathBasement2 = dylib.lookupFunction<mathBasement2__base__ffi, mathBasement2__base>('mathBasement2');
@@ -411,7 +457,25 @@ final norm_inf__base matply__norm_inf = dylib.lookupFunction<norm_inf__base__ffi
 final norm_zero__base matply__norm_zero = dylib.lookupFunction<norm_zero__base__ffi, norm_zero__base>('norm_zero');
 final norm_one__base matply__norm_one = dylib.lookupFunction<norm_one__base__ffi, norm_one__base>('norm_one');
 final norm__base matply__norm = dylib.lookupFunction<norm__base__ffi, norm__base>('norm');
-
+final argmax__base matply__argmax = dylib.lookupFunction<argmax__base__ffi, argmax__base>('argmax');
+final argmin__base matply__argmin = dylib.lookupFunction<argmin__base__ffi, argmin__base>('argmin');
+final flatten__base matply__flatten = dylib.lookupFunction<flatten__base__ffi, flatten__base>('flatten');
+final range__base matply__range = dylib.lookupFunction<range__base__ffi, range__base>('range');
+final replace__base matply__replace = dylib.lookupFunction<replace__base__ffi, replace__base>('replace');
+final replaceNoReturned__base matply__replaceNoReturned = dylib.lookupFunction<replaceNoReturned__base__ffi, replaceNoReturned__base>('replaceNoReturned');
+final normalization1__base matply__normalization1 = dylib.lookupFunction<normalization1__base__ffi, normalization1__base>('normalization1');
+final normalization2__base matply__normalization2 = dylib.lookupFunction<normalization2__base__ffi, normalization2__base>('normalization2');
+final normalization3__base matply__normalization3 = dylib.lookupFunction<normalization3__base__ffi, normalization3__base>('normalization3');
+final sliceR__base matply__sliceR = dylib.lookupFunction<sliceR__base__ffi, sliceR__base>('sliceR');
+final sliceC__base matply__sliceC = dylib.lookupFunction<sliceC__base__ffi, sliceC__base>('sliceC');
+final clip__base matply__clip = dylib.lookupFunction<clip__base__ffi, clip__base>('clip');
+final clipNoReturned__base matply__clipNoReturned = dylib.lookupFunction<clipNoReturned__base__ffi, clipNoReturned__base>('clipNoReturned');
+final all__base matply__all = dylib.lookupFunction<all__base__ffi, all__base>('all');
+final any__base matply__any = dylib.lookupFunction<any__base__ffi, any__base>('any');
+final counter__base matply__counter = dylib.lookupFunction<counter__base__ffi, counter__base>('counter');
+final reduce__base matply__reduce = dylib.lookupFunction<reduce__base__ffi, reduce__base>('reduce');
+final qr__base matply__qr = dylib.lookupFunction<qr__base__ffi, qr__base>('qr');
+final E_like__base matply_E_like = dylib.lookupFunction<E_like__base__ffi, E_like__base>('E_like');
 
 dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {

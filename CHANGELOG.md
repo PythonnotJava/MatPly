@@ -39,3 +39,11 @@
 
 ### Warning
 - Suspend the expansion of List functions and do not recommend using list expansion
+
+## [1.0.6]
+### Added
+- Added some useful matrix methods.
+
+### Fixed
+- Some C API errors are fixed and optimized.
+

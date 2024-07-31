@@ -22,9 +22,16 @@ double get_round() => matply__get__round();
 
 void set_seed(int seed) => matply__setSeed(seed);
 
+/// 对误会以及不建议内容的警告
 final class Alert{
   final String info;
   const Alert(this.info);
+}
+
+/// 做出特大更新的标志
+final class Since {
+  final String info;
+  const Since(this.info);
 }
 
 /// Auxiliary functions

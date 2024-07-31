@@ -25,10 +25,10 @@ void set_round( double number)
     return DROUND;
 }
 
-__attribute__((visibility("default"))) double PI = M_PI;
-__attribute__((visibility("default"))) double e = M_E;
-__attribute__((visibility("default"))) double _nan = NAN;
-__attribute__((visibility("default"))) double inf = INFINITY;
+__attribute__((visibility("default"))) const double PI = M_PI;
+__attribute__((visibility("default"))) const double e = M_E;
+__attribute__((visibility("default"))) const double _nan = NAN;
+__attribute__((visibility("default"))) const double inf = INFINITY;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -2224,5 +2224,129 @@ double *** qr(int row, int column, double** data) {
         }
     }
 
+    return new;
+}
+
+double ** clip_reverse(int row, int column, double  **data, double lb, double ub, double (*condition)(double)){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    double value;
+    for (int r = 0;r < row;r++){
+        new[r] = (double *) malloc(sizeof (double ) * column);
+        for (int c = 0;c < column;c ++){
+            value = data[r][c];
+            new[r][c] = (value <= lb || value >= ub) ? value : condition(value);
+        }
+    }
+    return new;
+}
+
+void clip_reverseNoReturned(int row, int column, double  **data, double lb, double ub, double (*condition)(double)){
+    double value;
+    for (int r = 0;r < row;r++){
+        for (int c = 0;c < column;c ++){
+            value = data[r][c];
+            if (value > lb && value < ub)
+                data[r][c] = condition(value);
+        }
+    }
+}
+
+double ** customize(int row, int column, double ** data, double (*condition)(double )){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    for (int r = 0;r < row;r ++){
+        new[r] = (double *) malloc(sizeof (double) * column);;
+        for (int c = 0;c < column;c ++){
+            new[r][c] = condition(data[r][c]);
+        }
+    }
+    return new;
+}
+
+double ** divrev(int row, int column, double **data, double number){
+    double ** new = (double **) malloc(row * sizeof (double *));
+    for(int r = 0;r < row;r++){
+        new[r] = (double *) malloc(sizeof (double ) * column);
+        for (int c = 0;c < column;c ++){
+            new[r][c] = number / new[r][c];
+        }
+    }
+    return new;
+}
+
+int ** findIndexs(int row, int column, double **data, bool (*condition)(double ), int prediction){
+    int**new = (int **) malloc(sizeof (int *) * row);
+    for (int r = 0;r < row;r++){
+        int baseIndex = r * column;
+        new[r] = findall_condition(data[r], column, prediction, condition, baseIndex);
+    }
+    return new;
+}
+
+double ** rotate(int row, int column, double ** data, int mode){
+    double ** new = NULL;
+    int counter = 0;
+    switch (mode) {
+        case -3: label0: {  // 顺90/逆270
+            new = (double **) malloc(sizeof(double *) * column);
+            for (int r = 0; r < column; r++) {
+                new[r] = (double *) malloc(sizeof(double) * row);
+                for (int c = 0; c < row; c++) {
+                    new[r][c] = data[row - c - 1][r];
+                }
+            }
+            break;
+        }
+        case -2: label1 : {  // 顺逆180
+            new = (double**)malloc(sizeof(double*) * row);
+            for (int r = 0; r < row; r++) {
+                new[r] = (double*)malloc(sizeof(double) * column);
+                for (int c = 0; c < column; c++) {
+                    new[r][c] = data[row - r - 1][column - c - 1];
+                }
+            }
+            return new;
+        }
+        case -1: label2:{  // 逆90/顺270
+            {
+                new = (double **) malloc(sizeof(double *) * column);
+                for (int r = 0; r < column; r++) {
+                    new[r] = (double *) malloc(sizeof(double) * row);
+                    for (int c = 0; c < row; c++) {
+                        new[r][c] = data[c][column - r - 1];
+                    }
+                }
+                break;
+            }
+        }
+        case 0: goto label4;
+        case 1: goto label0;
+        case 2: goto label1;
+        case 3: goto label2;
+        default: label4 :{
+            new = deepcopy(row, column, data);
+            break;
+        }
+    }
+    return new;
+}
+
+double ** mirror(int row, int column, double ** data, int mode) {
+    double ** new = (double**)malloc(row * sizeof(double*));
+    if (mode == 0) {
+        for (int r = 0; r < row; r++) {
+            new[r] = (double*)malloc(column * sizeof(double));
+            for (int c = 0; c < column;c ++) {
+                new[r][c] = data[r][column - c - 1];
+            }
+        }
+    } else {
+        for (int r = 0; r < row; r++)
+            new[r] = (double*)malloc(column * sizeof(double));
+        for (int c = 0; c < column; c ++) {
+            for (int r = 0; r < row; r++) {
+                new[r][c] = data[row - r - 1][c];
+            }
+        }
+    }
     return new;
 }

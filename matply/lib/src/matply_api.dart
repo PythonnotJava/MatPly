@@ -1,7 +1,7 @@
 part of 'core.dart';
 // final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', 'matply.dll'));
 
-const VERSION = '1.0.5';
+const VERSION = '1.0.6';
 
 String pubCacheDir = path.join(
     Platform.environment['LOCALAPPDATA']!,
@@ -10,7 +10,7 @@ String pubCacheDir = path.join(
     'hosted',
     'pub.dev',
     'matply-$VERSION'
-);  // 对1.0.0版本的路径问题的修复，查找pub下载cache路径，如果每个人不一样，可以通过设置pubCacheDir即可
+);  // 查找pub下载cache路径，如果每个人不一样，可以通过设置pubCacheDir即可
 
 final dylib = DynamicLibrary.open(path.join(pubCacheDir, 'lib/src/C', 'matply.dll'));
 
@@ -375,6 +375,30 @@ typedef qr__base = Pointer<Pointer<Pointer<Double>>> Function(int row, int colum
 typedef E_like__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
 typedef E_like__base = Pointer<Pointer<Double>> Function(int row, int column);
 
+typedef divrev__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column,  Pointer<Pointer<Double>> data, Double number);
+typedef divrev__base = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, double number);
+
+typedef clip_reverse__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double lb, Double ub, Pointer<NativeFunction<Double Function(Double)>> condition);
+typedef clip_reverse__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, double lb, double ub, Pointer<NativeFunction<Double Function(Double)>> condition);
+
+typedef clip_reverseNoReturned__base__ffi = Void Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Double lb, Double ub, Pointer<NativeFunction<Double Function(Double)>> condition);
+typedef clip_reverseNoReturned__base  = void Function(int row, int column, Pointer<Pointer<Double>> data, double lb, double ub, Pointer<NativeFunction<Double Function(Double)>> condition);
+
+typedef customize__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Pointer<NativeFunction<Double Function(Double)>> condition);
+typedef customize__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, Pointer<NativeFunction<Double Function(Double)>> condition);
+
+typedef findIndexs__base__ffi = Pointer<Pointer<Int32>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Pointer<NativeFunction<Bool Function(Double)>> condition, Int32 prediction);
+typedef findIndexs__base  = Pointer<Pointer<Int32>> Function(int row, int column, Pointer<Pointer<Double>> data, Pointer<NativeFunction<Bool Function(Double)>> condition, int prediction);
+
+typedef freeppvoid__base__ffi = Void Function(Pointer<Pointer<Void>> data, Int32 row);
+typedef freeppvoid__base  = void Function(Pointer<Pointer<Void>> data, int row);
+
+typedef rotate__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 mode);
+typedef rotate__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int mode);
+
+typedef mirror__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 mode);
+typedef mirror__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int mode);
+
 final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
 final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
@@ -423,7 +447,7 @@ final mean__base matply__mean = dylib.lookupFunction<mean__base__ffi, mean__base
 final max__base matply__max = dylib.lookupFunction<max__base__ffi, max__base>('max');
 final min__base matply__min = dylib.lookupFunction<min__base__ffi, min__base>('min');
 final data_isSame__base matply__data__isSame = dylib.lookupFunction<data_isSame__base__ffi, data_isSame__base>('data_isSame');
-final spc__isSame__base matply__spc__isSame = dylib.lookupFunction<spc__isSame__base__ffi, spc__isSame__base>('spc__isSame');
+final spc__isSame__base matply__spc__isSame = dylib.lookupFunction<spc__isSame__base__ffi, spc__isSame__base>('spc_isSame');
 final cut__base matply__cut = dylib.lookupFunction<cut__base__ffi, cut__base>('cut');
 final cutfree__base matply__cutfree = dylib.lookupFunction<cutfree__base__ffi, cutfree__base>('cutfree');
 final concatR__base matply__concatR = dylib.lookupFunction<concatR__base__ffi, concatR__base>('concatR');
@@ -475,7 +499,15 @@ final any__base matply__any = dylib.lookupFunction<any__base__ffi, any__base>('a
 final counter__base matply__counter = dylib.lookupFunction<counter__base__ffi, counter__base>('counter');
 final reduce__base matply__reduce = dylib.lookupFunction<reduce__base__ffi, reduce__base>('reduce');
 final qr__base matply__qr = dylib.lookupFunction<qr__base__ffi, qr__base>('qr');
-final E_like__base matply_E_like = dylib.lookupFunction<E_like__base__ffi, E_like__base>('E_like');
+final E_like__base matply__E_like = dylib.lookupFunction<E_like__base__ffi, E_like__base>('E_like');
+final divrev__base matply__divrev= dylib.lookupFunction<divrev__base__ffi, divrev__base>('divrev');
+final clip_reverse__base matply__clip_reverse = dylib.lookupFunction<clip_reverse__base__ffi, clip_reverse__base>('clip_reverse');
+final clip_reverseNoReturned__base matply__clip_reverseNoReturned = dylib.lookupFunction<clip_reverseNoReturned__base__ffi, clip_reverseNoReturned__base>('clip_reverseNoReturned');
+final customize__base matply__customize = dylib.lookupFunction<customize__base__ffi, customize__base>('customize');
+final findIndexs__base matply__findIndexs = dylib.lookupFunction<findIndexs__base__ffi, findIndexs__base>('findIndexs');
+final freeppvoid__base matply__freeppvoid = dylib.lookupFunction<freeppvoid__base__ffi, freeppvoid__base>('freeppvoid');
+final mirror__base matply__mirror = dylib.lookupFunction<mirror__base__ffi, mirror__base>('mirror');
+final rotate__base matply__rotate = dylib.lookupFunction<rotate__base__ffi, rotate__base>('rotate');
 
 dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
@@ -492,6 +524,15 @@ void TestArrayPointer(int row, int column, Pointer<Pointer<Double>> data){
       print(data[r][c]);
     }
   }
+}
+
+// 一维列表转一维数组
+Pointer<Double> oneListToArray(List<double> data){
+  int len = data.length;
+  Pointer<Double> op = malloc.allocate<Double>(len);
+  for (int r = 0;r < len;r++)
+    op[r] = data[r];
+  return op;
 }
 
 final double Pi = _Pi.value;

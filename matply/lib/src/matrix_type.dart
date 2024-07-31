@@ -1,6 +1,6 @@
 part of 'core.dart';
 
-class MatrixType{
+class MatrixType {
   /// Attributes
   late Pointer<Matrix> self;
 
@@ -148,7 +148,7 @@ class MatrixType{
 
   MatrixType.E_like({required int row, required int column}) : assert(row > 0 && column > 0){
     this.self = matply__init__point__data__(
-      row, column, matply_E_like(row, column), nullptr
+      row, column, matply__E_like(row, column), nullptr
     );
   }
 
@@ -176,13 +176,21 @@ class MatrixType{
   bool get isSquare => shape[0] == shape[1];
 
   /// Overloading Operators
-  @Alert('Just return a List?, do not support pointer type.')
-  List operator [](int row) {
-    if (row < 0 || row >= shape[0]) {
-      throw row_outRange;
-    } else {
-      return matply__row_(row, shape[1], self.ref.data).asTypedList(shape[1]).toList();
-    }
+  @Since('1.0.6')
+  Object operator [](Object indice){
+    if (indice is int){
+      if (indice >= 0 && indice < shape[0])
+        return matply__row_(indice, shape[1], self.ref.data).asTypedList(shape[1]).toList();
+      else
+        throw row_outRange;
+    }else if (indice is (int, )){
+      return slice(from: indice.$1, to: null);
+    }else if (indice is (int, int?)){
+      return slice(from: indice.$1, to: indice.$2);
+    }else if (indice is List && indice.length == 2){
+      return at(indice[0], indice[1]);
+    }else
+      throw UnsupportedError('Unsupported indexing method.');
   }
 
   MatrixType operator +(Object other) {
@@ -205,7 +213,9 @@ class MatrixType{
     }
   }
 
-  MatrixType operator / (double number) => divide(number);
+  MatrixType operator -() => this * -1;
+
+  MatrixType operator / (num number) => divide(number.toDouble());
 
   MatrixType operator * (Object other) {
     if (other is num) {
@@ -401,11 +411,11 @@ class MatrixType{
     if (T == double) {
       return List.generate(shape[0], (i) => matply__row_(shape[0], shape[1], self.ref.data).asTypedList(shape[1])).toList();
     } else if (T == int) {
-      return List.generate(shape[0], (i) => this[i].map<int>((e) => e.toInt()).toList());
+      return List.generate(shape[0], (i) => (this[i] as List).map<int>((e) => e.toInt()).toList());
     } else if (T == String) {
-      return List.generate(shape[0], (i) => this[i].map<String>((e) => e.toString()).toList());
+      return List.generate(shape[0], (i) => (this[i] as List).map<String>((e) => e.toString()).toList());
     }else if (T == bool){
-      return List.generate(shape[0], (i) => this[i].map<bool>((e) => (e != 0) ).toList());
+      return List.generate(shape[0], (i) => (this[i] as List).map<bool>((e) => (e != 0) ).toList());
     } else {
       throw UnsupportedError('Unsupported type.');
     }
@@ -458,6 +468,18 @@ class MatrixType{
     assert(lb <= ub);
     matply__clipNoReturned(shape[0], shape[1], self.ref.data, lb, ub);
   }
-}
 
+  MatrixType rotate({required int angle}){  // 正数代表顺时针，负数逆时针
+    if (angle % 90 != 0)
+      throw UnsupportedError('The angle must be an integer multiple of 90.');
+    else{
+      int mode = angle ~/ 90 % 4;  /// The value of [mode] just in [-3, -2, -1, 0, 1, 2, 3]
+      List<int> _shape = mode % 2 == 0 ? shape : [shape[1], shape[0]];
+      return MatrixType.__fromDataPointer(matply__rotate(shape[0], shape[1], self.ref.data, mode), _shape);
+    }
+  }
+
+  MatrixType mirror({int mode = 0}) => MatrixType.__fromDataPointer(matply__mirror(shape[0], shape[1], self.ref.data, mode), shape);
+
+}
 

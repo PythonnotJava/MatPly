@@ -131,7 +131,7 @@ extension Functools on MatrixType{
       {required double init, int dim = -1}) {
     NativeCallable<Double Function(Double, Double)> func = NativeCallable<
         Double Function(Double, Double)>
-        .isolateLocal(condition, exceptionalReturn: 0.0);
+        .isolateLocal(condition, exceptionalReturn: double.nan);
     late Pointer<Double> ct;
     switch (dim) {
       case 0:
@@ -202,4 +202,52 @@ extension Functools on MatrixType{
         return returned(reflect_all == null? current : reflect_all(current));
     }
   }
+
+  MatrixType clip_reverse(double Function(double) condition, {required double lb, required double ub}){
+    assert(lb <= ub);
+    NativeCallable<Double Function(Double)> func = NativeCallable<Double Function(Double)>
+        .isolateLocal(condition, exceptionalReturn: double.nan);
+    MatrixType mt = MatrixType.__fromDataPointer(
+        matply__clip_reverse(shape[0], shape[1], self.ref.data, lb, ub, func.nativeFunction),
+        shape
+    );
+    func.close();
+    return mt;
+  }
+
+  void clip_reverse_no_returned(double Function(double) condition, {required double lb, required double ub}){
+    assert(lb <= ub);
+    NativeCallable<Double Function(Double)> func = NativeCallable<Double Function(Double)>
+        .isolateLocal(condition, exceptionalReturn: double.nan);
+    matply__clip_reverseNoReturned(shape[0], shape[1], self.ref.data, lb, ub, func.nativeFunction);
+    func.close();
+  }
+
+  MatrixType customize(double Function(double) condition){
+    NativeCallable<Double Function(Double)> func = NativeCallable<Double Function(Double)>
+        .isolateLocal(condition, exceptionalReturn: double.nan);
+    MatrixType mt = MatrixType.__fromDataPointer(
+        matply__customize(shape[0], shape[1], self.ref.data, func.nativeFunction),
+        shape
+    );
+    func.close();
+    return mt;
+  }
+
+  List<List<int>> findall(bool Function(double) condition, {int? prediction}){
+    NativeCallable<Bool Function(Double)> func = NativeCallable<Bool Function(Double)>
+        .isolateLocal(condition, exceptionalReturn: false);
+    Pointer<Pointer<Int32>> ls = matply__findIndexs(
+        shape[0], shape[1], self.ref.data, func.nativeFunction, prediction ?? shape[1] ~/ 4);
+    late Pointer<Int32> lr;
+    List<List<int>> list = [];
+    for (int r = 0;r < shape[0];r++){
+      lr = ls[r];
+      list.add(lr.asTypedList(1 + lr[0]).toList()..removeAt(0));
+    }
+    func.close();
+    matply__freeppvoid(ls.cast<Pointer<Void>>(), shape[0]);
+    return list;
+  }
+
 }

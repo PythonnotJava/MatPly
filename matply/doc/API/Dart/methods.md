@@ -206,3 +206,22 @@ L0范数
 
 ## magic[new from V1.0.5] **_!!!_**
 [@alert]高自由度地使用抽象出来的方式来自定义抽象地反射矩阵数据
+
+## customize[new from V1.0.6]
+相较于矩阵多次创建对象的运算方式，customize可以根据运算流程创建一个矩阵对象
+
+## clip_reverse[new from V1.0.6]
+在范围外的数据不发生变化，否则按照条件设置值
+
+## clip_reverse_no_returned[new from V1.0.6]
+clip_reverse的无返回值方式
+
+## findIndexs[new from V1.0.6]
+查询所有符合条件值的索引，每行都查询，其中prediction是预测平均每行有多少符合条件的值，不传入则设置为行长度的四分之一取整。返回值是包含匹配值索引的二维列表，元素可谓空值一维列表
+
+## rotate[new from V1.0.6]
+获取矩阵的旋转矩阵，旋转角度必须是90的整数倍，负值表示逆时针，正值表示顺时针
+
+## mirror[new from V1.0.6]
+获取矩阵的镜像，mode == 0表示横向镜像、其他值表示总线镜像
+

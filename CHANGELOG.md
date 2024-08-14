@@ -47,3 +47,15 @@
 ### Fixed
 - Some C API errors are fixed and optimized.
 
+## [1.0.7]
+### Added
+- Added some useful matrix methods，especially on Probability Theory and Mathematical Statistics.
+- Linux and Android platform support.
+- Preview version of extension by using C++.
+
+### Fixed
+- Fixed various bugs left over from using the matrix class before the refactoring version
+- Some other C API errors are fixed and optimized.
+
+### Optimized
+- Optimized some functions.

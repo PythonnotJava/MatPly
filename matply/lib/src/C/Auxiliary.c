@@ -14,6 +14,21 @@
 #include <string.h>
 #endif
 
+#if defined _TIME_H_
+#else
+#include <time.h>
+#endif
+
+#ifdef _INC_STDIO
+#else
+#include <stdio.h>
+#endif
+
+#ifdef _MATH_H_
+#else
+#include <math.h>
+#endif
+
 double getMin( double *arr,  int len)
 {
     double min = arr[0];
@@ -201,7 +216,6 @@ void _findall_condition_continue(
         _findall_condition_continue(arr, results, len, condition, init, realloc_init, current, i, results_len, counter, baseIndex);
 }
 
-// 顺序查找算法，返回一个索引数组，数组第一个数是长度
 int * findall_condition(double * arr, int len, int init, bool (*condition)(double ),   int baseIndex){
     int counter = init; // 对初始化内存使用量剩余计数
     int size = (init + 1);
@@ -224,6 +238,121 @@ int * findall_condition(double * arr, int len, int init, bool (*condition)(doubl
     return results;
 }
 
+/// 和随机数相关
+void initialize_random_seed() {
+    static int initialized = 0;
+    if (!initialized) {
+        srand((unsigned int)time(NULL));
+        initialized = 42;
+    }
+}
+
+void _shuffle(double *arr, int len){
+    initialize_random_seed();
+    for (int i = len - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        double temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+
+int randint(double lb, double ub){
+    initialize_random_seed();
+    return (int )(lb + random1() * (ub - lb));
+}
+
+double random1() {
+    return (double)rand() / RAND_MAX;
+}
+
+double randdouble(double lb, double ub){
+    initialize_random_seed();
+    return lb + random1() * (ub - lb);
+}
+
+double random_choice(double *arr, int len) {
+    initialize_random_seed();
+    return arr[rand() % len];
+}
+
+double * random_choices(double *arr, int len, int times, bool back) {
+    initialize_random_seed();
+    double *result = (double *)malloc(times * sizeof(double));
+    int index;
+    if (back) {
+        for (int i = 0; i < times; i++) {
+            index = rand() % len;
+            result[i] = arr[index];
+        }
+    } else {
+        {
+            double * temp_arr = (double *)malloc(len * sizeof(double));
+            memcpy(temp_arr, arr, sizeof (double )*len);
+            _shuffle(temp_arr, len);
+            for (int i = 0; i < times; i++)
+                result[i] = temp_arr[i];
+            free(temp_arr);
+        }
+    }
+    return result;
+}
+
+// 根据概率数组挑选一个值
+int __select_index(double * p, double total_weight, int len) {
+    double r = random1() * total_weight;
+    double cumulative_weight = 0.0;
+    for (int i = 0; i < len; i++) {
+        cumulative_weight += p[i];
+        if (r <= cumulative_weight)
+            return i;
+    }
+    return len - 1;
+}
+
+static inline double sigmoidfunc(double x) {
+    return 1.0 / (1.0 + exp(-x));
+}
+
+// 核心选择函数
+double * perfect_choices(double *arr, double *p, int len, int times, bool back, int method) {
+    initialize_random_seed();
+    double *result = malloc(times * sizeof(double));
+    double *adjusted_p = malloc(len * sizeof(double));
+    double total_weight = 0.0;
+
+    if (method == 0) {
+        for (int i = 0; i < len; i++) {
+            adjusted_p[i] = p[i];
+            total_weight += adjusted_p[i];
+        }
+    } else if (method == 1) {
+        for (int i = 0; i < len; i++) {
+            adjusted_p[i] = sigmoidfunc(p[i]);
+            total_weight += adjusted_p[i];
+        }
+    } else {
+        for (int i = 0; i < len; i++) {
+            adjusted_p[i] = fabs(p[i]);
+            total_weight += adjusted_p[i];
+        }
+    }
+
+    int selected_index;
+    for (int t = 0; t < times; t++) {
+        selected_index = __select_index(adjusted_p, total_weight, len);
+        result[t] = arr[selected_index];
+
+        if (!back) {
+            total_weight -= adjusted_p[selected_index];
+            adjusted_p[selected_index] = 0.0;
+        }
+    }
+
+    free(adjusted_p);
+    return result;
+}
+
 void freeppvoid(void ** data, int row){
     if (data){
         for (int r = 0;r < row;r++)
@@ -231,3 +360,4 @@ void freeppvoid(void ** data, int row){
         free(data);
     }
 }
+

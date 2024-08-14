@@ -36,6 +36,25 @@ int find_bin(double * arr, int len, double target);
 int * findall(double * arr, int len, double target, int init, int baseIndex);
 int * findall_condition(double * arr, int len, int init, bool (*condition)(double ), int baseIndex);
 
+/// simple--random--module
+void initialize_random_seed();
+// 实现随机打乱
+void _shuffle(double *arr, int len);
+// 随机生成介于0~1之间的数
+double random1();
+// 随机生成一个整数
+int randint(double lb, double ub);
+// 随机生成一个浮点数
+double randdouble(double lb, double ub);
+// 实现random_choice 函数
+double random_choice(double *arr, int len);
+// 实现多次random_choice选择，times表示次数，back为false表示无放回抽样。思路：先打乱，然后要几个拿几个
+double * random_choices(double * arr, int len, int times, bool back);
+// 根据概率一维数组挑选值。对应系列概率和不一定为1.0，可以是任意数，也就是说，此概率另含有占有权重的意思。
+// times表示次数，back为false表示无放回抽样
+// method参数用来处理权重情况，比如说出现负数权重。默认0时候用原始值，1的时候采用Sigmoid映射概率， 用来处理负数权重，其他整数的时候使用权重的绝对值
+double * perfect_choices(double * arr, double * p, int len, int times, bool back, int method);
+
 // 释放泛型二级指针
 void freeppvoid(void ** data, int row);
 #endif //MATPLY_AUXILIARY_H

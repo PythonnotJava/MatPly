@@ -2,7 +2,7 @@
 
 part of 'core.dart';
 
-extension Random on MatrixType{
+extension ProbStat on MatrixType{
   void shuffle() => matply__shuffle(shape[0], shape[1], self.ref.data);
 
   Object __variance_std({bool sample = false, required bool std, int dim = -1}){
@@ -99,6 +99,178 @@ extension Random on MatrixType{
           }
         });
         return _k;
+    }
+  }
+
+  MatrixType decentralizate({int dim = -1}) => MatrixType.__fromDataPointer(
+      matply__decentralizate(shape[0], shape[1], self.ref.data, dim), shape
+  );
+
+  Object covariance({required MatrixType other, bool sample = false, int dim = -1}){
+    if (hasSameShape(other)){
+      switch(dim){
+        case 0:
+           return matply__covariance(
+               shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 0).asTypedList(shape[0]).toList();
+        case 1:
+          return matply__covariance(
+              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 1).asTypedList(shape[1]).toList();
+        default:
+          return matply__covariance(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, -1).value;
+      }
+    }else
+      throw different_shape;
+  }
+
+  MatrixType cov({MatrixType? other, bool sample = false}){
+    int row = shape[0], column = shape[1];
+    if (other == null)
+      return MatrixType.__fromDataPointer(matply__cov1(row, column, self.ref.data, sample), [row, row]);
+    else{
+      if (hasSameShape(other))
+        return MatrixType.__fromDataPointer(
+            matply__cov2(row, column, self.ref.data, other.self.ref.data, sample),
+            [2 * row, 2 * row]
+        );
+      else
+        throw different_shape;
+    }
+  }
+
+  Object pearsonCoef({required MatrixType other, bool sample = false, int dim = -1}){
+    if (hasSameShape(other)){
+      switch(dim){
+        case 0:
+          return matply__pearsonCoef(
+              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 0).asTypedList(shape[0]).toList();
+        case 1:
+          return matply__pearsonCoef(
+              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 1).asTypedList(shape[1]).toList();
+        default:
+          return matply__pearsonCoef(
+              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, -1).value;
+      }
+    }else
+      throw different_shape;
+  }
+
+  /// 在几个评分标准中，传入的矩阵参数表示真实数据，而本身表示预测数据
+  Object __MSE({required MatrixType rea, bool rmse = false, int dim = -1}){
+    if (!hasSameShape(rea))
+      throw different_shape;
+    switch(dim){
+      case 0:
+        return matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0, rmse).asTypedList(shape[0]).toList();
+      case 1:
+        return matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1, rmse).asTypedList(shape[1]).toList();
+      default:
+        return matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1, rmse).value;
+    }
+  }
+
+  Object MSE({required MatrixType rea, int dim = -1}) => __MSE(rea: rea, rmse: false, dim: dim);
+  Object RMSE({required MatrixType rea, int dim = -1}) => __MSE(rea: rea, rmse: true, dim: dim);
+
+  Object MAE({required MatrixType rea, int dim = -1}){
+    if (hasSameShape(rea)){
+      switch(dim){
+        case 0:
+          return matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+        case 1:
+          return matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+        default:
+          return matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+      }
+    }else
+      throw different_shape;
+  }
+
+  Object MAPE({required MatrixType rea, int dim = -1}){
+    if (hasSameShape(rea)){
+      switch(dim) {
+        case 0:
+          return matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+        case 1:
+          return matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+        default:
+          return matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+      }
+    }else
+      throw different_shape;
+  }
+
+  Object R2({required MatrixType rea, int dim = -1}){
+    if (hasSameShape(rea)){
+      switch(dim) {
+        case 0:
+          return matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+        case 1:
+          return matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+        default:
+          return matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+      }
+    }else
+      throw different_shape;
+  }
+
+  Object SMAPE({required MatrixType rea, int dim = -1}){
+    if (hasSameShape(rea)){
+      switch(dim) {
+        case 0:
+          return matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+        case 1:
+          return matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+        default:
+          return matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+      }
+    }else
+      throw different_shape;
+  }
+
+  MatrixType choice({List<double>? commonp, MatrixType? seriesp, int times = 1, bool back = true, int method = 0}){
+    assert(times >= 0);
+    int row = shape[0], column = shape[1];
+    List<int> newShape = [row, times];
+    times = times != 0? times : column;
+    if (commonp == null && seriesp == null){
+      if (back == false && times <= column)
+        return MatrixType.__fromDataPointer(matply__choice3(row, column, self.ref.data, times, false), newShape);
+      else if (back)
+        return MatrixType.__fromDataPointer(matply__choice3(row, column, self.ref.data, times, true), newShape);
+      else
+        throw "The number of times must be no more than column when setting not back";
+    }
+    else if (commonp != null){
+     if (commonp.length == column){
+        if (back == false && times <= column){
+          Pointer<Double> op = oneListToArray(commonp);
+          var mt = MatrixType.__fromDataPointer(matply__choice2(row, column, self.ref.data, op, times, false, method), newShape);
+          malloc.free(op);
+          return mt;
+        }else if(back == true){
+          Pointer<Double> op = oneListToArray(commonp);
+          var mt = MatrixType.__fromDataPointer(matply__choice2(row, column, self.ref.data, op, times, true, method), newShape);
+          malloc.free(op);
+          return mt;
+        }else{
+          throw "The number of times must be no more than column when setting not back";
+        }
+     }else
+       throw "commonp.length must be equal to column";
+    }else{
+      seriesp as MatrixType;
+      if (!hasSameShape(seriesp)){
+        throw different_shape;
+      }else{
+        if (back)
+          return MatrixType.__fromDataPointer(matply__choice1(row, column, self.ref.data, seriesp.self.ref.data, times, true, method), newShape);
+        else{
+          if (times <= column){
+            return MatrixType.__fromDataPointer(matply__choice1(row, column, self.ref.data, seriesp.self.ref.data, times, false, method), newShape);
+          }else
+            throw "The number of times must be no more than column when setting not back";
+        }
+      }
     }
   }
 }

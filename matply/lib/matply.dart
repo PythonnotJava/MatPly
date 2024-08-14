@@ -1,3 +1,3 @@
 library matply;
 
-export 'src/core.dart';
+export 'core.dart';

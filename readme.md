@@ -12,8 +12,11 @@
 ## 什么是MatPly？
 > MatPly是使用C语言实现并被转换为多个语言版本的矩阵操作库  
 > 目前提供的语言以及支持平台的版本有：
-> - Windows平台下Dart语言版本
-> [点击查看相关文档](doc/API/Dart/index.md)
+> - Windows/Linux/Android平台下Dart语言版本
 
 ## 网页文档版本
 > [https://www.robot-shadow.cn/src/pkg/MatPly_Dart/site/](https://www.robot-shadow.cn/src/pkg/MatPly_Dart/site/)
+
+## Github地址
+> [https://github.com/PythonnotJava/MatPly](https://github.com/PythonnotJava/MatPly)
+

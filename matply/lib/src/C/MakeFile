@@ -18,9 +18,9 @@ ifeq ($(OS),Windows_NT)
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
-        OUTPUT = libmatply.so
+        OUTPUT = matply.so
     else ifeq ($(UNAME_S),Darwin)
-        OUTPUT = libmatply.dylib
+        OUTPUT = matply.dylib
     endif
 endif
 

@@ -12,7 +12,7 @@ void set_visible_round( char* new_round)
 {
     ROUND = new_round;
 }
- char * get_visible_round()
+char * get_visible_round()
 {
     return ROUND;
 }
@@ -234,7 +234,7 @@ bool isSquare( Matrix * matrix) {return matrix->column == matrix->row;}
 
 double ** transpose( int row,  int column,  double ** data)
 {
-    double ** new = (double ** )allocateButNoNumbers(column, row);
+    double ** new = allocateButNoNumbers(column, row);
     for (int r = 0; r < row; r++) {
         for (int c = 0; c < column; c++) {
             new[c][r] = data[r][c];
@@ -375,9 +375,8 @@ double ** matmul( int row,  int column,  double **data1,  double **data2, int co
 {
     double ** new = (double **)malloc(sizeof(double*) * row);
     for (int r = 0; r < row; r++) {
-        new[r] = (double *) malloc(sizeof (double ) * column2);
-        for (int c = 0; c < column;c ++) {
-            new[r][c] = 0.0;
+        new[r] = (double *) calloc(column2, sizeof (double ));
+        for (int c = 0; c < column2;c ++) {
             for (int k = 0; k < column;k++) {
                 new[r][c] += data1[r][k] * data2[k][c];
             }
@@ -457,6 +456,7 @@ double ** divide( int row,  int column,  double **data,  double number)
     double ** new = (double **)malloc(sizeof(double*) * row);
     for (int r = 0;r <row;r++)
     {
+        new[r] = (double *) malloc(sizeof (double ) * column);
         for (int c =0;c<column;c ++)
         {
             new[r][c] = data[r][c] / number;
@@ -498,6 +498,7 @@ double ** linspace( double start,  double end,  int row,  int column,  bool keep
     double ** new = (double **)malloc(sizeof(double *) * row);
     double value = start;
     for (int r = 0; r < row; r++) {
+        new[r] = (double *) malloc(sizeof (double ) * column);
         for (int c = 0; c< column; c ++) {
             new[r][c] = value;
             value += step;
@@ -515,6 +516,17 @@ double trace( int row,  int column,  double **data)
     for (int r = 0;r < n;r++)
         sum += data[r][r];
     return sum;
+}
+
+double ** E( int n)
+{
+    double**new = (double **)calloc(n, sizeof (double *));
+    for (int r = 0;r < n;r++)
+    {
+        new[r] = (double *) calloc(n, sizeof (double ));
+        new[r][r] = 1.;
+    }
+    return new;
 }
 
 double det( int row,  int column,  double **data)
@@ -553,17 +565,6 @@ double det( int row,  int column,  double **data)
     return detValue;
 }
 
-double ** E( int n)
-{
-    double**new = (double **)calloc(n, sizeof (double *));
-    for (int r = 0;r < n;r++)
-    {
-        new[r] = (double *) calloc(n, sizeof (double ));
-        new[r][r] = 1.;
-    }
-    return new;
-}
-
 double ** cofactor( int row,  int column,  double ** data,  int prow,  int pcolumn)
 {
     double **new = (double **)malloc(sizeof(double *) * (row - 1));
@@ -586,32 +587,29 @@ double ** cofactor( int row,  int column,  double ** data,  int prow,  int pcolu
 double ** adjugate( int row,  int column,  double ** data)
 {
      int n = row;
-    double ** new = (double**)malloc(sizeof(double*) * row);
-
-    for (int r = 0; r < row; r++)
+    double ** new = allocateButNoNumbers(row, column);
+    for (int r = 0; r < n; r++)
     {
-        new[r] = (double*)malloc(sizeof(double) * column);
-
-        for (int c = 0; c < column; c++)
+        for (int c = 0; c < n; c ++)
         {
-            double ** cof = cofactor(row, column, data, r, c);
-            new[c][r] = pow(-1, r + c) * det(row - 1, column - 1, cof);
-            __delete__data__(cof, row);
+            double ** cof = cofactor(n, n, data, r, c);  // [n - 1, n - 1]
+
+            new[c][r] = pow(-1, r + c) * det(n - 1, n - 1, cof);
+            __delete__data__(cof, n - 1);
         }
     }
-
     return new;
 }
 
-double ** inverse( int row,  int column,  double ** data)
+double ** inverse( int row,  int column,  double ** data, double det)
 {
-     double _det = det(row, column, data);
      int n = row;
     double ** new = (double**)malloc(sizeof(double *) * row);
     double ** adj = adjugate(row, column, data);
     for (int r = 0; r < n; r++) {
+        new[r] = (double *) malloc(sizeof (double ) *n) ;
         for (int c = 0; c< n;  c ++) {
-            new[r][c] = adj[r][c] / _det;
+            new[r][c] = adj[r][c] / det;
         }
     }
     __delete__data__(adj, row);
@@ -725,10 +723,8 @@ double * mean( int row,  int column,  double **data,  int dim)
         }
     default:
         {
-            double *sumResult = sum(row, column, data, -1);
-            number = (double *)malloc(sizeof(double));
-            *number = *sumResult / (row * column);
-            free(sumResult);
+            number = sum(row, column, data, -1);
+            *number = *number / (row * column);
             break;
         }
     }
@@ -920,13 +916,17 @@ double ** concatC( int row1,  int row2,  int column,  double ** data1,  double *
 {
     double ** new = (double**)malloc(sizeof(double*) *(row1 + row2));
     for (int r = 0; r < row1; r++) {
+        new[r] = (double *) malloc(sizeof (double )* column);
         for (int c = 0; c < column; c ++) {
             new[r][c] =data1[r][c];
         }
     }
+    int rownow;
     for (int r = 0; r < row2; r++) {
+        rownow = r + row1;
+        new[rownow] = (double *) malloc(sizeof (double )* column);
         for (int c = 0; c < column; c ++) {
-            new[r + row1][c] = data2[r][c];
+            new[rownow][c] = data2[r][c];
         }
     }
     return new;
@@ -1014,7 +1014,9 @@ double ** reshape( int row,  int column,  double ** data,  int origin_column)
     return new;
 }
 
-void setSeed( int seed) {srand(seed);}
+void setSeed( int seed) {
+    seed > 0 ? srand(seed):  initialize_random_seed();;
+}
 
 double ** mathBasement1( int row,  int column,  double ** data,  int mode)
 {
@@ -1321,9 +1323,7 @@ double ** sort( int row,  int column, double ** data,  bool reverse,  int dim,  
 
 double ** uniform( int row,  int column,  double start,  double end,  int seed,  bool use)
 {
-    srand(time(NULL));
-    if (use)
-        srand(seed);
+    if (use) setSeed(seed);
     double ** new = (double **)malloc(sizeof(double *) *row);
     for (int r=0;r < row;r ++)
     {
@@ -1338,9 +1338,7 @@ double ** uniform( int row,  int column,  double start,  double end,  int seed, 
 
 double ** normal( int row,  int column,  double mu,  double sigma,  int seed,  bool use )
 {
-    srand(time(NULL));
-    if(use)
-        srand(seed);
+    if (use) setSeed(seed);
     double ** new = (double **)malloc(sizeof(double *) *row);
     for(int r = 0; r < row; ++r){
         new[r] = (double *)malloc(sizeof(double) * column);
@@ -1352,9 +1350,7 @@ double ** normal( int row,  int column,  double mu,  double sigma,  int seed,  b
 }
 
 double ** poisson( int row,  int column,  double lambda,  int seed,  bool use){
-    srand(time(NULL));
-    if(use)
-        srand(seed);
+    if (use) setSeed(seed);
     double ** new = (double **)malloc(sizeof(double *) *row);
     double p = 1.0;
     int k = 0;
@@ -1492,18 +1488,17 @@ double ** testArray( int row,  int column)
     return new;
 }
 
-// 函数实现
 double* variance(int row, int column, double** data, bool sample, int dim, bool std) {
     double* number = NULL;
-    double* means = NULL;
+    double* means = means = mean(row, column, data, dim);;
     double diff, _mean;
-    int size = sample ? column * row - 1 : column * row;
+    int size;
 
     switch (dim) {
     case 0:
         {
+            size = sample ? column - 1 : column;
             number = (double*)calloc(row, sizeof(double));
-            means = mean(row, column, data, 0);
             for (int r = 0; r < row; ++r) {
                 _mean = means[r];
                 for (int c = 0; c < column; ++c) {
@@ -1518,8 +1513,8 @@ double* variance(int row, int column, double** data, bool sample, int dim, bool 
         }
     case 1:
         {
+            size = sample ? row - 1: row;
             number = (double*)calloc(column, sizeof(double));
-            means = mean(row, column, data, 1);
             for (int c = 0; c < column; ++c) {
                 _mean = means[c];
                 for (int r = 0; r < row; ++r) {
@@ -1534,8 +1529,8 @@ double* variance(int row, int column, double** data, bool sample, int dim, bool 
         }
     default:
         {
+            size = sample ? (row * column - 1) : row * column;
             number = (double*)calloc(1, sizeof(double));
-            means = mean(row, column, data, -1);
             _mean = *means;
             for (int r = 0; r < row; ++r) {
                 for (int c = 0; c < column; ++c) {
@@ -2348,5 +2343,472 @@ double ** mirror(int row, int column, double ** data, int mode) {
             }
         }
     }
+    return new;
+}
+
+double ** decentralizate(int row, int column, double **data, int dim){
+    double * means = mean(row, column, data, dim);
+    double ** new = (double **) malloc(sizeof (double* ) * row);
+    double m;
+    switch (dim) {
+        case 0:{
+            for (int r = 0;r < row;r++){
+                m = means[r];
+                new[r] = (double *) malloc(sizeof (double )*column);
+                for (int c  =0;c < column;c ++){
+                    new[r][c] = data[r][c] - m;
+                }
+            }
+            break;
+        }
+        case 1:{
+            for (int r = 0;r < row;r++)
+                new[r] = (double *) malloc(sizeof (double )*column);
+            for (int c = 0;c < column;c ++){
+                m = means[c];
+                for (int r  = 0;r < row;r++){
+                    new[r][c] = data[r][c] - m;
+                }
+            }
+            break;
+        }
+        default:{
+            m = *means;
+            for (int r = 0;r < row;r++){
+                new[r] = (double *) malloc(sizeof (double )*column);
+                for (int c  =0;c < column;c ++){
+                    new[r][c] = data[r][c] - m;
+                }
+            }
+            break;
+        }
+    }
+    free(means);
+    return new;
+}
+
+double * covariance(int row, int column, double ** data1, double ** data2, bool sample, int dim){
+    double * number = NULL;
+    double * means1 = mean(row, column, data1, dim);
+    double * means2 = mean(row, column, data2, dim);
+    double value, xm, ym;
+    double n;
+    switch (dim) {
+        case 0:{
+            n = sample ? (double)(column - 1) : (double)column;
+            number = (double *) malloc(sizeof (double ) * row);
+            for (int r = 0;r < row;r++){
+                value = 0.;
+                xm = means1[r];
+                ym = means2[r];
+                for(int c = 0;c < column;c ++){
+                    value += (data1[r][c] - xm) * (data2[r][c] - ym);
+                }
+                number[r] = value / n;
+            }
+            break;
+        }
+        case 1:{
+            n = sample ? (double)(row - 1) :(double) row;
+            number = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0;c < column; c ++){
+                value = 0.;
+                xm = means1[c];
+                ym = means2[c];
+                for (int r = 0;r < row;r++){
+                    value += (data1[r][c] - xm) * (data2[r][c] - ym);
+                }
+                number[c] = value / n;
+            }
+            break;
+        }
+        default: {
+            xm = *means1;
+            ym = *means2;
+            n = sample ? (double)(row * column - 1) :(double)( row * column);
+            number = (double *) calloc(1, sizeof(double));
+            for (int r = 0; r < row; r++) {
+                for (int c = 0; c < column; c++) {
+                    *number += (data1[r][c] - xm) * (data2[r][c] - ym);
+                }
+            }
+            *number /= n;
+            break;
+        }
+    }
+    free(means1);
+    free(means2);
+    return number;
+}
+
+double ** cov1(int row, int column, double ** data, bool sample){
+    double n = sample ? (double)(column - 1):(double)column;
+    double sum;
+    double ** A = decentralizate(row, column, data, 0);  // 获取去中心化的矩阵
+    double ** A_T = transpose(row, column, A);  // [column, row]
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    for (int r = 0; r < row; r++) {
+        new[r] = (double *) malloc(sizeof (double )*row);
+        for (int j = 0; j < row; j++) {
+            sum = 0.0;
+            for (int k = 0; k < column; k++) {
+                sum += A[r][k] * A_T[j][k];
+            }
+            new[r][j] = sum / n;
+        }
+    }
+    __delete__data__(A, row);
+    __delete__data__(A_T, column);
+    return new;
+}
+
+double ** cov2(int row, int column, double ** data1, double ** data2, bool sample){
+    double n = sample ? (double)(column - 1) : (double)column;
+    double ** A = decentralizate(row, column, data1, 0);
+    double ** B = decentralizate(row, column, data2, 0);
+    double ** A_T = transpose(row, column, A);
+    double ** B_T = transpose(row, column, B);
+    // 实现矩阵左行右列内积
+    double ** covaat = matmul(row, column, A, A_T, row);  // [row, row]
+    double ** covabt = matmul(row, column, A, B_T, row);  // [row, row]
+    double ** covbat = matmul(row, column, B, A_T, row);  // [row, row]
+    double ** covbbt = matmul(row, column, B, B_T, row);  // [row, row]
+    double ** new = (double **) malloc(sizeof (double *)*(row * 2));
+    for (int r = 0;r < row;r++){
+        new[r] = (double *) malloc(sizeof (double ) * (row * 2));
+        for (int c = 0;c < row;c ++){
+            new[r][c] = covaat[r][c] / n;
+        }
+        for (int c = 0;c < row;c ++){
+            new[r][c + row] = covabt[r][c] / n;
+        }
+    }
+    for (int r = 0;r < row;r++){
+        new[r + row] = (double *) malloc(sizeof (double ) * (row * 2));
+        for (int c = 0;c < row;c ++){
+            new[r + row][c] = covbat[r][c] / n;
+        }
+        for (int c = 0;c < row;c ++){
+            new[r + row][c + row] = covbbt[r][c] / n;
+        }
+    }
+
+    __delete__data__(A, row);
+    __delete__data__(B, row);
+    __delete__data__(A_T, column);
+    __delete__data__(B_T, column);
+    __delete__data__(covaat, row);
+    __delete__data__(covabt, row);
+    __delete__data__(covbat, row);
+    __delete__data__(covbbt, row);
+    return new;
+}
+
+double * pearsonCoef(int row, int column, double ** data1, double ** data2, bool sample, int dim){
+    double * number = NULL;
+    double * xstd = variance(row, column, data1, sample, dim, true);
+    double * ystd = variance(row, column, data2, sample, dim, true);
+    double * covxy = covariance(row, column, data1, data2, sample, dim);
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double )*row);
+            for (int r = 0;r < row;r++)
+                number[r] = covxy[r] / (xstd[r] * ystd[r]);
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0;c < column;c ++)
+                number[c] = covxy[c] / (xstd[c] * ystd[c]);
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            *number = *covxy / (*xstd * *ystd);
+            break;
+        }
+    }
+    free(xstd);
+    free(ystd);
+    free(covxy);
+    return number;
+}
+
+double * MSE(int row, int column, double ** data1, double ** data2, int dim, bool rmse){
+    double * number = NULL;
+    double sum;
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double ) * row);
+            for (int r = 0;r < row;r++){
+               sum = 0.;
+               for(int c = 0;c < column;c ++){
+                   sum += pow(data1[r][c] - data2[r][c], 2.0);
+               }
+               number[r] = rmse ? sqrt(sum / column) : sum / column;
+            }
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0; c < column;c ++){
+                sum = 0.;
+                for (int r = 0;r < row;r++){
+                    sum += pow(data1[r][c] - data2[r][c], 2.);
+                }
+                number[c] = rmse? sqrt(sum / row) : sum / row;
+            }
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            sum = 0.;
+            for (int r = 0;r < row;r++){
+                for (int c = 0;c < column;c++){
+                    sum += pow(data1[r][c] - data2[r][c], 2.);
+                }
+            }
+            number[0] = rmse? sqrt(sum / (column * row)) : sum / (column * row);
+            break;
+        }
+    }
+    return number;
+}
+
+double * MAE(int row, int column, double ** data1, double ** data2, int dim){
+    double * number = NULL;
+    double sum;
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double ) * row);
+            for (int r = 0;r < row;r++){
+                sum = 0.;
+                for(int c = 0;c < column;c ++){
+                    sum += fabs(data1[r][c] - data2[r][c]);
+                }
+                number[r] = sum / column;
+            }
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0; c < column;c ++){
+                sum = 0.;
+                for (int r = 0;r < row;r++){
+                    sum += fabs(data1[r][c] - data2[r][c]);
+                }
+                number[c] = sum / row;
+            }
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            sum = 0.;
+            for (int r = 0;r < row;r++){
+                for (int c = 0;c < column;c++){
+                    sum += fabs(data1[r][c] - data2[r][c]);
+                }
+            }
+            number[0] = sum / (column * row);
+            break;
+        }
+    }
+    return number;
+}
+
+double * MAPE(int row, int column, double ** pre, double ** rea, int dim){
+    double * number = NULL;
+    double sum, value;
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double ) * row);
+            for (int r = 0;r < row;r++){
+                sum = 0.;
+                for (int c = 0;c < column;c ++){
+                    value = rea[r][c];
+                    sum += fabs((pre[r][c] - value) / value);
+                }
+                number[r] = sum / column;
+            }
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double )* column);
+            for (int c =0;c< column;c ++){
+                sum = 0.;
+                for (int r = 0;r < row;r++){
+                    value =rea[r][c];
+                    sum += fabs((pre[r][c] - value) / value);
+                }
+                number[c] = sum / row;
+            }
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            sum = 0.;
+            for (int r = 0;r < row;r++) {
+                for (int c = 0; c < column; c++) {
+                    value = rea[r][c];
+                    sum += fabs((pre[r][c] - value) / value);
+                }
+            }
+            *number = sum / (column * row);
+            break;
+        }
+    }
+    return number;
+}
+
+double * R2(int row, int column, double ** pre, double ** rea, int dim){
+    double * number = NULL;
+    double sum1, sum2, value;
+    double * means = mean(row, column, rea, dim);
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double ) * row);
+            for (int r = 0;r < row;r++){
+                sum1 = 0.;
+                sum2 = 0.;
+                for (int c = 0;c < column;c ++){
+                    value = rea[r][c];
+                    sum1 += pow(pre[r][c] - value, 2.);
+                    sum2 += pow(means[r] - value, 2.);
+                }
+                number[r] = 1 - sum1 / sum2;
+            }
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0;c <column;c ++){
+                sum1 = 0.;
+                sum2 = 0.;
+                for (int r = 0;r < row;r++){
+                    value = rea[r][c];
+                    sum1 += pow(pre[r][c] - value, 2.);
+                    sum2 += pow(means[c] - value, 2.);
+                }
+                number[c] = 1 - sum1 / sum2;
+            }
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            sum2 = 0.;
+            sum1 = 0.;
+            double _mean = *means;
+            for (int r = 0;r < row;r++){
+                for (int c = 0;c < column;c ++ ){
+                    value = rea[r][c];
+                    sum1 += pow(pre[r][c] - value, 2.);
+                    sum2 += pow(_mean - value, 2.);
+                }
+            }
+            number[0] = 1 - sum1 / sum2;
+            break;
+        }
+    }
+    free(means);
+    return number;
+}
+
+double * SMAPE(int row, int column, double ** data1, double ** data2, int dim){
+    double * number = NULL;
+    double sum, value1, value2;
+    switch (dim) {
+        case 0:{
+            number = (double *) malloc(sizeof (double ) * row);
+            for (int r = 0;r < row;r++){
+                sum = 0.;
+                for (int c = 0;c < column;c ++){
+                    value1 = data1[r][c];
+                    value2 = data2[r][c];
+                    sum += 2 * fabs(value2 - value1) / (fabs(value1) + fabs(value2));
+                }
+                number[r] = sum / column;
+            }
+            break;
+        }
+        case 1:{
+            number = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0;c < column;c ++){
+                sum = 0.;
+                for(int r = 0;r < row;r++){
+                    value1 = data1[r][c];
+                    value2 = data2[r][c];
+                    sum += 2 * fabs(value2 - value1) / (fabs(value1) + fabs(value2));
+                }
+                number[c] = sum / row;
+            }
+            break;
+        }
+        default:{
+            number = (double *) malloc(sizeof (double ));
+            sum = 0.;
+            for (int r = 0;r < row;r++){
+                for(int c = 0;c < column;c ++){
+                    value1 = data1[r][c];
+                    value2 = data2[r][c];
+                    sum += 2 * fabs(value2 - value1) / (fabs(value1) + fabs(value2));
+                }
+            }
+            *number = sum / (row * column);
+            break;
+        }
+    }
+    return number;
+}
+
+// 获取关于对角线对称的随机数矩阵，sub为true表示副对角线对称
+double ** diagonal(int row, int column, double start, double end, bool sub, int seed, bool use){
+    if (use) setSeed(seed);
+    double ** new = allocateButNoNumbers(row, column);
+    double value;
+    if(!sub) {
+        for (int r = 0; r < row; r++) {
+            for (int c = r; c < column; c ++) {
+                value = start + ((double) rand() / (double) RAND_MAX) * (end - start);
+                new[r][c] = value;
+                new[c][r] = value;
+            }
+        }
+        return new;
+    } else{
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < column; c ++) {
+                value = start + ((double)rand() / (double)RAND_MAX) * (end - start);
+                new[r][c] = value;
+                new[column - c - 1][row - r - 1] = value;
+            }
+        }
+        return new;
+    }
+}
+
+void fill_diagonal(int row, int column, double ** data, double number){
+    int n = column < row ? column : row;
+    for(int r = 0;r < n;r ++)
+        data[r][r] = number;
+}
+
+double ** choice1(int row, int column, double ** data, double ** p, int times, bool back, int method) {
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r = 0; r < row; r++)
+        new[r] = perfect_choices(data[r], p[r], column, times, back, method);
+    return new;
+}
+
+double ** choice2(int row, int column, double ** data, double * p, int times, bool back, int method){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    for(int r = 0;r < row;r++)
+        new[r] = perfect_choices(data[r], p, column, times, back, method);
+    return new;
+}
+
+double ** choice3(int row, int column, double ** data, int times, bool back){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    for(int r = 0;r < row;r++)
+        new[r] = random_choices(data[r], column, times, back);
     return new;
 }

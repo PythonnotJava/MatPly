@@ -17,9 +17,14 @@ extension Linalg on MatrixType{
     if (value == 0)
       throw UnsupportedError('The matrix is not invertible.');
     else
-      return MatrixType.__fromDataPointer(matply__inverse(shape[0], shape[1], self.ref.data), shape);
+      return MatrixType.__fromDataPointer(matply__inverse(shape[0], shape[1], self.ref.data, value), shape);
   }
-  MatrixType get adj => MatrixType.__fromDataPointer(matply__adjugate(shape[0], shape[1], self.ref.data), shape);
+  MatrixType get adj{
+    if (isSquare)
+      return MatrixType.__fromDataPointer(matply__adjugate(shape[0], shape[1], self.ref.data), shape);
+    else
+      throw not_a_square;
+  }
   int get rank => matply__rank(shape[0], shape[1], self.ref.data);
 
   /// method

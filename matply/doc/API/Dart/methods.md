@@ -225,3 +225,38 @@ clip_reverse的无返回值方式
 ## mirror[new from V1.0.6]
 获取矩阵的镜像，mode == 0表示横向镜像、其他值表示总线镜像
 
+## decentralizate[new from V1.0.7]
+获取去中心化的矩阵
+
+## covariance[new from V1.0.7]
+计算两个矩阵的协方差值
+
+## cov[new from V1.0.7]
+当不传入另一个矩阵时，计算当前矩阵的协方差矩阵，否则获取二者的协方差矩阵。底层实现时，视纵向为变量，横向为特征
+
+## pearsonCoef[new from V1.0.7]
+皮尔森系数计算
+
+## MSE[new from V1.0.7]
+均方误差。在几个评分标准中，传入的矩阵参数（rea）表示真实数据，而本身表示预测数据
+
+## RMSE[new from V1.0.7]
+均方根误差
+
+## MAE[new from V1.0.7]
+平均绝对误差
+
+## MAPE[new from V1.0.7]
+平均绝对百分比误差
+
+## R2[new from V1.0.7]
+决定系数
+
+## SMAPE[new from V1.0.7]
+对称平均绝对百分比误差
+
+## fill_diagonal[new from V1.0.7]
+对矩阵的最小维度对角上的值换为number
+
+## choice[new from V1.0.7]
+如果根据权重获取数据，权重可以是等列长一维列表，也可以是同形状矩阵。视行为样本。其中method方法分别为0、1、其他整数时，权重映射为原值、sigmoid函数值、绝对值；如果不传入权重，则按照等概率处理

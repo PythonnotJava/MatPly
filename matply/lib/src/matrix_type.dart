@@ -152,6 +152,19 @@ class MatrixType {
     );
   }
 
+  // 生成对角矩阵
+  MatrixType.Diag({
+    required int n,
+    required double start,
+    required double end,
+    bool sub = false,
+    int? seed
+  }): assert(n > 0 && start < end){
+    this.self = matply__init__point__data__(
+      n, n, matply__diagonal(n, n, start, end, sub, seed ?? 0, seed != null), nullptr
+    );
+  }
+
   /// setter && getter
   bool get identityMatrix => this.self.ref.spc.ref.identityMatrix;
   set identityMatrix(bool value) => this.self.ref.spc.ref.identityMatrix = value;
@@ -481,5 +494,6 @@ class MatrixType {
 
   MatrixType mirror({int mode = 0}) => MatrixType.__fromDataPointer(matply__mirror(shape[0], shape[1], self.ref.data, mode), shape);
 
+  void fill_diagonal({double number = 0.0}) => matply__fill_diagonal(shape[0], shape[1], self.ref.data, number);
 }
 

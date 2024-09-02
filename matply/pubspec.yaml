@@ -1,11 +1,10 @@
-# 将在未来版本支持Android端和Linux端
 name: matply
-
+homepage: https://www.robot-shadow.cn/src/pkg/MatPly_Dart/site/
 description: "Dart Matrix realized by C Dll"
 
 repository: https://github.com/PythonnotJava/MatPly
 
-version: 1.0.7
+version: 1.0.8
 environment:
   sdk: '>=3.1.0 <4.0.0'
 

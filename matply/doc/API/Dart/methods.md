@@ -116,37 +116,37 @@ dim=0时，按行排序；dim=1，按列排序；dim为其他整数则整体排�
 ## setMask
 设置矩阵nan和正负无穷大数据的替换值，会改变矩阵本身。
 
-## toList[new from V1.0.2]
+## toList
 根据传入的类型，返回对应形状的二维列表。对于泊松分布这样的数据非常有用。
 
-## std[new from V1.0.2]
+## std
 求解标准差，如果设置sample为true，则视为样本标准差
 
-## variance[new from V1.0.2]
+## variance
 求解方差，，如果设置sample为true，则视为样本标准方差
 
-## median[new from V1.0.2]
+## median
 求解中位数
 
-## norm[new from V1.0.2]
+## norm
 求解矩阵范数。如果n==-2，则返回矩阵的负无穷范数；如果n==-1，则返回矩阵的正无穷范数；如果设置n==1，则返回矩阵的L1范数，如果n==0或者其他不小于2的正整数，则返回范数（包含行列向量的范数模型、矩阵范数模式），注意这里L0范数是一个整数返回值
 
-## norm2[new from V1.0.2]
+## norm2
 L2范数。即欧氏距离
 
-## norm_inf[new from V1.0.2]
+## norm_inf
 矩阵的正无穷范数
 
-## norm_negainf[new from V1.0.2]
+## norm_negainf
 矩阵的负无穷范数
 
-## norm_one[new from V1.0.2]
+## norm_one
 矩阵的L1范数
 
-## norm_zero[new from V1.0.2]
+## norm_zero
 L0范数
 
-## mode[new from V1.0.2]
+## mode
 求解众数（此方法没有基于C-API）
 
 ## argmax[new from V1.0.5]
@@ -260,3 +260,26 @@ clip_reverse的无返回值方式
 
 ## choice[new from V1.0.7]
 如果根据权重获取数据，权重可以是等列长一维列表，也可以是同形状矩阵。视行为样本。其中method方法分别为0、1、其他整数时，权重映射为原值、sigmoid函数值、绝对值；如果不传入权重，则按照等概率处理
+
+
+## concats[new from V1.0.8]
+concat函数的升级版本，可最多一次拼接四个矩阵
+
+## split[new from V1.0.8]
+根据传入长度为n且严格递增的范围内正整数列表，获取被按照索引分成n+1份的矩阵列表
+
+## split_equal[new from V1.0.8]
+按照步长均分矩阵得到矩阵列表。如果步长与所切分方向长度一样，则获取矩阵的深拷贝实例
+
+## cover[new from V1.0.8]
+对某个矩阵从其内部某点开始用另一个矩阵覆盖，多余的数据排除，并返回一个新的矩阵
+
+## stretch[new from V1.0.8]
+沿着横/竖方向对矩阵拉伸，method表示采用的策略——重复(0)、替换(1)、头部延展(2)、尾部延展(3)、镜像(4)、镜像的镜像(其他)
+
+## diffCenter[new from V1.0.8]
+在某范围内，传入该范围内连续可导的函数（不做检查）实现求导，基于中心差分法，最后得到导数矩阵（梯度矩阵）
+> 注：该方法借鉴于GSL2.8的中心差分法
+
+## get_range[new from V1.0.8]
+获取范围（只包含最小值和最大值）

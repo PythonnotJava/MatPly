@@ -62,7 +62,8 @@ acos\asin\atan\cos\sin\tan\cosh\sinh\tanh\exp\log\log10\sqrt\ceil\fabs
 
 在利用这些数学方法来处理矩阵中*正负无穷大*和*nan*数据时，可以使用*setMask*来处理这些数据的值变换，但这也会修改矩阵！因此，你可以采用矩阵深拷贝避免。
 
-
+## deepcopy[new from V1.0.8]
+提供实例的深拷贝方法
 
 
 

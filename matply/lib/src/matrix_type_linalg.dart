@@ -238,10 +238,10 @@ extension Linalg on MatrixType{
   }
 
   List<MatrixType> qr(){
-    Pointer<Pointer<Pointer<Double>>> lm = matply__qr(shape[0], shape[1], self.ref.data);
+    MultiDatas2 lm = matply__qr(shape[0], shape[1], self.ref.data);
     return [
-      MatrixType.__fromDataPointer(lm[0], shape),
-      MatrixType.__fromDataPointer(lm[1], [shape[1], shape[1]])
+      MatrixType.__fromDataPointer(lm.data1, shape),
+      MatrixType.__fromDataPointer(lm.data2, [shape[1], shape[1]])
     ];
   }
 }

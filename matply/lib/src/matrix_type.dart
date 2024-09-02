@@ -8,6 +8,8 @@ class MatrixType {
   // 一般构造
   MatrixType(
       List<List<double>> data, {
+        int? row,
+        int? column,
         bool identityMatrix = false,
         bool principalDiagonalMatrix = false,
         bool subDiagonalMatrix = false,
@@ -15,9 +17,11 @@ class MatrixType {
         bool lowerTriangularMatrix = false,
         bool singularMatrix  = false
       }){
-    this.self = matply__new__(data.length, data[0].length);  // 已经对data和spc分配了内存，并且对spc初始化了
-    for (int r = 0;r < this.shape[0];r++){
-      for (int c = 0;c < this.shape[1];c ++){
+    row = row ?? data.length;
+    column = column ?? data[0].length;
+    this.self = matply__new__(row, column);  // 已经对data和spc分配了内存，并且对spc初始化了
+    for (int r = 0;r < row;r++){
+      for (int c = 0;c < column;c ++){
         this.self.ref.data[r][c] = data[r][c];
       }
     }
@@ -123,7 +127,9 @@ class MatrixType {
   }
 
   // 根据已经建立好的Matrix指针初始化
-  MatrixType.__fromPointer(this.self);
+  // 原__fromPointer方法
+  @Since('1.0.8')
+  MatrixType.fromPointer(this.self);
   // 根据已经设置完毕的数据指针引用并且初始化
   MatrixType.__fromDataPointer(Pointer<Pointer<Double>> data, List<int> shape) :
         this.self = matply__init__point__data__(shape[0], shape[1], data, nullptr);
@@ -187,6 +193,7 @@ class MatrixType {
   List<int> get shape => [this.self.ref.row, this.self.ref.column];
   int get size => shape[0] * shape[1];
   bool get isSquare => shape[0] == shape[1];
+  MatrixType get deepcopy => MatrixType.__fromDataPointer(matply__deepcopy(shape[0], shape[1], self.ref.data), shape);
 
   /// Overloading Operators
   @Since('1.0.6')
@@ -349,7 +356,7 @@ class MatrixType {
           [shape[0] + other.shape[0], shape[1]]
       );
     } else
-      throw row_or_column_not_sampe;
+      throw row_or_column_not_same;
   }
 
   MatrixType reshape({required int row, required int column}){
@@ -495,5 +502,154 @@ class MatrixType {
   MatrixType mirror({int mode = 0}) => MatrixType.__fromDataPointer(matply__mirror(shape[0], shape[1], self.ref.data, mode), shape);
 
   void fill_diagonal({double number = 0.0}) => matply__fill_diagonal(shape[0], shape[1], self.ref.data, number);
+
+  MatrixType __concatsR3(MatrixType other1, MatrixType other2){
+    int row = shape[0], column = shape[1], column1 = other1.shape[1], column2 = other2.shape[1];
+    if (column == column1 && column == column2)
+      return MatrixType.__fromDataPointer(
+        matply__concatsR(
+          row,
+          column, column1, column2, 0,
+          self.ref.data, other1.self.ref.data, other2.self.ref.data, nullptr
+        ),
+        [row, column + column1 + column2]
+      );
+    else
+      throw row_or_column_not_same;
+  }
+
+  MatrixType __concatsR4(MatrixType other1, MatrixType other2, MatrixType other3){
+    int row = shape[0], column = shape[1], column1 = other1.shape[1], column2 = other2.shape[1], column3 = other3.shape[1];
+    if (column == column1 && column == column2 && column == column3)
+      return MatrixType.__fromDataPointer(
+          matply__concatsR(
+              row,
+              column, column1, column2, column3,
+              self.ref.data, other1.self.ref.data, other2.self.ref.data, other3.self.ref.data
+          ),
+          [row, column + column1 + column2 + column3]
+      );
+    else
+      throw row_or_column_not_same;
+  }
+
+  MatrixType __concatsC3(MatrixType other1, MatrixType other2){
+    int row = shape[0], column = shape[1], row1 = other1.shape[0], row2 = other2.shape[0];
+    if (row == row1 && row == row2)
+      return MatrixType.__fromDataPointer(
+          matply__concatsC(
+              row, row1, row2, 0,
+              column,
+              self.ref.data, other1.self.ref.data, other2.self.ref.data, nullptr
+          ),
+          [row + row1 + row2, column]
+      );
+    else
+      throw row_or_column_not_same;
+  }
+
+  MatrixType __concatsC4(MatrixType other1, MatrixType other2, MatrixType other3){
+    int row = shape[0], column = shape[1], row1 = other1.shape[0], row2 = other2.shape[0], row3 = other3.shape[0];
+    if (row == row1 && row == row2 && row == row3)
+      return MatrixType.__fromDataPointer(
+          matply__concatsC(
+              row, row1, row2, row3,
+              column,
+              self.ref.data, other1.self.ref.data, other2.self.ref.data, other3.self.ref.data
+          ),
+          [row + row1 + row2 + row3, column]
+      );
+    else
+      throw row_or_column_not_same;
+  }
+
+  MatrixType concats({required MatrixType other1, MatrixType? other2, MatrixType? other3, bool horizontal = true}) {
+    if (other3 == null && other2 == null)
+      return concat(other: other1, horizontal: horizontal);
+    else if (other2 != null && other3 == null){
+      if (horizontal)
+        return __concatsR3(other1, other2);
+      else
+        return __concatsC3(other1, other2);
+    }
+    else if (other2 == null && other3 != null){
+      if (horizontal)
+        return __concatsR3(other1, other3);
+      else
+        return __concatsC3(other1, other3);
+    }else{
+      if (horizontal)
+        return __concatsR4(other1, other2!, other3!);
+      else
+        return __concatsC4(other1, other2!, other3!);
+    }
+  }
+
+  List<MatrixType> split({required List<int> slices, bool horizontal = true}){
+    // 检测是不是严格递增的且在范围内的正整数数列
+    if (slices[0] > 0 && horizontal? slices.last < shape[1] : slices.last < shape[0]){
+      bool stop = false;
+      int len = slices.length, row = shape[0], column = shape[1];
+      List<List<int>> shapes = [horizontal? [row, slices.first] : [slices.first, column]];
+      for (int i = 1; i < len; i++) {
+        if (slices[i] <= slices[i - 1]) {
+          stop = true;
+          break;
+        }
+        shapes.add(horizontal? [row, slices[i] - slices[i - 1]]: [slices[i] - slices[i - 1], column]);
+      }
+      shapes.add(horizontal? [row, column - slices.last] : [row - slices.last, column]);
+      if (stop)
+        throw "Please pass in a strictly increasing positive integer slice index that is within the range.";
+      else{
+        Pointer<Int32> op = oneListToArrayInt32(slices);
+        Pointer<Pointer<Pointer<Double>>> mtops = matply__split(shape[0], shape[1], self.ref.data, len, op, horizontal);
+        malloc.free(op);
+        return List.generate(
+          len + 1,
+          (index) => MatrixType.__fromDataPointer(mtops[index], shapes[index]),
+          growable: true
+        );
+      }
+    }else
+      throw random_outRange;
+  }
+
+  Object split_equal({required int step, bool horizontal = true}){
+    assert (step > 0);
+    int column = shape[1], row = shape[0];
+    if (horizontal? step < column : step < row)
+      return split(
+          slices: horizontal?
+          List<int>.generate((column / step).ceil() - 1, (i) => (i + 1) * step) :
+          List<int>.generate((row / step).ceil() - 1, (i) => (i + 1) * step),
+          horizontal: horizontal
+      );
+    else if (horizontal? step == column : step == row)
+      return MatrixType.deepCopy(this);
+    else
+      throw random_outRange;
+  }
+
+  MatrixType cover(MatrixType mt, {required int row, required int column}){
+    if (row >= 0 && row < shape[0] && column >= 0 && column < shape[1]){
+      return MatrixType.__fromDataPointer(
+          matply__cover(shape[0], shape[1], self.ref.data, mt.shape[0], mt.shape[1], mt.self.ref.data, row, column), shape
+      );
+    }else
+      throw random_outRange;
+  }
+
+  MatrixType stretch({required int len, bool horizontal = true, double? number, int method = 0}){
+    assert(len > 0);
+    if (method == 1)
+      assert(number != null);
+    var [row, column] = shape;
+    return MatrixType.__fromDataPointer(
+        matply__stretch(row, column, self.ref.data, len, horizontal, number ?? 0, method),
+        horizontal? [row, column + len]: [row + len, column]
+    );
+  }
+
 }
 

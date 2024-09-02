@@ -4,6 +4,8 @@
 ```text
 MatrixType(
   List<List<double>> data, {
+    int? row,
+    int? column,
     bool identityMatrix = false,
     bool principalDiagonalMatrix = false,
     bool subDiagonalMatrix = false,
@@ -12,8 +14,9 @@ MatrixType(
     bool singularMatrix  = false
   })
 ```
+> 1. 默认构造函数必须传入一个二维数组，并接受指定一些矩阵的特殊性质，对于该特殊性质并未做出任何操作，考虑到一些矩阵的特殊性质——如对角方阵可以以O(n)的复杂度求解行列式值，该性质可以视为做出简易计算的接口。
+> 2. 注：自**V1.0.8**开始，基本构造函数添加了选择性传入形状（如果已知，但必须保证正整数，不做检查），则免去了计算机自动计算形状。
 
-> 默认构造函数必须传入一个二维数组，并接受指定一些矩阵的特殊性质，对于该特殊性质并未做出任何操作，考虑到一些矩阵的特殊性质——如对角方阵可以以O(n)的复杂度求解行列式值，该性质可以视为做出简易计算的接口。
 
 ### example
 ```dart
@@ -440,10 +443,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
 ## 指向C语言生成矩阵对象指针
 ```text
-MatrixType.__fromPointer(this.self, this.shape)
+MatrixType.fromPointer(this.self, this.shape)
 ```
 
-> Warning ：不建议在Dart使用指针类，因此我设置了此构造函数为私有方法
+> 注:
+> V1.0.8开始，fromPointer从__fromPointer设置为公有方法
 
 ## 工厂构造——深拷贝矩阵
 ```text

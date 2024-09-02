@@ -1,6 +1,55 @@
 /// 矩阵相关的统计学分支
-
 part of 'core.dart';
+
+/// simple-random
+extension RandomExtension on math.Random{
+  void setSeed(int seed) => seed > 0 ? matply__setSeed(seed) : matply_initialize_random_seed();
+
+  double random() => matply_random();
+
+  int randint(double lb, double ub){
+    assert(lb < ub);
+    return matply_randint(lb, ub);
+  }
+
+  double randn(double lb, double ub){
+    assert(lb < ub);
+    return matply_randdouble(lb, ub);
+  }
+
+  void shuffle<T>(List<T> list) => list.shuffle();
+
+  Object choice({required List<double> arr, List<double>? p, int? times, bool? back, int? method}){
+    int len = arr.length;
+    if (p == null && times == null && back == null && method == null){
+      Pointer<Double> op = oneListToArray(arr);
+      double value = matply_random_choice(op, len);
+      malloc.free(op);
+      return value;
+    }else if(p == null && times != null && back != null){
+      assert(times >= 0);
+      times = times != 0? times : len;
+      Pointer<Double> op1 = oneListToArray(arr);
+      Pointer<Double> op2 = matply_random_choices(op1, len, times, back);
+      List<double> value = op2.asTypedList(len).toList();
+      malloc.free(op1);
+      malloc.free(op2);
+      return value;
+    }else if(p != null && times != null && back != null && method != null){
+      assert(times >= 0 && p.length == len);
+      times = times != 0? times : len;
+      Pointer<Double> op1 = oneListToArray(arr);
+      Pointer<Double> op2 = oneListToArray(p);
+      Pointer<Double> op3 = matply_perfect_choices(op1, op2, len, times, back, method);
+      List<double> value = op3.asTypedList(len).toList();
+      malloc.free(op1);
+      malloc.free(op2);
+      malloc.free(op3);
+      return value;
+    }else
+      throw UnsupportedError('Confusing parameter matching');
+  }
+}
 
 extension ProbStat on MatrixType{
   void shuffle() => matply__shuffle(shape[0], shape[1], self.ref.data);
@@ -274,3 +323,4 @@ extension ProbStat on MatrixType{
     }
   }
 }
+

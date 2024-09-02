@@ -1,6 +1,42 @@
 /// 矩阵相关的纯粹数学操作分支
 
 part of 'core.dart';
+/// 关于二维点的操作拓展
+extension Point2D<T extends num> on math.Point<T> {
+  // 二次线性变换
+  math.Point<T> transform(Object mt) {
+    if (mt is MatrixType){
+      assert(mt.shape[0] == 2 && mt.shape[1] == 2);
+      var x = mt.at(0, 0) * this.x.toDouble() + mt.at(0, 1) * this.y.toDouble();
+      var y = mt.at(1, 0) * this.x.toDouble() + mt.at(1, 1) * this.y.toDouble();
+      return math.Point(x as T, y as T);
+    }else if (mt is List<List<num>>){
+      assert(mt.length == 2 && mt[0].length == 2);
+      var x = mt[0][0] * this.x.toDouble() + mt[0][1] * this.y.toDouble();
+      var y = mt[1][0] * this.x.toDouble() + mt[1][1] * this.y.toDouble();
+      return math.Point(x as T, y as T);
+    }else
+      throw UnsupportedError('Unsupported Type!');
+  }
+
+  // 旋转变换
+  math.Point<T> rotate(num angle) => transform(
+      [[math.cos(angle), -math.sin(angle)],
+        [math.sin(angle), math.cos(angle)]]
+  );
+  // 缩放变换
+  math.Point<T> scale(num sx, num sy) => transform([[sx, 0.0], [0.0, sy]]);
+}
+
+// 生成笛卡尔积
+Iterable<math.Point<num>> getCartesianProduct(List<num> list1, List<num> list2) sync* {
+  assert(list1.isNotEmpty && list2.isNotEmpty);
+  for (num value1 in list1) {
+    for (num value2 in list2) {
+      yield math.Point<num>(value1, value2);
+    }
+  }
+}
 
 extension PureMath on MatrixType{
   /// setter && getter
@@ -107,6 +143,33 @@ extension PureMath on MatrixType{
     }
   }
 
+  MatrixType diff_center(double Function(double) condition){
+    NativeCallable<Double Function(Double)> func = NativeCallable<
+        Double Function(Double)>
+        .isolateLocal(condition, exceptionalReturn: 0.0);
+    var mt = matply__diffC(shape[0], shape[1], self.ref.data, func.nativeFunction);
+    func.close();
+    return MatrixType.__fromDataPointer(mt, shape);
+  }
 
+  List get_range({int dim = -1}){
+    late final List list;
+    var [row, column] = shape;
+    Pointer<Pointer<Double>> dataOp = matply__get_range(row, column, self.ref.data, dim);
+    switch (dim) {
+      case 0:
+        list = List.generate(row, (i) => dataOp[i].asTypedList(2).toList());
+        matply__delete__data__(dataOp, row);
+        return list;
+      case 1:
+        list = List.generate(column, (i) => dataOp[i].asTypedList(2).toList());
+        matply__delete__data__(dataOp, column);
+        return list;
+      default:
+        list = dataOp[0].asTypedList(2).toList();
+        matply__delete__data__(dataOp, 1);
+        return list;
+    }
+  }
 }
 

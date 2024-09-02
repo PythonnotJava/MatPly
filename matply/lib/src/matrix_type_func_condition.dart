@@ -249,5 +249,4 @@ extension Functools on MatrixType{
     matply__freeppvoid(ls.cast<Pointer<Void>>(), shape[0]);
     return list;
   }
-
 }

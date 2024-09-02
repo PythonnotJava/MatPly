@@ -43,3 +43,5 @@ clean:
 .PHONY: all clean
 
 # my orders : gcc -shared -o matply.dll  matply.c Auxiliary.c
+# gcc -c -fPIC matply.c Auxiliary.c
+# gcc -shared -o matply.so matply.o Auxiliary.o

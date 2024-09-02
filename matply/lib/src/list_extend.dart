@@ -1,76 +1,63 @@
 part of 'core.dart';
 
 /// extension for List.Test from V1.0.2
+/// Established extension from V1.0.8
 
-// 数据源为一维列表
-extension OneDimListExtend on List<double> {
-  Pointer<Double> getOnePointer({bool methed_is_malloc = true}){
-    Pointer<Double> op = methed_is_malloc ? malloc<Double>(length) : calloc<Double>(length);
-    for (int i = 0;i < length;i++)
-      op[i] = this[i];
+/// Extension for List operations, supporting both int and double types
+extension ListExtensions<T extends num> on List<T> {
+  /// Convert the list to a list of doubles
+  List<double> get toDoubleList => this.map((i) => i.toDouble()).toList();
+
+  /// Get a pointer to the data in the list
+  Pointer<Double> getOnePointer({bool methed_is_malloc = true}) {
+    Pointer<Double> op = methed_is_malloc
+        ? malloc<Double>(length * sizeOf<Double>())
+        : calloc<Double>(length * sizeOf<Double>());
+    for (int i = 0; i < length; i++) {
+      op[i] = this[i].toDouble();
+    }
     return op;
   }
+
+  /// Reshape the list into a matrix
   MatrixType reshape({required int row, required int column}) {
     assert(row > 0 && column > 0);
     if (length == column * row) {
       var op = getOnePointer();
-      MatrixType mt = MatrixType.__fromDataPointer(matply__oneTotwoArray(op, row, column), [row, column]);
+      MatrixType mt = MatrixType.__fromDataPointer(
+          matply__oneTotwoArray(op, row, column), [row, column]);
       malloc.free(op);
       return mt;
-    }else
+    } else {
       throw different_shape;
+    }
   }
 }
 
-// 数据源为二维列表
-extension TwoDimListExtend on List<List<double>>{
+/// Extension for 2D List operations, supporting both int and double types
+extension TwoDimListExtensions<T extends num> on List<List<T>> {
   int get row => this.length;
   int get column => this[0].length;
   List<int> get shape => [row, column];
 
-  Pointer<Pointer<Double>> getTwoPointer(){
-    var tp = malloc<Pointer<Double>>(row);
+  /// Convert the 2D list to a 2D list of doubles
+  List<List<double>> get toDoubleList =>
+      List.generate(row, (i) => this[i].toDoubleList);
+
+  /// Get a pointer to the data in the 2D list
+  Pointer<Pointer<Double>> getTwoPointer() {
+    var tp = malloc<Pointer<Double>>(row * sizeOf<Pointer<Double>>());
     for (int r = 0; r < row; r++) {
-      tp[r] = malloc<Double>(column);
+      tp[r] = malloc<Double>(column * sizeOf<Double>());
       for (int j = 0; j < column; j++) {
-        tp[r][j] = this[r][j];
+        tp[r][j] = this[r][j].toDouble();
       }
     }
     return tp;
   }
 
-  MatrixType toMatrixType() => MatrixType.__fromDataPointer(getTwoPointer(), this.shape);
-
-  MatrixType matmul({List<List<double>>? list, MatrixType? mt}){
-    assert(list != null || mt != null);
-    if (list != null){
-      if(column != list.row)
-        throw matmul_unsupport;
-      var tp1 = getTwoPointer();
-      var tp2 = list.getTwoPointer();
-      MatrixType _mt = MatrixType.__fromDataPointer(
-          matply__matmul(row, column, tp1, tp2, list.column),
-          [row, list.column]
-      );
-      matply__delete__data__(tp1, row);
-      matply__delete__data__(tp2, column);
-      return _mt;
-    }else {
-      if (column != mt!.shape[0])
-        throw matmul_unsupport;
-      var tp = getTwoPointer();
-      MatrixType _mt = MatrixType.__fromDataPointer(
-          matply__matmul(row, column, tp, mt.self.ref.data, mt.shape[1]),
-          [row, mt.shape[1]]
-      );
-      matply__delete__data__(tp, row);
-      return _mt;
-    }
-  }
-
-  MatrixType sort({bool reverse = false, int dim = -1, double mask_nan = 0.0}){
-    var data = getTwoPointer();
-    matply__sortNoReturned(row, column, data, reverse, dim, mask_nan);
-    return MatrixType.__fromDataPointer(data, shape);
-  }
+  /// Convert the 2D list to a MatrixType by pointer
+  MatrixType toMatrixTypeByPointer() => MatrixType.__fromDataPointer(getTwoPointer(), this.shape);
+  /// Convert the 2D list to a MatrixType by list
+  MatrixType toMatrixTypeByList() => MatrixType(toDoubleList);
 }

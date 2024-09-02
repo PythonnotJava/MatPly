@@ -18,6 +18,7 @@ main(){
   print(inf.isInfinite);
   print(negativeinf.isNegative);
   print(e * inf);
+  print(euler);  // [new from V1.0.8]
 }
 
 /* outputs : 
@@ -27,6 +28,7 @@ true
 true
 true
 Infinity
+0.5772156649015329
 * */
 ```
 

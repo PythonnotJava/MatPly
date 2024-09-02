@@ -361,3 +361,37 @@ void freeppvoid(void ** data, int row){
     }
 }
 
+double ** genTestdatas(int row, int column, double (*func)(double, double)){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    for(int r = 0; r < row;r++){
+        new[r] = (double *) malloc(sizeof (double ) * column);
+        for(int c = 0;c < column;c ++)
+            new[r][c] = func(r, c);
+    }
+    return new;
+}
+
+double diffCentral(double x, double (*func)(double)){
+    int i, k;
+    double h = EPSILON;
+    double a[4], d[4], a3;
+
+    for (i = 0; i < 4; i++){
+        a[i] = x + (i - 2.0) * h;
+        d[i] = func(a[i]);
+    }
+    for (k = 1; k < 5; k++)
+        for (i = 0; i < 4 - k; i++)
+            d[i] = (d[i + 1] - d[i]) / (a[i + k] - a[i]);
+
+    a3 = fabs(d[0] + d[1] + d[2] + d[3]);
+
+    if (a3 < 100.0 * EPSILON)
+        a3 = 100.0 * EPSILON;
+
+    h = pow (EPSILON / (2.0 * a3), 1.0 / 3.0);
+
+    if (h > 100.0 * EPSILON)
+        h = 100.0 * EPSILON;
+    return (func(x + h) - func(x - h)) / (2.0 * h);
+}

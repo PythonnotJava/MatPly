@@ -13,8 +13,12 @@ late final String platform_cpp = __login_platform_cpp();
 
 /// C++ Extension for C
 class MatrixCppApi {
+  // 发布时
   static MatrixCppApi get instance => MatrixCppApi(DynamicLibrary.open(
       path.join(pubCacheDir, 'lib/src/Cpp', platform_cpp)));
+  // 开发时
+  // static MatrixCppApi get instance => MatrixCppApi(DynamicLibrary.open(
+  //     path.join(pubCacheDir, '../', 'cpp_extension.dll')));
   /// Holds the symbol lookup function.
   final Pointer<T> Function<T extends NativeType>(String symbolName)
   _lookup;

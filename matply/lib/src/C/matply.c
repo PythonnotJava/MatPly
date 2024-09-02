@@ -3,7 +3,6 @@
 //
 
 #include "matply.h"
-#include "Auxiliary.h"
 
 static  char * ROUND = "%.5lf\t";
 static double DROUND = 1e-10;
@@ -12,7 +11,8 @@ void set_visible_round( char* new_round)
 {
     ROUND = new_round;
 }
-char * get_visible_round()
+
+__attribute__((unused)) char * get_visible_round()
 {
     return ROUND;
 }
@@ -25,10 +25,11 @@ void set_round( double number)
     return DROUND;
 }
 
-__attribute__((visibility("default"))) const double PI = M_PI;
-__attribute__((visibility("default"))) const double e = M_E;
-__attribute__((visibility("default"))) const double _nan = NAN;
-__attribute__((visibility("default"))) const double inf = INFINITY;
+const double PI = M_PI;
+const double e = M_E;
+const double _nan = NAN;
+const double inf = INFINITY;
+const double euler = 0.57721566490153286060651209;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,53 +37,69 @@ void initMp(Matrix * matrix)
 {
     if (matrix && __Mp.instances == 0)
     {
-        MatrixLinked *matrix_linked = (MatrixLinked *)malloc(sizeof(MatrixLinked));
-        matrix_linked->matrix = matrix;
-        matrix_linked->next = NULL;
-        __Mp.matrix_linked = matrix_linked;
+        MatrixLinked * head = (MatrixLinked*) malloc(sizeof (MatrixLinked));
+        MatrixLinked * tail = (MatrixLinked*) malloc(sizeof (MatrixLinked));
+        head->matrix = matrix;
+        head->next = tail;
+        tail->matrix = NULL;
+        tail->next = NULL;
+        __Mp.head = head;
+        __Mp.tail = tail;
+        __Mp.instances++;
     }
 }
 
 void addToMp(Matrix * matrix)
 {
-    MatrixLinked *matrix_linked = (MatrixLinked *)malloc(sizeof(MatrixLinked));
-    matrix_linked->matrix = matrix;
-    matrix_linked->next = NULL;
-    if (__Mp.instances == 0)
-        __Mp.matrix_linked = matrix_linked;
-    else
-    {
-        MatrixLinked *current = __Mp.matrix_linked;
-        while (current->next)
-            current = current->next;
-        current->next = matrix_linked;
+    if (matrix && __Mp.instances == 0)
+        initMp(matrix);
+    else{
+        MatrixLinked * new = (MatrixLinked *) malloc(sizeof (MatrixLinked));
+        new->next = NULL;
+        new->matrix = matrix;
+        __Mp.tail->next = new;
+        __Mp.tail = __Mp.tail->next;
+        __Mp.instances++; // 不记录尾节点
     }
-    __Mp.instances++;
 }
 
-void freeMp(bool visible)
+void freeMp(bool visible, bool hex)
 {
-    MatrixLinked * current = __Mp.matrix_linked;
+    MatrixLinked * current = __Mp.head;
     MatrixLinked * temp = NULL;
     if (visible)
     {
-        while (current)
-        {
-            temp = current;
-            current = current->next;
-            __delete__(temp->matrix);
-            printf("Free Memory in location : %p\n", (void *)temp);
-            free(temp);
+        if (hex) {
+            while (current != __Mp.tail)
+            {
+                temp = current;
+                current = current->next;
+                __delete__(temp->matrix);
+                printf("Free Memory in location : %p\n", (void *)temp);
+                free(temp);
+            }
         }
+        else{
+            while (current != __Mp.tail)
+            {
+                temp = current;
+                current = current->next;
+                __delete__(temp->matrix);
+                printf("Free Memory in location : %lu\n", (void *)temp);
+                free(temp);
+            }
+        }
+        free(__Mp.tail);
     }else
     {
-        while (current)
+        while (current != __Mp.tail)
         {
             temp = current;
             current = current->next;
             __delete__(temp->matrix);
             free(temp);
         }
+        free(__Mp.tail);
     }
     __Mp.instances = 0;
 }
@@ -114,7 +131,7 @@ Matrix * __new__( int row,  int column){
     new->column = column;
     new->row = row;
     new->data = allocateButNoNumbers(row, column);
-    new->spc = (Spc *) malloc(sizeof (Spc));;
+    new->spc = (Spc *) malloc(sizeof (Spc));
     *new->spc = (Spc){false, false, false, false, false, false};
     Signal(new)
     return new;
@@ -127,7 +144,7 @@ Matrix * __init__( int row,  int column,  double ** data,  Spc * spc){
         new->data[r] = (double *) malloc(sizeof (double ) * column);
         memcpy(new->data[r], data[r], column * sizeof(double));
     }
-    new->spc = (Spc *) malloc(sizeof (Spc));;
+    new->spc = (Spc *) malloc(sizeof (Spc));
     if (spc)
         *new->spc = *spc;
     else
@@ -644,19 +661,19 @@ bool ** compare( int row,  int column,  double **data1,  double ** data2,  int m
 
     switch (mode) {
     case 1:
-        COMPARE_OP(>, data1, data2, column, row, new);
+        COMPARE_OP(>, data1, data2, column, row, new)
         break;
     case 2:
-        COMPARE_OP(<, data1, data2, column, row, new);
+        COMPARE_OP(<, data1, data2, column, row, new)
         break;
     case 3:
-        COMPARE_OP(<=, data1, data2, column, row, new);
+        COMPARE_OP(<=, data1, data2, column, row, new)
         break;
     case 4:
-        COMPARE_OP(>=, data1, data2, column, row, new);
+        COMPARE_OP(>=, data1, data2, column, row, new)
         break;
     default:
-        COMPARE_OP(==, data1, data2, column, row, new);
+        COMPARE_OP(==, data1, data2, column, row, new)
         break;
     }
     #undef COMPARE_OP
@@ -1015,7 +1032,7 @@ double ** reshape( int row,  int column,  double ** data,  int origin_column)
 }
 
 void setSeed( int seed) {
-    seed > 0 ? srand(seed):  initialize_random_seed();;
+    seed > 0 ? srand(seed):  initialize_random_seed();
 }
 
 double ** mathBasement1( int row,  int column,  double ** data,  int mode)
@@ -1106,9 +1123,14 @@ double ** mathBasement2( int row,  int column,  double ** data,  int mode,  doub
 
     switch (mode)
     {
-        case 0: MATCH2(data, pow, new, column, row);break;
-        case 1: MATCH2(data, atan2, new, column, row);break;
-        default:break;
+        case 0:
+            MATCH2(data, pow, new, column, row)
+            break;
+        case 1:
+            MATCH2(data, atan2, new, column, row)
+            break;
+        default:
+            break;
     }
     #undef MATCH2
     return new;
@@ -1131,8 +1153,8 @@ double ** mathBasement2reverse( int row,  int column,  double ** data,  int mode
 
     switch (mode)
     {
-        case 0: MATCH3(data, pow, new, column, row);
-        case 1: MATCH3(data, atan2, new, column, row);
+        case 0: MATCH3(data, pow, new, column, row)
+        case 1: MATCH3(data, atan2, new, column, row)
         default:break;
     }
     #undef MATCH3
@@ -2178,20 +2200,16 @@ double ** E_like(int row, int column){
     return new;
 }
 
-double *** qr(int row, int column, double** data) {
-    double *** new = (double***)malloc(2 * sizeof(double**));
-    new[0] = (double**)malloc(row * sizeof(double*));
-    new[1] = (double**)malloc(column * sizeof(double*));
+MultiDatas2 qr(int row, int column, double** data) {
+    double ** Q = (double**)malloc(row * sizeof(double*));
+    double ** R = (double**)malloc(column * sizeof(double*));
 
     for (int i = 0; i < row; ++i) {
-        new[0][i] = (double*)calloc(column, sizeof(double));
+        Q[i] = (double*)calloc(column, sizeof(double));
     }
     for (int i = 0; i < column; ++i) {
-        new[1][i] = (double*)calloc(column, sizeof(double));
+        R[i] = (double*)calloc(column, sizeof(double));
     }
-
-    double ** Q = new[0];
-    double ** R = new[1];
 
     for (int j = 0; j < column; ++j) {
         for (int i = 0; i < row; ++i) {
@@ -2219,7 +2237,7 @@ double *** qr(int row, int column, double** data) {
         }
     }
 
-    return new;
+    return (MultiDatas2){Q, R};
 }
 
 double ** clip_reverse(int row, int column, double  **data, double lb, double ub, double (*condition)(double)){
@@ -2279,7 +2297,6 @@ int ** findIndexs(int row, int column, double **data, bool (*condition)(double )
 
 double ** rotate(int row, int column, double ** data, int mode){
     double ** new = NULL;
-    int counter = 0;
     switch (mode) {
         case -3: label0: {  // 顺90/逆270
             new = (double **) malloc(sizeof(double *) * column);
@@ -2812,3 +2829,393 @@ double ** choice3(int row, int column, double ** data, int times, bool back){
         new[r] = random_choices(data[r], column, times, back);
     return new;
 }
+
+double ** concatsR(
+        int row,
+        int column1,
+        int column2,
+        int column3,
+        int column4,
+        double ** data1,
+        double ** data2,
+        double ** data3,
+        double ** data4
+){
+    double ** new = (double **) malloc(sizeof (double *) * row);
+    int totalColumn = column1 + column2;
+    if (data3 != NULL && data4 == NULL){
+        totalColumn += column3;
+        for(int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * totalColumn);
+            int currentIndex = 0, c;
+            for (c = 0;c < column1;c ++)
+                new[r][currentIndex++] = data1[r][c];
+            for (c = 0;c < column2;c ++)
+                new[r][currentIndex++] = data2[r][c];
+            for (c = 0;c < column3;c ++)
+                new[r][currentIndex++] = data3[r][c];
+        }
+    } else {        // 只考虑data3 != NULL && data4 != NULL
+        totalColumn += column4 + column3;
+        for(int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * totalColumn);
+            int currentIndex = 0, c;
+            for (c = 0;c < column1;c ++)
+                new[r][currentIndex++] = data1[r][c];
+            for (c = 0;c < column2;c ++)
+                new[r][currentIndex++] = data2[r][c];
+            for (c = 0;c < column3;c ++)
+                new[r][currentIndex++] = data3[r][c];
+            for (c = 0;c < column4;c ++)
+                new[r][currentIndex++] = data4[r][c];
+        }
+    }
+    return new;
+}
+
+double ** concatsC(
+        int row1,
+        int row2,
+        int row3,
+        int row4,
+        int column,
+        double ** data1,
+        double ** data2,
+        double ** data3,
+        double ** data4
+){
+    int totalRow = row1 + row2;
+    double ** new = NULL;
+    if (data3 != NULL && data4 == NULL){
+        totalRow += row3;
+        new = allocateButNoNumbers(totalRow, column);
+        int currentIndex = 0;
+        for(int r = 0;r < row1;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data1[r][c];
+            currentIndex++;
+        }
+        for(int r = 0;r < row2;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data2[r][c];
+            currentIndex++;
+        }
+        for(int r = 0;r < row3;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data3[r][c];
+            currentIndex++;
+        }
+    } else{
+        new = allocateButNoNumbers(totalRow + row3 + row4, column);
+        int currentIndex = 0;
+        for(int r = 0;r < row1;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data1[r][c];
+            currentIndex++;
+        }
+        for(int r = 0;r < row2;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data2[r][c];
+            currentIndex++;
+        }
+        for(int r = 0;r < row3;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data3[r][c];
+            currentIndex++;
+        }
+        for(int r = 0;r < row4;r ++){
+            for (int c = 0;c < column;c ++)
+                new[currentIndex][c] = data4[r][c];
+            currentIndex++;
+        }
+    }
+    return new;
+}
+
+double *** split(int row, int column, double ** data, int len, int * slices, bool mode) {
+    int num_splits = len + 1;
+    double *** new = (double ***)malloc(num_splits * sizeof(double **));
+    if (mode) {
+        for (int i = 0; i < num_splits; i++) {
+            int start = (i == 0) ? 0 : slices[i - 1];
+            int end = (i == len) ? column : slices[i];
+            int dim1 = row;
+            int dim2 = end - start;
+            new[i] = (double **)malloc(dim1 * sizeof(double *));
+            for (int r = 0; r < dim1; r++) {
+                new[i][r] = (double *)malloc(dim2 * sizeof(double));
+                for (int c = 0; c < dim2; c ++) {
+                    new[i][r][c] = data[r][start + c];
+                }
+            }
+        }
+    } else {
+        for (int i = 0; i < num_splits; i++) {
+            int start = (i == 0) ? 0 : slices[i - 1];
+            int end = (i == len) ? row : slices[i];
+            int dim1 = end - start;
+            int dim2 = column;
+            new[i] = (double **)malloc(dim1 * sizeof(double *));
+            for (int r = 0; r < dim1; r++) {
+                new[i][r] = (double *)malloc(dim2 * sizeof(double));
+                for (int c = 0; c < dim2; c ++) {
+                    new[i][r][c] = data[start + r][c];
+                }
+            }
+        }
+    }
+    return new;
+}
+
+double ** cover(int row, int column, double ** data1, int row1, int column1, double ** data2, int rowx, int rowy){
+    double ** new = deepcopy(row, column, data1);
+    int needColumn = column1 + rowy <= column ? column1 : column - rowy;
+    int needRow = row1 + rowx <= row ? row1 : row - rowx;
+    for (int r = 0;r < needRow;r++){
+        for(int c = 0;c < needColumn;c ++){
+            new[r + rowx][c + rowy] = data2[r][c];
+        }
+    }
+    return new;
+}
+
+double ** stretch_repeat(int row, int column, double ** data, int len, bool hor){
+    double ** new = NULL;
+    if (hor){
+        new = (double **) malloc(sizeof (double *) * row);
+        int newColumn = len + column;
+        for (int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * newColumn);
+            for (int c = 0;c < newColumn;c ++) {
+                new[r][c] = data[r][c % column];
+            }
+        }
+    } else{
+        int newRow = row + len;
+        new = (double ** ) malloc(sizeof (double *) * newRow);
+        for (int r = 0;r < newRow;r++){
+            new[r] = (double *) malloc(sizeof (double )* column);
+            memcpy(new[r], data[r % row], column * sizeof (double ));
+        }
+    }
+    return new;
+}
+
+double ** stretch_replace(int row, int column, double ** data, int len, bool hor, double number){
+    double ** new = NULL;
+    if (hor){
+        int newColumn = column + len, c;
+        new = (double **) malloc(sizeof (double *) * row);
+        for(int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * newColumn);
+            c = 0;
+            for (;c < column;c ++)
+                new[r][c] = data[r][c];
+            for (;c < newColumn;c ++)
+                new[r][c] = number;
+        }
+    } else{
+        int newRow = len + row;
+        new = (double **) malloc(sizeof (double *) * newRow);
+        int r = 0;
+        for (;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[r], column * sizeof (double ));
+        }
+        for (;r < row + 1;r++){
+            new[row] = (double *) malloc(sizeof (double ) * column);
+            for (int c = 0;c < column;c ++)
+                new[r][c] = number;
+        }
+        for (;r < newRow;r++){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], new[row], column * sizeof (double ));
+        }
+    }
+    return new;
+}
+
+double ** stretch_head(int row, int column, double ** data, int len, bool hor){
+    double ** new = NULL;
+    if (hor){
+        int newColumn = column + len, c;
+        new = (double **) malloc(sizeof (double ) * row);
+        for (int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * newColumn);
+            c = 0;
+            for(;c < column;c ++)
+                new[r][c] = data[r][c];
+            for(;c < newColumn;c ++)
+                new[r][c] = data[r][0];
+        }
+    } else{
+        int newRow = row + len, r = 0;
+        new = (double **) malloc(sizeof (double *)*newRow);
+        for(;r < row;r++ ){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[r], column * sizeof (double ));
+        }
+        for (;r < newRow;r++){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[0], column * sizeof (double ));
+        }
+    }
+    return new;
+}
+
+double ** stretch_end(int row, int column, double ** data, int len, bool hor){
+    double ** new = NULL;
+    if (hor){
+        int newColumn = column + len, c, last = column - 1;
+        new = (double **) malloc(sizeof (double ) * row);
+        for (int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * newColumn);
+            c = 0;
+            for(;c < column;c ++)
+                new[r][c] = data[r][c];
+            for(;c < newColumn;c ++)
+                new[r][c] = data[r][last];
+        }
+    } else{
+        int newRow = row + len, r = 0, last = row - 1;
+        new = (double **) malloc(sizeof (double *)*newRow);
+        for(;r < row;r++ ){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[r], column * sizeof (double ));
+        }
+        for (;r < newRow;r++){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[last], column * sizeof (double ));
+        }
+    }
+    return new;
+}
+
+double ** stretch_mirror(int row, int column, double ** data, int len, bool hor){
+    double ** new = NULL;
+    if (hor){
+        new = (double **) malloc(sizeof (double *) * row);
+        int newColumn = column + len, c;
+        for (int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * newColumn);
+            c = 0;
+            for(;c < column;c ++)
+                new[r][c] = data[r][c];
+            for(;c < newColumn;c ++)
+                new[r][c] = data[r][column - 1 - c % column];
+        }
+    } else{
+        int newRow = row + len;
+        new = (double **) malloc(sizeof (double *) * newRow);
+        for(int r = 0;r < row;r++){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[r], sizeof (double ) * column);
+        }
+        for (int r = row;r< newRow;r++){
+            new[r] = (double *) malloc(sizeof (double ) * column);
+            memcpy(new[r], data[row - 1 - r % row], sizeof (double ) * column);
+        }
+    }
+    return new;
+}
+
+double ** stretch_mirrors(int row, int column, double **data, int len, bool hor) {
+    double **new = NULL;
+    if (hor) {
+        new = (double **) malloc(sizeof(double *) * row);
+        int newColumn = column + len;
+        for (int r = 0; r < row; r++) {
+            new[r] = (double *) malloc(sizeof(double) * newColumn);
+            for (int c = 0; c < newColumn; c++) {
+                int index = c % column;
+                bool reverse = (c / column) % 2;
+                new[r][c] = data[r][reverse ? column - 1 - index : index];
+            }
+        }
+    } else {
+        int newRow = row + len;
+        new = (double **) malloc(sizeof(double *) * newRow);
+        for (int r = 0; r < newRow; r++) {
+            int index = r % row;
+            bool reverse = (r / row) % 2;
+            new[r] = (double *) malloc(sizeof(double) * column);
+            memcpy(new[r], data[reverse ? row - 1 - index : index], sizeof(double) * column);
+        }
+    }
+    return new;
+}
+
+double ** stretch(int row, int column, double ** data, int len, bool hor, double number, int method){
+    switch (method) {
+        case 0:
+            return stretch_repeat(row, column, data, len, hor);
+        case 1:
+            return stretch_replace(row, column, data, len, hor, number);
+        case 2:
+            return stretch_head(row, column, data, len, hor);
+        case 3:
+            return stretch_end(row, column, data, len, hor);
+        case 4:
+            return stretch_mirror(row, column, data, len, hor);
+        default:
+            return stretch_mirrors(row, column, data, len, hor);
+    }
+}
+
+double ** diffC(int row, int column, double ** data, double (*func)(double)) {
+    double ** new = (double**)malloc(sizeof(double *) * row);
+    for (int r = 0;r < row;r++) {
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++) {
+            new[r][c] = diffCentral(data[r][c], func);
+        }
+    }
+    return new;
+}
+
+double ** get_range(int row, int column, double ** data, int dim) {
+    double ** new = NULL;
+    double value;
+    switch (dim) {
+    case 0: {
+        new = (double **)malloc(sizeof(double *) * row);
+        for (int r = 0; r < row; r++) {
+            new[r] = (double *)malloc(sizeof(double) * 2);
+            new[r][0] = new[r][1] = data[r][0];
+            for (int c = 1; c < column; c ++) {
+                value = data[r][c];
+                if (value < new[r][0]) new[r][0] = value;
+                if (value > new[r][1]) new[r][1] = value;
+            }
+        }
+        return new;
+    }
+    case 1: {
+        new = (double **)malloc(sizeof(double *) * column);
+        for (int c = 0; c < column; c ++) {
+            new[c] = (double *)malloc(sizeof(double) * 2);
+            new[c][0] = new[c][1] = data[0][c];
+            for (int r = 1; r < row; r++) {
+                value = data[r][c];
+                if (value < new[c][0]) new[c][0] = value;
+                if (value > new[c][1]) new[c][1] = value;
+            }
+        }
+        return new;
+    }
+    default: {
+        new = (double **)malloc(sizeof(double *));
+        new[0] = (double *)malloc(sizeof(double) * 2);
+        new[0][0] = new[0][1] = data[0][0];
+        for (int r = 0; r < row; r++) {
+            for (int c = 0; c < column; c++) {
+                value = data[r][c];
+                if (value < new[0][0]) new[0][0] = value;
+                if (value > new[0][1]) new[0][1] = value;
+            }
+        }
+        return new;
+    }
+    }
+}
+

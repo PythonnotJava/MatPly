@@ -13,7 +13,7 @@ late final String platform = __login_platform();
 
 // late final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', platform));
 
-const VERSION = '1.0.7';
+const VERSION = '1.0.8';
 
 String pubCacheDir = path.join(
     Platform.environment['LOCALAPPDATA']!,
@@ -30,6 +30,7 @@ late final Pointer<Double> _Pi = dylib.lookup('PI').cast<Double>();
 late final Pointer<Double> _e = dylib.lookup('e').cast<Double>();
 late final Pointer<Double> _nan = dylib.lookup('_nan').cast<Double>();
 late final Pointer<Double> _inf = dylib.lookup('inf').cast<Double>();
+late final Pointer<Double> _euler = dylib.lookup('euler').cast<Double>();
 
 /// global functions
 typedef set__visible__round__base__ffi = Void Function(Pointer<Utf8> new_round);
@@ -52,19 +53,14 @@ late final get__round__base matply__get__round = dylib.lookupFunction<get__round
 final class SpecialAttributes extends Struct {
   @Bool()
   external bool identityMatrix;
-
   @Bool()
   external bool principalDiagonalMatrix;
-
   @Bool()
   external bool subDiagonalMatrix;
-
   @Bool()
   external bool upperTriangularMatrix;
-
   @Bool()
   external bool lowerTriangularMatrix;
-
   @Bool()
   external bool singularMatrix;
 }
@@ -73,13 +69,29 @@ final class SpecialAttributes extends Struct {
 final class Matrix extends Struct {
   @Int32()
   external int row;
-
   @Int32()
   external int column;
-
   external Pointer<SpecialAttributes> spc;
-
   external Pointer<Pointer<Double>> data;
+}
+
+// 存储多个二维数组的结构体
+final class MultiDatas2 extends Struct{
+  external Pointer<Pointer<Double>> data1;
+  external Pointer<Pointer<Double>> data2;
+}
+
+final class MultiDatas3 extends Struct{
+  external Pointer<Pointer<Double>> data1;
+  external Pointer<Pointer<Double>> data2;
+  external Pointer<Pointer<Double>> data3;
+}
+
+final class MultiDatas4 extends Struct{
+  external Pointer<Pointer<Double>> data1;
+  external Pointer<Pointer<Double>> data2;
+  external Pointer<Pointer<Double>> data3;
+  external Pointer<Pointer<Double>> data4;
 }
 
 // 定义DLL中的函数
@@ -380,8 +392,8 @@ typedef counter__base  = Pointer<Int32> Function(int row, int column, Pointer<Po
 typedef reduce__base__ffi = Pointer<Double> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 dim, Pointer<NativeFunction<Double Function(Double, Double)>> condition, Double init);
 typedef reduce__base = Pointer<Double> Function(int row, int column, Pointer<Pointer<Double>> data, int dim, Pointer<NativeFunction<Double Function(Double, Double)>> condition, double init);
 
-typedef qr__base__ffi = Pointer<Pointer<Pointer<Double>>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data);
-typedef qr__base = Pointer<Pointer<Pointer<Double>>> Function(int row, int column, Pointer<Pointer<Double>> data);
+typedef qr__base__ffi = MultiDatas2 Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data);
+typedef qr__base = MultiDatas2 Function(int row, int column, Pointer<Pointer<Double>> data);
 
 typedef E_like__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
 typedef E_like__base = Pointer<Pointer<Double>> Function(int row, int column);
@@ -454,6 +466,27 @@ typedef choice2__base  = Pointer<Pointer<Double>> Function(int row, int column, 
 
 typedef choice3__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 times, Bool back);
 typedef choice3__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int times, bool back);
+
+typedef concatsR__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column1, Int32 column2, Int32 column3, Int32 column4, Pointer<Pointer<Double>> data1, Pointer<Pointer<Double>> data2, Pointer<Pointer<Double>> data3, Pointer<Pointer<Double>> data4);
+typedef concatsR__base = Pointer<Pointer<Double>> Function( int row,  int column1,  int column2,  int column3, int column4, Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2, Pointer<Pointer<Double>> data3, Pointer<Pointer<Double>> data4);
+
+typedef concatsC__base__ffi = Pointer<Pointer<Double>> Function( Int32 row1,  Int32 row2,  Int32 row3, Int32 row4, Int32 column,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2, Pointer<Pointer<Double>> data3, Pointer<Pointer<Double>> data4);
+typedef concatsC__base = Pointer<Pointer<Double>> Function( int row1,  int row2,  int row3, int row4, int column,  Pointer<Pointer<Double>>  data1,  Pointer<Pointer<Double>>  data2, Pointer<Pointer<Double>> data3, Pointer<Pointer<Double>> data4);
+
+typedef split__base__ffi = Pointer<Pointer<Pointer<Double>>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 len, Pointer<Int32> slices, Bool mode);
+typedef split__base  = Pointer<Pointer<Pointer<Double>>> Function(int row, int column, Pointer<Pointer<Double>> data, int len, Pointer<Int32> slices, bool mode);
+
+typedef cover__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data1, Int32 row1, Int32 column1, Pointer<Pointer<Double>> data2, Int32 rowx, Int32 rowy);
+typedef cover__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int row1, int column1, Pointer<Pointer<Double>> data2, int rowx, int rowy);
+
+typedef stretch__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 len, Bool hor, Double number, Int32 method);
+typedef stretch__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int len, bool hor, double number, int method);
+
+typedef diffC__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Pointer<NativeFunction<Double Function(Double)>> func);
+typedef diffC__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, Pointer<NativeFunction<Double Function(Double)>> func);
+
+typedef get_range__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 dim);
+typedef get_range__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int dim);
 
 late final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 late final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
@@ -579,6 +612,13 @@ late final fill_diagonal__base matply__fill_diagonal = dylib.lookupFunction<fill
 late final choice1__base matply__choice1 = dylib.lookupFunction<choice1__base__ffi, choice1__base>('choice1');
 late final choice2__base matply__choice2 = dylib.lookupFunction<choice2__base__ffi, choice2__base>('choice2');
 late final choice3__base matply__choice3 = dylib.lookupFunction<choice3__base__ffi, choice3__base>('choice3');
+late final concatsR__base matply__concatsR = dylib.lookupFunction<concatsR__base__ffi, concatsR__base>('concatsR');
+late final concatsC__base matply__concatsC = dylib.lookupFunction<concatsC__base__ffi, concatsC__base>('concatsC');
+late final split__base matply__split = dylib.lookupFunction<split__base__ffi, split__base>('split');
+late final cover__base matply__cover = dylib.lookupFunction<cover__base__ffi, cover__base>('cover');
+late final stretch__base matply__stretch = dylib.lookupFunction<stretch__base__ffi, stretch__base>('stretch');
+late final diffC__base matply__diffC = dylib.lookupFunction<diffC__base__ffi, diffC__base>('diffC');
+late final get_range__base matply__get_range = dylib.lookupFunction<get_range__base__ffi, get_range__base>('get_range');
 
 dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
@@ -603,10 +643,18 @@ void TestArrayPointer(int row, int column, Pointer<Pointer<Double>> data){
   }
 }
 
-// 一维浮点列表转一维浮点数组
+// 一维列表转一维数组
 Pointer<Double> oneListToArray(List<double> data){
   int len = data.length;
   Pointer<Double> op = malloc.allocate<Double>(len * sizeOf<Double>());
+  for (int r = 0;r < len;r++)
+    op[r] = data[r];
+  return op;
+}
+
+Pointer<Int32> oneListToArrayInt32(List<int> data){
+  int len = data.length;
+  Pointer<Int32> op = malloc.allocate<Int32>(len * sizeOf<Int32>());
   for (int r = 0;r < len;r++)
     op[r] = data[r];
   return op;
@@ -617,19 +665,16 @@ late final double e = _e.value;
 late final double inf = _inf.value;  // 正无穷大，和Dart的内置相通，下同
 late final double negativeinf = -inf;  // 负无穷大
 late final double nan = _nan.value;  // 非法数据
+late final double euler = _euler.value;  // 欧拉常数
 
 /// 全局的内存管理单例
 /// 该内存单例允许：凡是创建一个新Matrix实例，都会主动被检测并添加到内存池中，在程序执行完毕后，可以一键释放。
-// void initMp(Matrix * matrix);
-// void addToMp(Matrix * matrix);
-// void freeMp();
-// int getInstances();
 late final void Function(Pointer<Matrix> matrix) __initMp = dylib.lookupFunction<Void Function(Pointer<Matrix> matrix), void Function(Pointer<Matrix> matrix)>('initMp');
 late final void Function(Pointer<Matrix> matrix) Signal = dylib.lookupFunction<Void Function(Pointer<Matrix> matrix), void Function(Pointer<Matrix> matrix)>('addToMp');
-late final void Function(bool) __freeMp = dylib.lookupFunction<Void Function(Bool), void Function(bool)>('freeMp');
+late final void Function(bool, bool) __freeMp = dylib.lookupFunction<Void Function(Bool, Bool), void Function(bool, bool)>('freeMp');
 late final int Function() getInstances = dylib.lookupFunction<Int32 Function(), int Function()>('getInstances');
 void initMp({Pointer<Matrix>? matrix}) => __initMp(matrix?? nullptr);
-void freeMp({bool visible = false}) => __freeMp(visible);
+void freeMp({bool visible = false, bool hex = true}) => __freeMp(visible, hex);
 
 /// simple-random-extension-for-dart
 typedef initialize_random_seed__base__ffi = Void Function();

@@ -71,3 +71,15 @@
 - Optimized some functions.
 - Confirmed the expansion of the list.
 
+## [1.0.9] - 2024-09-25
+### Added
+- Added some useful matrix methods and properties.
+- Geometry Simulation Function.
+
+### Fixed
+- Some C basic errors.
+
+### Optimized
+- More secure underlying code.
+- Small part of MatrixType optimization.
+

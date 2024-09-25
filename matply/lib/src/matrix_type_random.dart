@@ -33,7 +33,7 @@ extension RandomExtension on math.Random{
       Pointer<Double> op2 = matply_random_choices(op1, len, times, back);
       List<double> value = op2.asTypedList(len).toList();
       malloc.free(op1);
-      malloc.free(op2);
+      matply__freeOp(op2.cast<Void>());
       return value;
     }else if(p != null && times != null && back != null && method != null){
       assert(times >= 0 && p.length == len);
@@ -44,7 +44,7 @@ extension RandomExtension on math.Random{
       List<double> value = op3.asTypedList(len).toList();
       malloc.free(op1);
       malloc.free(op2);
-      malloc.free(op3);
+      matply__freeOp(op3.cast<Void>());
       return value;
     }else
       throw UnsupportedError('Confusing parameter matching');
@@ -52,7 +52,7 @@ extension RandomExtension on math.Random{
 }
 
 extension ProbStat on MatrixType{
-  void shuffle() => matply__shuffle(shape[0], shape[1], self.ref.data);
+  void shuffle({int? seed}) => matply__shuffle(shape[0], shape[1], self.ref.data, seed ?? 0, seed != null);
 
   Object __variance_std({bool sample = false, required bool std, int dim = -1}){
     switch(dim){

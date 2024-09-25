@@ -29,7 +29,7 @@ class Dataframe<T> extends MatrixType{
   Series<T> operator [](Object indice) {
     if (indice is int)
       return Series(
-          super.row_<Pointer>(indice) as Pointer<Double>,
+          row_<Pointer>(indice) as Pointer<Double>,
           horizontal: true,
           labels: colLabels,
           series: rowLabels[indice]
@@ -37,7 +37,7 @@ class Dataframe<T> extends MatrixType{
     int index = rowLabels.indexOf(indice as T);
     if (index != -1)
       return Series(
-          super.row_<Pointer>(index) as Pointer<Double>,
+          row_<Pointer>(index) as Pointer<Double>,
           horizontal: true,
           labels: colLabels,
           series: rowLabels[index]
@@ -50,8 +50,8 @@ class Dataframe<T> extends MatrixType{
     int index = (horizontal? rowLabels : colLabels).indexOf(indice);
     if (index != -1)
       return Series(
-          horizontal? super.row_<Pointer>(index) as Pointer<Double>
-              :super.column_<Pointer>(index) as Pointer<Double>,
+          horizontal? row_<Pointer>(index) as Pointer<Double>
+              : column_<Pointer>(index) as Pointer<Double>,
           horizontal: horizontal,
           labels: horizontal? colLabels: rowLabels,
           series: indice
@@ -78,8 +78,8 @@ class Dataframe<T> extends MatrixType{
 
   Series<T> iloc(int indice, {bool horizontal = true}){
     return Series(
-        horizontal?super.row_<Pointer>(indice) as Pointer<Double>
-            :super.column_<Pointer>(indice) as Pointer<Double>,
+        horizontal? row_<Pointer>(indice) as Pointer<Double>
+            : column_<Pointer>(indice) as Pointer<Double>,
         horizontal: horizontal,
         labels: horizontal?colLabels : rowLabels,
         series: horizontal?rowLabels[indice] : colLabels[indice]
@@ -97,16 +97,16 @@ class Dataframe<T> extends MatrixType{
   }
 }
 
-main(){
-  Dataframe dataframe = Dataframe(
-      [[2.0, 4, 2], [2, 5, 1]],
-      rowLabels: ['A', 'B'],
-      colLabels: ['T1', 'T2', 'T3'],
-      whatthis: 'DES'
-  );
-  var s1 = dataframe[1];
-  print(s1);
-  dataframe.self.ref.data[1] = ([3, 2, 1]).getOnePointer();
-  print(s1);
-
-}
+// main(){
+//   Dataframe dataframe = Dataframe(
+//       [[2.0, 4, 2], [2, 5, 1]],
+//       rowLabels: ['A', 'B'],
+//       colLabels: ['T1', 'T2', 'T3'],
+//       whatthis: 'DES'
+//   );
+//   var s1 = dataframe[1];
+//   print(s1);
+//   dataframe.self.ref.data[1] = ([3, 2, 1]).getOnePointer();
+//   print(s1);
+//
+// }

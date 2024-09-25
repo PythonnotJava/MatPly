@@ -1,6 +1,6 @@
 library matply;
 
-export 'src/core.dart';
-export 'src/data_frame/data_frame.dart';
-export 'src/data_frame/series.dart';
-export 'src/io/csv.dart';
+export 'core.dart';
+export 'data_frame/data_frame.dart' show Dataframe;
+export 'data_frame/series.dart' show Series;
+export 'io/csv.dart' show CSVReader, CSV;

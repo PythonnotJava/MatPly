@@ -1,29 +1,26 @@
 //
-// Created by 20281 on 2024/7/6.
+// Created by 25654 on 24-9-20.
 //
 
-#include "Auxiliary.h"
+#include "mp_auxiliary.h"
+
+#ifdef MP_CFG_H
+#else
+    #include "mp_cfg.h"
+#endif
 
 #if defined _INC_STDLIB
 #else
 #include <stdlib.h>
 #endif
-
 #if defined _INC_STRING
 #else
 #include <string.h>
 #endif
-
 #if defined _TIME_H_
 #else
 #include <time.h>
 #endif
-
-#ifdef _INC_STDIO
-#else
-#include <stdio.h>
-#endif
-
 #ifdef _MATH_H_
 #else
 #include <math.h>
@@ -32,7 +29,6 @@
 double getMin( double *arr,  int len)
 {
     double min = arr[0];
-
     for (int i = 1; i < len; i++) {
         if (arr[i] < min) {
             min = arr[i];
@@ -241,17 +237,19 @@ int * findall_condition(double * arr, int len, int init, bool (*condition)(doubl
 /// 和随机数相关
 void initialize_random_seed() {
     static int initialized = 0;
-    if (!initialized) {
-        srand((unsigned int)time(NULL));
+    if (initialized <= 0) {
+        srand(time(NULL));
         initialized = 42;
     }
 }
 
 void _shuffle(double *arr, int len){
     initialize_random_seed();
+    int j;
+    double temp;
     for (int i = len - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
-        double temp = arr[i];
+        j = rand_func() % (i + 1);
+        temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
@@ -263,7 +261,7 @@ int randint(double lb, double ub){
 }
 
 double random1() {
-    return (double)rand() / RAND_MAX;
+    return (double)rand_func() / MAXRAND;
 }
 
 double randdouble(double lb, double ub){
@@ -273,7 +271,7 @@ double randdouble(double lb, double ub){
 
 double random_choice(double *arr, int len) {
     initialize_random_seed();
-    return arr[rand() % len];
+    return arr[rand_func() % len];
 }
 
 double * random_choices(double *arr, int len, int times, bool back) {
@@ -282,7 +280,7 @@ double * random_choices(double *arr, int len, int times, bool back) {
     int index;
     if (back) {
         for (int i = 0; i < times; i++) {
-            index = rand() % len;
+            index = rand_func() % len;
             result[i] = arr[index];
         }
     } else {
@@ -395,3 +393,19 @@ double diffCentral(double x, double (*func)(double)){
         h = 100.0 * EPSILON;
     return (func(x + h) - func(x - h)) / (2.0 * h);
 }
+
+void freeOp(void * data) {free(data);}
+
+double ** testArray( int row,  int column)
+{
+    double ** new = (double **)malloc(sizeof(double *) * row);
+    for (int r = 0;r < row ;r ++)
+    {
+        new[r] = (double *)malloc(sizeof(double) * column);
+        for (int c = 0;c < column;c ++)
+            new[r][c] = r + c;
+    }
+    return new;
+}
+
+

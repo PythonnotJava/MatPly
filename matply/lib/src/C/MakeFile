@@ -1,47 +1,76 @@
-# Compiler
+# 编译器
 CC = gcc
 
-# Compiler flags
-CFLAGS = -fPIC
-LDFLAGS = -shared
+# 源文件列表
+SRCS = matply.c \
+       mp_auxiliary.c \
+       mp_base.c \
+       mp_cfg.c \
+       mp_geometry.c \
+       mp_linalg.c \
+       mp_manage.c \
+       mp_matrix.c \
+       mp_point2d.c \
+       mp_random.c
 
-# Source files
-SRCS = matply.c Auxiliary.c
-
-# Object files
+# 对象文件列表
 OBJS = $(SRCS:.c=.o)
 
-# Detect platform
+# 库名称
+LIBNAME = matply
+
+# 默认操作系统检测
 ifeq ($(OS),Windows_NT)
-    OUTPUT = matply.dll
-    LDFLAGS += -Wl,--out-implib,libmatply.a
+    TARGET_OS = Windows
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
-        OUTPUT = matply.so
-    else ifeq ($(UNAME_S),Darwin)
-        OUTPUT = matply.dylib
+        TARGET_OS = Linux
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        TARGET_OS = macOS
     endif
 endif
 
-# Default target
-all: $(OUTPUT)
+# 根据操作系统设置共享库扩展名和编译选项
+ifeq ($(TARGET_OS),Linux)
+    SHARED_EXT = so
+    CFLAGS = -fPIC -Wall -Wextra
+    LDFLAGS = -shared
+    LIB_PREFIX = lib
+endif
 
-# Rule to build the output library
-$(OUTPUT): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+ifeq ($(TARGET_OS),macOS)
+    SHARED_EXT = dylib
+    CFLAGS = -fPIC -Wall -Wextra
+    LDFLAGS = -dynamiclib
+    LIB_PREFIX = lib
+endif
 
-# Rule to compile source files into object files
+ifeq ($(TARGET_OS),Windows)
+    SHARED_EXT = dll
+    CFLAGS = -Wall -Wextra
+    LDFLAGS = -shared
+    LIB_PREFIX =
+endif
+
+# 默认目标
+all: $(LIB_PREFIX)$(LIBNAME).$(SHARED_EXT)
+
+# 链接生成动态库
+$(LIB_PREFIX)$(LIBNAME).$(SHARED_EXT): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+# 编译源文件为对象文件
 %.o: %.c
-	$(CC) -c $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean rule
+# 清理生成的文件
 clean:
-	rm -f $(OBJS) $(OUTPUT)
+ifeq ($(TARGET_OS),Windows)
+	del /Q $(OBJS) $(LIB_PREFIX)$(LIBNAME).$(SHARED_EXT)
+else
+	rm -f $(OBJS) $(LIB_PREFIX)$(LIBNAME).$(SHARED_EXT)
+endif
 
-# Phony targets
 .PHONY: all clean
-
-# my orders : gcc -shared -o matply.dll  matply.c Auxiliary.c
-# gcc -c -fPIC matply.c Auxiliary.c
-# gcc -shared -o matply.so matply.o Auxiliary.o

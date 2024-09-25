@@ -149,62 +149,63 @@ L0范数
 ## mode
 求解众数（此方法没有基于C-API）
 
-## argmax[new from V1.0.5]
+## argmax
 获取最大值索引
 
-## argmin[new from V1.0.5]
+## argmin
 获取最小值索引
 
-## flatten[new from V1.0.5]
+## flatten
 返回一个1 * size的扁平化矩阵，mode参数决定了从横向开始还是纵向
 
-## flatten_list[new from V1.0.5]
+## flatten_list
 返回一个扁平化后的一维列表
+> 注：1.0.9版本开始，flatten_list已弃用，改成了toDoubleVector函数
 
-## replace[new from V1.0.5]
+## replace
 获取替换不符合条件的值后的矩阵
 
-## replace_no_returned[new from V1.0.5]
+## replace_no_returned
 替换矩阵不符合条件的值
 
-## normalization[new from V1.0.5]
+## normalization
 获取归一化后的矩阵，0、1、其他值分别对应线性归一化、均值归一化、z-score归一化
 
-## slice[new from V1.0.5]
+## slice
 获取矩阵切片切出的矩阵，如果不指定切到哪，则切至终点行（列）
 
-## clip[new from V1.0.5]
+## clip
 获取一个框住范围的矩阵，矩阵数据满足lb <= x <= ub，小于则变成lb，大于变成ub
 
-## clip_no_returned[new from V1.0.5]
+## clip_no_returned
 框住矩阵本身范围
 
-## all[new from V1.0.5]
+## all
 矩阵所有值全满足条件返回true，反之
 
-## any[new from V1.0.5]
+## any
 矩阵任意值满足条件返回true，反之
 
-## counter[new from V1.0.5]
+## counter
 对矩阵中满足条件的值计数
 
-## reduce[new from V1.0.5]
+## reduce
 对矩阵相邻的两个值累计操作
 
-## where[new from V1.0.5]
+## where
 [condition] 是必须传入的条件函数，也同时添加另一个约束 [any]，但这时候 [obj] 不能为空。只操作满足条件的值
 若不传入 [cpl] 参数，则默认返回满足条件的值到一个一维列表；否则，则按照cpl函数更新的值与未满足条件的值一起写入原来矩阵，返回一个矩阵对象
 
-## qr[new from V1.0.5]
+## qr
 获取矩阵QR分解得到的两个矩阵组成的列表
 
-## Hist[new from V1.0.5]
+## Hist
 获取未可视化、统计出来的值计数
 
-## Bar[new from V1.0.5]
+## Bar
 获取未可视化、根据条件约束分类并且符合生成标签的值计数
 
-## magic[new from V1.0.5] **_!!!_**
+## magic **_!!!_**
 [@alert]高自由度地使用抽象出来的方式来自定义抽象地反射矩阵数据
 
 ## customize[new from V1.0.6]
@@ -261,7 +262,6 @@ clip_reverse的无返回值方式
 ## choice[new from V1.0.7]
 如果根据权重获取数据，权重可以是等列长一维列表，也可以是同形状矩阵。视行为样本。其中method方法分别为0、1、其他整数时，权重映射为原值、sigmoid函数值、绝对值；如果不传入权重，则按照等概率处理
 
-
 ## concats[new from V1.0.8]
 concat函数的升级版本，可最多一次拼接四个矩阵
 
@@ -283,3 +283,23 @@ concat函数的升级版本，可最多一次拼接四个矩阵
 
 ## get_range[new from V1.0.8]
 获取范围（只包含最小值和最大值）
+
+## cumsum[new from V1.0.9]
+获取与前一个的累积和，当dim设置除0或者1之外的整数时，必须设置flatten参数，当为true，则返回1 * size的二维数组，反之形状不变
+
+## sgn[new from V1.0.9]
+当数据小于0获取-1，等于0得到0，大于0获取1，注意MatPly是以double为核心
+
+## toDoubleVector[new from V1.0.9]
+转成一维列表（底层是flatten）
+
+## toDobleVector[new from V1.0.9]
+转成一维列表（底层是flatten）
+
+## toBoolVector[new from V1.0.9]
+转成一维列表（底层是flatten）
+
+## shake[new from V1.0.9]
+对矩阵数据按照bias随机偏移内[-bias / 2, bias / 2]大小
+
+

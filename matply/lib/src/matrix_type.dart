@@ -171,6 +171,366 @@ class MatrixType {
     );
   }
 
+  // 指数分布
+  MatrixType.exponential({
+    required int row,
+    required int column,
+    required double scale,
+    int? seed
+  }):assert(row > 0 && column > 0 && scale > 0){
+    this.self = matply__init__point__data__(
+      row, column, matply__exponential(row, column, scale, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 伽马分布
+  MatrixType.gamma({
+    required int row,
+    required int column,
+    required double shape,
+    required double scale,
+    int? seed
+  }) : assert(row > 0 && column > 0 && shape > 0 && scale > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__gamma_(row, column, shape, scale, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 二项分布
+  MatrixType.binomial({
+    required int row,
+    required int column,
+    required int n,
+    required double p,
+    int? seed
+  }) : assert(row > 0 && column > 0 && n > 0 && 0 <= p && p <= 1){
+    this.self = matply__init__point__data__(
+        row, column, matply__binomial(row, column, n, p, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 卡方分布
+  MatrixType.chisquare({
+    required int row,
+    required int column,
+    required int k,
+    int? seed
+  }): assert (row > 0 && column > 0 && k > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__chisquare(row, column, k, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // t分布
+  MatrixType.tdis({
+    required int row,
+    required int column,
+    required int k,
+    int? seed
+  }) : assert(row > 0 && column > 0 && k > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__tdis(row, column, k, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // F分布
+  MatrixType.fdis({
+    required int row,
+    required int column,
+    required int k1,
+    required int k2,
+    int? seed
+  }): assert(row > 0 && column > 0 && k1 > 0 && k2 > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__fdis(row, column, k1, k2, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 几何分布
+  MatrixType.geometric({
+    required int row,
+    required int column,
+    required double p,
+    int? seed
+  }):assert(row > 0 && column > 0 && p > 0 && p <= 1){
+    this.self = matply__init__point__data__(
+        row, column, matply__geometric(row, column, p, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 负二项分布
+  MatrixType.nbinomial({
+    required int row,
+    required int column,
+    required int n,
+    required double p,
+    int? seed
+  }) : assert(row > 0 && column > 0 && n > 0 && p > 0 && p < 1) {
+    this.self = matply__init__point__data__(
+        row, column, matply__nbinomial(row, column, n, p, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 对数正态分布
+  MatrixType.lognormal({
+    required int row,
+    required int column,
+    required double mu,
+    required double sigma,
+    int? seed
+  }):assert(row > 0 && column > 0 && sigma >= 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__lognormal(row, column, mu, sigma, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 柯西分布
+  MatrixType.cauchydis({
+    required int row,
+    required int column,
+    required double base,
+    required double gamma,
+    int? seed
+  }):assert(row > 0 && column > 0 && gamma > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__cauchydis(row, column, base, gamma, seed ?? 0, seed != null), nullptr
+    );
+  }
+
+  // 多项式分布
+  MatrixType.multinomial({
+    required List<double> p,
+    required int n,
+    required int size,
+    int? seed
+  }): assert(p.reduce((a, b) => a + b) == 1.0 && n > 0 && size > 0){
+    int row = size, column = p.length;
+    final op = p.getOnePointer();
+    this.self = matply__init__point__data__(
+        row, column, matply__multinomial(op, column, n, size, seed ?? 0, seed != null), nullptr
+    );
+    malloc.free(op);
+  }
+
+  // 贝塔分布
+  MatrixType.beta({
+    required int row,
+    required int column,
+    required double a,
+    required double b,
+    int? seed
+  }): assert(row > 0 && column > 0 && a > 0 && b > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__beta(row, column, a, b, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 维纳过程
+  MatrixType.wiener_process({
+    required int row,
+    required int column,
+    required double t,
+    int? seed
+  }) : assert(row > 0 && column > 0 && t > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__wiener_process(row, column, t, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 维纳过程，某时间戳
+  MatrixType.wiener_process_stage({
+    required int row,
+    required int column,
+    required double t1,
+    required double t2,
+    required double base,
+    int? seed
+  }):assert(row > 0 && column > 0 && t1 > 0 && t1 < t2){
+    this.self = matply__init__point__data__(
+        row, column, matply__wiener_process_stage(row, column, t1, t2, base, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 狄利克雷分布
+  MatrixType.dirichlet({
+    required List<num> alpha,
+    required int size,
+    int? seed
+  }): assert(size > 0){
+    int column = 0;
+    for (var e in alpha){
+      if (e > 0)
+        column++;
+      else
+        throw "The alpha array must be all positive real numbers.";
+    }
+    final op = alpha.getOnePointer();
+    this.self = matply__init__point__data__(
+        size, column, matply__dirichlet(op, column, size, seed?? 0, seed != null), nullptr
+    );
+    malloc.free(op);
+  }
+
+  // 拉普拉斯分布
+  MatrixType.laplacedis({
+    required int row,
+    required int column,
+    required double mu,
+    required double b,
+    int? seed
+  }) : assert(row > 0 && column > 0 && b > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__laplacedis(row, column, mu, b, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 耿贝尔分布
+  MatrixType.gumbel({
+    required int row,
+    required int column,
+    required double mu,
+    required double beta,
+    bool left = true,
+    int? seed
+  }): assert(row > 0 && column > 0 && beta > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__gumbel(row, column, mu, beta, left, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 超几何分布
+  MatrixType.hypergeometric({
+    required int row,
+    required int column,
+    required int expected,
+    required int unexpected,
+    required int n,
+    int? seed
+  }) : assert(row > 0 && column > 0 && expected >= 0 && unexpected >= 0 && n > 0 && expected + unexpected >= n)
+  {
+    this.self = matply__init__point__data__(
+        row, column, matply__hypergeometric(row, column, expected, unexpected, n, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 对数分布
+  MatrixType.logseries({
+    required int row,
+    required int column,
+    required double p,
+    int? seed
+  }):assert(row > 0 && column > 0 && 0 <= p && p < 1){
+    this.self = matply__init__point__data__(
+        row, column, matply__logseries(row, column, p, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 韦伯分布
+  MatrixType.weibull({
+    required int row,
+    required int column,
+    required double lambda,
+    required double k,
+    int? seed
+  }) : assert(row > 0 && column > 0 && lambda > 0 && k > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__weibull(row, column, lambda, k, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 三角分布
+  MatrixType.triangular({
+    required int row,
+    required int column,
+    required double left,
+    required double middle,
+    required double right,
+    int? seed
+  }):assert(row > 0 && column > 0 && left <= middle && middle <= right){
+    this.self = matply__init__point__data__(
+        row, column, matply__triangular(row, column, left, middle, right, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 幂定律分布
+  MatrixType.power_law({
+    required int row,
+    required int column,
+    required double xmin,
+    required double alpha,
+    int? seed
+  }):assert(row > 0 && column > 0 && xmin > 0 && alpha > 1){
+    this.self = matply__init__point__data__(
+        row, column, matply__power_law(row, column, xmin, alpha, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 瑞利分布
+  MatrixType.rayleigh({
+    required int row,
+    required int column,
+    required double sigma,
+    int? seed
+  }) : assert (row > 0 && column > 0 && sigma > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__rayleigh(row, column, sigma, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 稳定分布
+  MatrixType.stabledis({
+    required int row,
+    required int column,
+    required double alpha,
+    required double beta,
+    required double gamma,
+    required double delta,
+    int? seed
+  }) : assert(row > 0 && column > 0 && alpha > 0 && alpha <= 2 && beta.abs() <= 1 && gamma >= 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__stabledis(row, column, alpha, beta, gamma, delta, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 帕累托分布
+  MatrixType.pareto({
+    required int row,
+    required int column,
+    required double xmin,
+    required double alpha,
+    int? seed
+  }): assert(row > 0 && column > 0 && xmin > 0 && alpha > 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__pareto(row, column, xmin, alpha, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 莱斯分布
+  MatrixType.rice({
+    required int row,
+    required int column,
+    required double v,
+    required double sigma,
+    int? seed
+  }): assert(row > 0 && column > 0 && v >= 0 && sigma >= 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__rice(row, column, v, sigma, seed?? 0, seed != null), nullptr
+    );
+  }
+
+  // 逆高斯分布（沃德分布）
+  MatrixType.wald({
+    required int row,
+    required int column,
+    required double mu,
+    required double sigma,
+    int? seed
+  }): assert(row > 0 && column > 0 && mu >= 0 && sigma >= 0){
+    this.self = matply__init__point__data__(
+        row, column, matply__wald(row, column, mu, sigma, seed?? 0, seed != null), nullptr
+    );
+  }
+
   /// setter && getter
   bool get identityMatrix => this.self.ref.spc.ref.identityMatrix;
   set identityMatrix(bool value) => this.self.ref.spc.ref.identityMatrix = value;
@@ -266,390 +626,5 @@ class MatrixType {
   List<List<bool>> operator <(MatrixType other) => compare(other, mode: 2);
   List<List<bool>> operator <=(MatrixType other) => compare(other, mode: 3);
   List<List<bool>> operator >=(MatrixType other) => compare(other, mode: 4);
-
-  /// Methods
-  void visible() => matply__VisibleMatrix(this.self);
-
-  void visible_spc() => matply__VisibleMatrixSpc(this.self);
-
-  @Alert('Returning a Pointer? or a List? depends on the type you give in.'
-      'However in Dart, Using the Pointer type is not a good choice')
-  Object row_<T>(int row) {
-    if (row < 0 || row >= shape[0]) {
-      throw row_outRange;
-    } else {
-      if (T == Pointer) {
-        return matply__row_(row, shape[1], self.ref.data);
-      } else if (T == List || T == dynamic) {
-        return matply__row_(row, shape[1], self.ref.data).asTypedList(shape[1]).toList();
-      } else {
-        throw UnsupportedError('T must be Pointer or List');
-      }
-    }
-  }
-
-  @Alert('Returning a Pointer? or a List? depends on the type you give in.'
-      'However in Dart, using the Pointer type is not a good choice')
-  Object column_<T>(int column) {
-    if (column < 0 || column >= shape[1]) {
-      throw column_outRange;
-    } else {
-      if (T == Pointer) {
-        return matply__column_(shape[0], column, self.ref.data);
-      } else if (T == List || T == dynamic) {
-        return matply__column_(shape[0], column, self.ref.data).asTypedList(shape[1]).toList();
-      } else {
-        throw UnsupportedError('T must be Pointer or List');
-      }
-    }
-  }
-
-  double at(int row, int column){
-    if (column < 0 || column >= shape[1] || row < 0 || row >= shape[0])
-      throw random_outRange;
-    else{
-      return matply__at(row, column, self.ref.data);
-    }
-  }
-
-  bool hasSameShape(MatrixType other){ return other.shape[0] == shape[0] && shape[1] == other.shape[1];}
-
-  List<List<bool>> compare(MatrixType other, {int mode = 0}){
-    if (hasSameShape(other)){
-      Pointer<Pointer<Bool>> results = matply__compare(shape[0], shape[1], self.ref.data, other.self.ref.data, mode);
-      return List.generate(
-          shape[0],
-              (e) {
-            Pointer<Bool> rowPointer = (results + e).value;
-            return List.generate(shape[1], (j) => (rowPointer + j).value
-            );
-          });
-    }
-    else
-      throw different_shape;
-  }
-
-  MatrixType cut({required int row, required int column, required int width, required int height}){
-    assert(width > 0 && height > 0);
-    if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1] || column + width > shape[1] || row + height > shape[0])
-      throw random_outRange;
-    else
-      return MatrixType.__fromDataPointer(matply__cut(shape[0], shape[1], self.ref.data, row, column, width, height), shape);
-  }
-
-  MatrixType cutfree({required int row, required int column, required int width, required int height, double number = .0}){
-    assert(width > 0 && height > 0);
-    if (row < 0 || row >= shape[0] || column < 0 || column >= shape[1])
-      throw random_outRange;
-    else
-      return MatrixType.__fromDataPointer(matply__cutfree(shape[0], shape[1], self.ref.data, row, column, width, height, number), shape);
-  }
-
-  MatrixType concat({required MatrixType other, required bool horizontal}) {
-    if (horizontal ? other.shape[0] == shape[0] : other.shape[1] == shape[1]) {
-      return horizontal ? MatrixType.__fromDataPointer(
-          matply__concatR(shape[0], shape[1], other.shape[1], self.ref.data, other.self.ref.data),
-          [shape[0], shape[1] + other.shape[1]]
-      )
-          : MatrixType.__fromDataPointer(
-          matply__concatC(shape[0], other.shape[0], shape[1], self.ref.data, other.self.ref.data),
-          [shape[0] + other.shape[0], shape[1]]
-      );
-    } else
-      throw row_or_column_not_same;
-  }
-
-  MatrixType reshape({required int row, required int column}){
-    if (row * column != size)
-      throw size_changed;
-    else{
-      if (row == shape[0])
-        return MatrixType.deepCopy(this);
-      assert (row > 0 && column > 0);
-      return MatrixType.__fromDataPointer(matply__reshape(row, column, self.ref.data, shape[1]), [row, column]);
-    }
-  }
-
-  MatrixType resize({required int row, required int column, double number = .0, bool horizontal = true}){
-    assert(row > 0 && column > 0);
-    return horizontal ?
-    MatrixType.__fromDataPointer(matply__resizeR(row, column, self.ref.data, shape[0], shape[1], number), [row, column]) :
-    MatrixType.__fromDataPointer(matply__resizeC(row, column, self.ref.data, shape[0], shape[1], number), [row, column]);
-  }
-
-  void resize_no_returned({required int row, required int column, double number = .0, bool horizontal = true}){
-    assert(row > 0 && column > 0);
-    Pointer<Pointer<Double>> data = horizontal
-        ? matply__resizeR(row, column, self.ref.data, shape[0], shape[1], number)
-        : matply__resizeC(row, column, self.ref.data, shape[0], shape[1], number);
-    matply__delete__data__(self.ref.data, shape[0]);
-    self.ref.data = data;
-    self.ref.column = column;
-    self.ref.row = row;
-  }
-
-  void reshape_no_returned({required int row, required int column}) {
-    if (row * column != size)
-      throw size_changed;
-    else{
-      if (row == shape[0])
-        return;
-      assert(row > 0 && column > 0);
-      Pointer<Pointer<Double>> data = matply__reshape(row, column, self.ref.data, shape[1]);
-      matply__delete__data__(self.ref.data, shape[0]);
-      self.ref.data = data;
-      self.ref.column = column;
-      self.ref.row = row;
-    }
-  }
-
-  void sort_no_returned({
-    bool reverse = false,
-    double mask_nan = 0.0,
-    int dim = -1
-  }) => matply__sortNoReturned(shape[0], shape[1], self.ref.data, reverse, dim, mask_nan);
-
-  MatrixType sort({
-    bool reverse = false,
-    double mask_nan = 0.0,
-    int dim = -1
-  }) => MatrixType.__fromDataPointer(matply__sort(shape[0], shape[1], self.ref.data, reverse, dim, mask_nan), shape);
-
-  void setMask({double? mask_nan, double? mask_inf, bool isNegativeInf = true, bool both = false}){  // both表示正负无穷大都取值
-    if (mask_nan == null && mask_inf == null)
-      throw UnsupportedError('At least one of mask_nan or mask_inf cannot be empty.');
-    if (mask_nan != null)
-      matply__set_mask_nan(shape[0], shape[1], self.ref.data, mask_nan);
-    if (mask_inf != null) {
-      matply__set_mask_inf(shape[0], shape[1], self.ref.data, mask_inf, isNegativeInf);
-    if (both)
-      matply__set_mask_inf(shape[0], shape[1], self.ref.data, mask_inf, !isNegativeInf);
-    }
-  }
-
-  List<List<Object>> toList<T>() {
-    if (T == double) {
-      return List.generate(shape[0], (i) => matply__row_(shape[0], shape[1], self.ref.data).asTypedList(shape[1])).toList();
-    } else if (T == int) {
-      return List.generate(shape[0], (i) => (this[i] as List).map<int>((e) => e.toInt()).toList());
-    } else if (T == String) {
-      return List.generate(shape[0], (i) => (this[i] as List).map<String>((e) => e.toString()).toList());
-    }else if (T == bool){
-      return List.generate(shape[0], (i) => (this[i] as List).map<bool>((e) => (e != 0) ).toList());
-    } else {
-      throw UnsupportedError('Unsupported type.');
-    }
-  }
-
-  MatrixType flatten({int mode = 0}) => MatrixType.__fromDataPointer(
-      matply__oneTotwoArray(matply__flatten(shape[0], shape[1], self.ref.data, mode), 1, shape[0] * shape[1]),
-      [1, shape[0] * shape[1]]
-  );
-
-  List<double> flatten_list({int mode = 0}) =>
-      matply__flatten(shape[0], shape[1], self.ref.data, mode).asTypedList(shape[0] * shape[1]).toList();
-  
-  MatrixType slice({required int from, int? to, bool horizontal = true}){
-    final int row = shape[0], column = shape[1];
-    if (to != null){
-      assert(from <= to);
-      if (horizontal){
-        if (from >= 0 && to < row)
-          return MatrixType.__fromDataPointer(matply__sliceR(shape[1], self.ref.data, from, to), [to - from + 1, column]);
-        else
-          throw row_outRange;
-      }else{
-        if (from >= 0 && to < column)
-          return MatrixType.__fromDataPointer(matply__sliceC(shape[0], self.ref.data, from, to), [row, to - from + 1]);
-        else
-          throw column_outRange;
-      }
-    }else{
-      if (horizontal){
-        if (from >= 0 && from < row)
-          return MatrixType.__fromDataPointer(matply__sliceR(shape[1], self.ref.data, from, row - 1), [row - from, column]);
-        else
-          throw row_outRange;
-      }else{
-        if (from >= 0 && from < column)
-          return MatrixType.__fromDataPointer(matply__sliceC(shape[0], self.ref.data, from, column - 1), [row, column - from]);
-        else
-          throw column_outRange;
-      }
-    }
-  }
-
-  MatrixType clip({required double lb, required double ub}){
-    assert(lb <= ub);
-    return MatrixType.__fromDataPointer(matply__clip(shape[0], shape[1], self.ref.data, lb, ub), shape);
-  }
-
-  void clip_no_returned({required double lb, required double ub}){
-    assert(lb <= ub);
-    matply__clipNoReturned(shape[0], shape[1], self.ref.data, lb, ub);
-  }
-
-  MatrixType rotate({required int angle}){  // 正数代表顺时针，负数逆时针
-    if (angle % 90 != 0)
-      throw UnsupportedError('The angle must be an integer multiple of 90.');
-    else{
-      int mode = angle ~/ 90 % 4;  /// The value of [mode] just in [-3, -2, -1, 0, 1, 2, 3]
-      List<int> _shape = mode % 2 == 0 ? shape : [shape[1], shape[0]];
-      return MatrixType.__fromDataPointer(matply__rotate(shape[0], shape[1], self.ref.data, mode), _shape);
-    }
-  }
-
-  MatrixType mirror({int mode = 0}) => MatrixType.__fromDataPointer(matply__mirror(shape[0], shape[1], self.ref.data, mode), shape);
-
-  void fill_diagonal({double number = 0.0}) => matply__fill_diagonal(shape[0], shape[1], self.ref.data, number);
-
-  MatrixType __concatsR3(MatrixType other1, MatrixType other2){
-    int row = shape[0], column = shape[1], column1 = other1.shape[1], column2 = other2.shape[1];
-    if (column == column1 && column == column2)
-      return MatrixType.__fromDataPointer(
-        matply__concatsR(
-          row,
-          column, column1, column2, 0,
-          self.ref.data, other1.self.ref.data, other2.self.ref.data, nullptr
-        ),
-        [row, column + column1 + column2]
-      );
-    else
-      throw row_or_column_not_same;
-  }
-
-  MatrixType __concatsR4(MatrixType other1, MatrixType other2, MatrixType other3){
-    int row = shape[0], column = shape[1], column1 = other1.shape[1], column2 = other2.shape[1], column3 = other3.shape[1];
-    if (column == column1 && column == column2 && column == column3)
-      return MatrixType.__fromDataPointer(
-          matply__concatsR(
-              row,
-              column, column1, column2, column3,
-              self.ref.data, other1.self.ref.data, other2.self.ref.data, other3.self.ref.data
-          ),
-          [row, column + column1 + column2 + column3]
-      );
-    else
-      throw row_or_column_not_same;
-  }
-
-  MatrixType __concatsC3(MatrixType other1, MatrixType other2){
-    int row = shape[0], column = shape[1], row1 = other1.shape[0], row2 = other2.shape[0];
-    if (row == row1 && row == row2)
-      return MatrixType.__fromDataPointer(
-          matply__concatsC(
-              row, row1, row2, 0,
-              column,
-              self.ref.data, other1.self.ref.data, other2.self.ref.data, nullptr
-          ),
-          [row + row1 + row2, column]
-      );
-    else
-      throw row_or_column_not_same;
-  }
-
-  MatrixType __concatsC4(MatrixType other1, MatrixType other2, MatrixType other3){
-    int row = shape[0], column = shape[1], row1 = other1.shape[0], row2 = other2.shape[0], row3 = other3.shape[0];
-    if (row == row1 && row == row2 && row == row3)
-      return MatrixType.__fromDataPointer(
-          matply__concatsC(
-              row, row1, row2, row3,
-              column,
-              self.ref.data, other1.self.ref.data, other2.self.ref.data, other3.self.ref.data
-          ),
-          [row + row1 + row2 + row3, column]
-      );
-    else
-      throw row_or_column_not_same;
-  }
-
-  MatrixType concats({required MatrixType other1, MatrixType? other2, MatrixType? other3, bool horizontal = true}) {
-    if (other3 == null && other2 == null)
-      return concat(other: other1, horizontal: horizontal);
-    else if (other2 != null && other3 == null){
-      if (horizontal)
-        return __concatsR3(other1, other2);
-      else
-        return __concatsC3(other1, other2);
-    }
-    else if (other2 == null && other3 != null){
-      if (horizontal)
-        return __concatsR3(other1, other3);
-      else
-        return __concatsC3(other1, other3);
-    }else{
-      if (horizontal)
-        return __concatsR4(other1, other2!, other3!);
-      else
-        return __concatsC4(other1, other2!, other3!);
-    }
-  }
-
-  List<MatrixType> split({required List<int> slices, bool horizontal = true}){
-    // 检测是不是严格递增的且在范围内的正整数数列
-    if (slices[0] > 0 && horizontal? slices.last < shape[1] : slices.last < shape[0]){
-      bool stop = false;
-      int len = slices.length, row = shape[0], column = shape[1];
-      List<List<int>> shapes = [horizontal? [row, slices.first] : [slices.first, column]];
-      for (int i = 1; i < len; i++) {
-        if (slices[i] <= slices[i - 1]) {
-          stop = true;
-          break;
-        }
-        shapes.add(horizontal? [row, slices[i] - slices[i - 1]]: [slices[i] - slices[i - 1], column]);
-      }
-      shapes.add(horizontal? [row, column - slices.last] : [row - slices.last, column]);
-      if (stop)
-        throw "Please pass in a strictly increasing positive integer slice index that is within the range.";
-      else{
-        Pointer<Int32> op = oneListToArrayInt32(slices);
-        Pointer<Pointer<Pointer<Double>>> mtops = matply__split(shape[0], shape[1], self.ref.data, len, op, horizontal);
-        malloc.free(op);
-        return List.generate(
-          len + 1,
-          (index) => MatrixType.__fromDataPointer(mtops[index], shapes[index]),
-          growable: true
-        );
-      }
-    }else
-      throw random_outRange;
-  }
-
-  Object split_equal({required int step, bool horizontal = true}){
-    assert (step > 0);
-    int column = shape[1], row = shape[0];
-    if (horizontal? step < column : step < row)
-      return split(
-          slices: horizontal?
-          List<int>.generate((column / step).ceil() - 1, (i) => (i + 1) * step) :
-          List<int>.generate((row / step).ceil() - 1, (i) => (i + 1) * step),
-          horizontal: horizontal
-      );
-    else if (horizontal? step == column : step == row)
-      return MatrixType.deepCopy(this);
-    else
-      throw random_outRange;
-  }
-
-  MatrixType cover(MatrixType mt, {required int row, required int column}){
-    if (row >= 0 && row < shape[0] && column >= 0 && column < shape[1]){
-      return MatrixType.__fromDataPointer(
-          matply__cover(shape[0], shape[1], self.ref.data, mt.shape[0], mt.shape[1], mt.self.ref.data, row, column), shape
-      );
-    }else
-      throw random_outRange;
-  }
-
-  MatrixType stretch({required int len, bool horizontal = true, double? number, int method = 0}){
-    assert(len > 0);
-    if (method == 1)
-      assert(number != null);
-    var [row, column] = shape;
-    return MatrixType.__fromDataPointer(
-        matply__stretch(row, column, self.ref.data, len, horizontal, number ?? 0, method),
-        horizontal? [row, column + len]: [row + len, column]
-    );
-  }
-
 }
 

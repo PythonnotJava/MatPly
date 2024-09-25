@@ -1,6 +1,6 @@
 import 'dart:convert' show Encoding, utf8;
 import 'dart:io' show File;
-import '../core.dart' show TwoDimListExtensions, MatrixType;
+import '../core.dart' show MatrixType;
 
 class CSVReader{
   late final String path;

@@ -563,3 +563,872 @@ output
 * */
 ```
 
+## 指数分布[new from V1.0.9]
+```text
+MatrixType.exponential({
+    required int row,
+    required int column,
+    required double scale,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.1f');
+  MatrixType.exponential(row: 3, column: 6, scale: 0.5).visible();
+  freeMp(visible: true, hex: false);
+}
+
+/*output
+[
+ [2.8 3.7 0.3 6.2 2.6 0.5]
+ [1.5 0.6 2.7 6.0 1.8 0.7]
+ [1.5 1.9 3.8 1.3 4.0 3.8]
+]
+Free Memory in location : 3044701056
+ */
+```
+
+## 伽马分布[new from V1.0.9]
+```text
+ MatrixType.gamma({
+    required int row,
+    required int column,
+    required double shape,
+    required double scale,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.gamma(row: 3, column: 6, scale: 0.5, shape: 1.0).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [1.58136 0.08194 2.77598 0.34273 1.37208 0.56165]
+ [2.88074 0.04974 0.32192 0.02766 1.67183 1.73036]
+ [1.31752 0.84275 1.17293 2.81444 0.38546 0.50470]
+]
+Free Memory in location : 000001efb2bb7380
+ */
+```
+
+## 二项分布（伯努利分布）[new from V1.0.9]
+```text
+MatrixType.binomial({
+    required int row,
+    required int column,
+    required int n,
+    required double p,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.binomial(row: 2, column: 6, p: 0.5, n: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [4.00000 3.00000 3.00000 4.00000 3.00000 5.00000]
+ [3.00000 5.00000 6.00000 7.00000 2.00000 9.00000]
+]
+Free Memory in location : 000002069dfb7300
+ */
+```
+
+## 卡方分布[new from V1.0.9]
+```text
+MatrixType.chisquare({
+    required int row,
+    required int column,
+    required int k,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.chisquare(row: 2, column: 10, k: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [15.56649 6.49801 15.22481 19.63363 13.40057 7.41420 6.87870 8.56945 10.14679 12.19465]
+ [10.69842 12.52793 13.45222 16.02619 2.52850 14.73268 1.99553 14.03686 23.45220 13.17031]
+]
+Free Memory in location : 00000224f20d7380
+ */import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.chisquare(row: 2, column: 10, k: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [15.56649 6.49801 15.22481 19.63363 13.40057 7.41420 6.87870 8.56945 10.14679 12.19465]
+ [10.69842 12.52793 13.45222 16.02619 2.52850 14.73268 1.99553 14.03686 23.45220 13.17031]
+]
+Free Memory in location : 00000224f20d7380
+ */
+```
+
+## t分布[new from V1.0.9]
+```text
+MatrixType.tdis({
+    required int row,
+    required int column,
+    required int k,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.tdis(row: 2, column: 10, k: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [-1.55972 0.00143 0.06831 -0.95161 0.57509 0.04076 -0.85714 -1.25147 -0.10346 -1.21439]
+ [-0.54939 0.15324 -1.64424 1.77921 0.30666 -2.25429 0.64608 -0.13936 -0.80505 0.06822]
+]
+Free Memory in location : 000002ad7b887380
+ */
+```
+## F分布[new from V1.0.9]
+```text
+MatrixType.fdis({
+    required int row,
+    required int column,
+    required int k1,
+    required int k2,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.fdis(row: 2, column: 10, k1: 10, k2: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.61269 0.50923 1.19459 1.13693 1.06316 3.46132 2.35123 0.70744 3.02284 3.84514]
+ [0.57377 0.21793 1.49196 0.55962 1.06172 1.16347 1.17703 0.85898 1.48983 0.73666]
+]
+Free Memory in location : 000002c26e167380
+ */
+```
+
+## 几何分布[new from V1.0.9]
+```text
+MatrixType.geometric({
+    required int row,
+    required int column,
+    required double p,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.geometric(row: 2, column: 10, p: .25).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [12.00000 0.00000 0.00000 3.00000 0.00000 3.00000 1.00000 0.00000 2.00000 6.00000]
+ [1.00000 3.00000 4.00000 7.00000 0.00000 1.00000 0.00000 8.00000 0.00000 2.00000]
+]
+Free Memory in location : 000001e2e1977380
+ */
+```
+
+## 负二项分布[new from V1.0.9]
+```text
+MatrixType.nbinomial({
+    required int row,
+    required int column,
+    required int n,
+    required double p,
+    int? seed
+  }) 
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.nbinomial(row: 2, column: 10, p: .5, n: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [8.00000 4.00000 10.00000 11.00000 10.00000 4.00000 14.00000 10.00000 16.00000 17.00000]
+ [10.00000 11.00000 10.00000 8.00000 21.00000 11.00000 16.00000 9.00000 14.00000 9.00000]
+]
+Free Memory in location : 0000023d8ca17380
+ */
+```
+
+## 对数正态分布[new from V1.0.9]
+```text
+MatrixType.lognormal({
+    required int row,
+    required int column,
+    required double mu,
+    required double sigma,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.lognormal(row: 2, column: 10, mu: 0.5, sigma: 0).visible();
+  MatrixType.lognormal(row: 2, column: 10, mu: 0.5, sigma: 0.5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872]
+ [1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872 1.64872]
+]
+[
+ [3.81646 2.29163 1.33575 2.29506 1.17002 1.19118 1.22871 2.71503 2.29982 2.71270]
+ [1.25637 1.75886 2.28643 1.04136 0.98519 0.86194 2.23628 1.92314 1.92319 1.46729]
+]
+Free Memory in location : 0000014647557380
+Free Memory in location : 00000146475573a0
+ */
+```
+
+## 柯西分布[new from V1.0.9]
+```text
+MatrixType.cauchydis({
+    required int row,
+    required int column,
+    required double base,
+    required double gamma,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.cauchydis(row: 2, column: 10, base: 1, gamma: 0.5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.37542 0.98209 2.42007 0.57578 -3.74944 0.93080 0.72307 -4.37754 -1.45691 1.58629]
+ [0.63870 3.46659 0.68280 -8.66677 1.43988 1.24878 1.85410 1.25154 -2.21948 2.62520]
+]
+Free Memory in location : 000001e62cd87380
+ */
+```
+
+## 多项式分布[new from V1.0.9]
+```text
+MatrixType.multinomial({
+    required List<double> p,
+    required int n,
+    required int size,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.0f');
+  MatrixType.multinomial(p: [0.3, 0.2, 0.3, 0.05, 0.15], n: 10, size: 3).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [2 3 4 1 0]
+ [5 1 2 0 2]
+ [2 0 8 0 0]
+]
+Free Memory in location : 00000276fd067320
+ */
+```
+
+## 贝塔分布[new from V1.0.9]
+```text
+MatrixType.beta({
+    required int row,
+    required int column,
+    required double a,
+    required double b,
+    int? seed
+  }):
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.2f');
+  MatrixType.beta(row: 2, column: 6, a: .5, b: .5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.27 0.91 0.69 0.55 0.41 0.96]
+ [0.89 0.23 0.90 0.17 0.60 0.75]
+]
+Free Memory in location : 000001dd73d47300
+ */
+```
+
+## 维纳过程[new from V1.0.9]
+```text
+MatrixType.wiener_process({
+    required int row,
+    required int column,
+    required double t,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.6f');
+  MatrixType.wiener_process(row: 1, column:10, t: 6.0).visible();
+  MatrixType.wiener_process(row: 1, column:10, t: .6).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.000000 -0.494991 -1.613652 -1.003171 -0.746069 1.047979 1.297541 1.423661 1.165988 1.294647]
+]
+[
+ [0.000000 -0.156530 -0.510282 -0.317230 -0.235928 0.331400 0.410318 0.450201 0.368718 0.409403]
+]
+Free Memory in location : 0000028f4ab81d80
+Free Memory in location : 0000028f4ab81da0
+ */
+```
+
+## 维纳过程某时间戳[new from V1.0.9]
+```text
+MatrixType.wiener_process_stage({
+    required int row,
+    required int column,
+    required double t1,
+    required double t2,
+    required double base,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.6f');
+  MatrixType.wiener_process_stage(row: 2, column:8, t1: 6.0, t2: 11.0, base: 1.14).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [1.140000 0.632525 0.594452 -0.243608 0.212239 0.289958 0.430776 -0.225537]
+ [1.140000 0.859476 0.931509 1.334139 2.012373 2.806146 3.353208 3.149699]
+]
+Free Memory in location : 000001e34b087350
+ */
+```
+
+## 狄利克雷分布[new from V1.0.9]
+```text
+MatrixType.dirichlet({
+    required List<num> alpha,
+    required int size,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.6f');
+  MatrixType.dirichlet(alpha: [0.2, 0.6, 0.4, 0.2, 0.15], size: 3).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.005214 0.336047 0.320509 0.060260 0.277970]
+ [0.013985 0.527971 0.016174 0.004724 0.437147]
+ [0.000005 0.930178 0.027854 0.028430 0.013533]
+]
+Free Memory in location : 0000019b3a2f7040
+ */
+```
+
+## 拉普拉斯分布[new from V1.0.9]
+```text
+MatrixType.laplacedis({
+    required int row,
+    required int column,
+    required double mu,
+    required double b,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.6f');
+  MatrixType.laplacedis(row: 2, column: 6, mu: 0.5, b: 1.0).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.774634 0.382278 1.694869 0.325200 0.745268 -1.411681]
+ [1.796428 0.719701 0.746751 1.678075 -1.453415 1.818313]
+]
+Free Memory in location : 0000023bc58b7300
+ */
+```
+
+## 耿贝尔分布[new from V1.0.9]
+```text
+MatrixType.gumbel({
+    required int row,
+    required int column,
+    required double mu,
+    required double beta,
+    bool left = true,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.6f');
+  MatrixType.gumbel(row: 1, column: 10, mu: 0.5, beta: 1).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [-0.271253 0.792400 -0.657043 -0.349956 1.168808 -0.522410 1.442951 -2.173026 0.170748 -0.329818]
+]
+Free Memory in location : 0000021ce0bd1d80
+ */
+```
+
+## 超几何分布[new from V1.0.9]
+```text
+MatrixType.hypergeometric({
+    required int row,
+    required int column,
+    required int expected,
+    required int unexpected,
+    required int n,
+    int? seed
+  }) 
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.0f');
+  MatrixType.hypergeometric(row: 2, column: 6, expected: 5, unexpected: 12, n: 10).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [3 2 4 2 3 2]
+ [2 4 2 1 2 5]
+]
+Free Memory in location : 000001d91f5c7300
+ */
+```
+
+## 对数级数分布[new from V1.0.9]
+```text
+MatrixType.logseries({
+    required int row,
+    required int column,
+    required double p,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.2f');
+  MatrixType.logseries(row: 2, column: 6, p: 0.5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.33 0.25 0.28 0.80 0.28 0.54]
+ [0.49 0.40 0.57 0.44 0.38 0.28]
+]
+Free Memory in location : 00000188144a7300
+ */
+```
+
+## 韦伯分布[new from V1.0.9]
+```text
+MatrixType.weibull({
+    required int row,
+    required int column,
+    required double lambda,
+    required double k,
+    int? seed
+}) 
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.2f');
+  MatrixType.weibull(row: 2, column: 4, lambda: 1.0, k: 1.5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.25 1.78 0.19 1.44]
+ [1.02 0.12 1.26 1.67]
+]
+Free Memory in location : 000001bf5b3a1d80
+ */
+```
+
+## 三角分布[new from V1.0.9]
+```text
+MatrixType.triangular({
+    required int row,
+    required int column,
+    required double left,
+    required double middle,
+    required double right,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.triangular(row: 2, column: 7, left: 1.0, middle: 2.0, right: 3.0).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [2.56347 1.71591 2.46651 2.27200 2.11517 1.80078 1.52699]
+ [1.96187 2.26499 2.86997 1.59944 2.23217 1.81338 2.62818]
+]
+Free Memory in location : 000001ca14a87300
+ */
+```
+
+## 幂定律分布[new from V1.0.9]
+```text
+MatrixType.power_law({
+    required int row,
+    required int column,
+    required double xmin,
+    required double alpha,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.power_law(row: 2, column: 7, xmin: 2, alpha: 11.1).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [2.24022 2.20870 2.94802 2.87119 2.13304 2.05349 2.13515]
+ [2.26827 2.71454 2.05313 2.14800 2.20670 2.94668 2.19404]
+]
+Free Memory in location : 000002bf4a287300
+ */
+```
+
+## 瑞利分布[new from V1.0.9]
+```text
+MatrixType.rayleigh({
+    required int row,
+    required int column,
+    required double sigma,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.rayleigh(row: 2, column: 6, sigma: 1).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [1.53414 1.73643 1.02215 2.37727 0.88869 2.75930]
+ [1.77184 2.58797 0.90467 1.93270 0.38486 1.69292]
+]
+Free Memory in location : 000002246e4b7300
+ */
+```
+
+## 稳定分布[new from V1.0.9]
+```text
+MatrixType.stabledis({
+    required int row,
+    required int column,
+    required double alpha,
+    required double beta,
+    required double gamma,
+    required double delta,
+    int? seed
+  }) 
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.stabledis(row: 2, column: 8, alpha: pi / 2, beta: 0.05, gamma: 1.5, delta: 2).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [2.81285 0.94737 -0.84381 2.21197 -0.03858 5.08785 4.30831 3.10489]
+ [-0.49566 4.02022 11.08963 1.96012 -0.43667 1.42398 0.89637 3.43363]
+]
+Free Memory in location : 0000029729597350
+ */
+```
+
+## 帕累托分布[new from V1.0.9]
+```text
+MatrixType.pareto({
+    required int row,
+    required int column,
+    required double xmin,
+    required double alpha,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.pareto(row: 2, column: 6, xmin: 2, alpha: 0.5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [30.98381 3.27788 5035.89882 6.14139 10.53488 2.88652]
+ [6.94651 4.99984 6.71013 40.57302 13.55804 7.76927]
+]
+Free Memory in location : 00000142854c7300
+ */
+```
+
+## [new from V1.0.9]
+```text
+MatrixType.rice({
+    required int row,
+    required int column,
+    required double v,
+    required double sigma,
+    int? seed
+  })
+```
+
+### 莱斯分布example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.rice(row: 2, column: 9, v: .5, sigma: .5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.60613 1.51139 1.32982 0.76693 0.49445 1.00509 1.39435 1.57219 1.10378]
+ [1.11027 0.52717 0.35058 0.16057 0.28000 0.75422 1.58283 0.97214 0.86201]
+]
+Free Memory in location : 0000022585957350
+ */
+```
+
+## 逆高斯分布[new from V1.0.9]
+```text
+MatrixType.wald({
+    required int row,
+    required int column,
+    required double mu,
+    required double sigma,
+    int? seed
+  })
+```
+
+### example
+```dart
+import 'core.dart';
+
+main(){
+  initMp();
+  set_visible_round('%.5f');
+  MatrixType.wald(row: 2, column: 9, mu: .5, sigma: .5).visible();
+  freeMp(visible: true, hex: true);
+}
+
+/*output
+[
+ [0.25622 0.28209 0.25044 0.43373 0.29696 0.69026 0.59955 0.26258 0.29329]
+ [1.25087 1.57323 0.30614 0.44101 0.25149 0.30327 0.29911 0.98868 2.15261]
+]
+Free Memory in location : 000002f0d1f97350
+ */
+```
+
+## [new from V1.0.9]
+```text
+
+```
+
+### example
+```dart
+
+```

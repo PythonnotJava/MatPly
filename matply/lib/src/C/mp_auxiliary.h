@@ -1,21 +1,22 @@
 //
-// Created by 20281 on 2024/7/6.
+// Created by 25654 on 24-9-20.
 //
+#pragma once
 
-#ifndef MATPLY_AUXILIARY_H
-#define MATPLY_AUXILIARY_H
-
-#ifdef _STDBOOL_H
-#else
-#include <stdbool.h>
-#endif
+#ifndef MP_AUXILIARY_H
+#define MP_AUXILIARY_H
 
 #ifndef MATPLY_API
-    #if defined(_WIN32)
+    #if defined(_WIN32) || defined(_WIN64)
         #define MATPLY_API __declspec(dllexport)
     #else
         #define MATPLY_API __attribute__((visibility("default")))
     #endif
+#endif
+
+#ifdef _STDBOOL_H
+#else
+#include <stdbool.h>
 #endif
 
 // 最小（大）值算法，未来会设置mode参数表示算法模式，目前只用简单遍历算法——默认数据无序
@@ -23,7 +24,7 @@ MATPLY_API double getMin( double * arr,  int len);
 MATPLY_API double getMax( double * arr,  int len);
 
 // @test 快速拷贝一个数组
-MATPLY_API void ** copy_array(void ** datas,  int row,  int column);
+MATPLY_API void ** copy_array(void ** datas, int row,  int column);
 
 // 获取一个开辟内存但是未分配数据的二维浮点数数组
 MATPLY_API double ** allocateButNoNumbers( int row,  int column);
@@ -76,8 +77,14 @@ MATPLY_API double ** genTestdatas(int row, int column, double (*func)(double, do
 // 机器精度机器精度
 #define EPSILON 1.4901161193847656e-08
 /// 中心差分法
-double diffCentral(double x, double (*func)(double));
-
-
+MATPLY_API double diffCentral(double x, double (*func)(double));
 ///////////////////////////////////////////////////////////////////////////////////
-#endif //MATPLY_AUXILIARY_H
+
+// 释放泛型一级指针
+MATPLY_API void freeOp(void * data);
+
+// 测试
+MATPLY_API double ** testArray( int row,  int column);
+
+
+#endif //MP_AUXILIARY_H

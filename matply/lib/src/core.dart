@@ -1,9 +1,10 @@
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:ffi/ffi.dart';
-import 'dart:io' show Platform, Directory;
 import 'package:path/path.dart' as path;
 
+part 'matply_type_basement.dart';
 part 'matply_api.dart';
 part 'matrix_type.dart';
 part 'list_extend.dart';
@@ -13,6 +14,7 @@ part 'matrix_type_pure_math.dart';
 part 'matrix_type_random.dart';
 part 'matrix_type_visualization.dart';
 part 'matrix_type_func_condition.dart';
+
 part 'cpp_extension/matply_type_cpp_extension.dart';
 part 'cpp_extension/matply_type_cpp_api.dart';
 
@@ -23,6 +25,9 @@ String get_visible_round() => matply__get__visible__round().toDartString();
 void set_round(double number) => matply__set__round(number);
 double get_round() => matply__get__round();
 void set_seed(int seed) => matply__setSeed(seed);
+
+void set_mult_rand(bool multi) {matply__set_mult_rand(multi);}
+bool get_mult_rand() {return matply__get_mult_rand();}
 
 /// 对误会以及不建议内容的警告
 final class Alert{

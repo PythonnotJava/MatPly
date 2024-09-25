@@ -13,7 +13,7 @@ late final String platform = __login_platform();
 
 // late final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', platform));
 
-const VERSION = '1.0.8';
+const VERSION = '1.0.9';
 
 String pubCacheDir = path.join(
     Platform.environment['LOCALAPPDATA']!,
@@ -48,6 +48,14 @@ late final get__visible__round__base matply__get__visible__round = dylib.lookupF
 typedef get__round__base__ffi = Double Function();
 typedef get__round__base = double Function();
 late final get__round__base matply__get__round = dylib.lookupFunction<get__round__base__ffi, get__round__base>('get_round');
+
+typedef set_mult_rand__base__ffi = Void Function(Bool use);
+typedef set_mult_rand__base = void Function(bool use);
+late final set_mult_rand__base matply__set_mult_rand = dylib.lookupFunction<set_mult_rand__base__ffi, set_mult_rand__base>('set_mult_rand');
+
+typedef get_mult_rand__base__ffi = Bool Function();
+typedef get_mult_rand__base = bool Function();
+late final get_mult_rand__base matply__get_mult_rand = dylib.lookupFunction<get_mult_rand__base__ffi, get_mult_rand__base>('get_mult_rand');
 
 // 定义与SpecialAttributes结构体对应的Dart结构体
 final class SpecialAttributes extends Struct {
@@ -92,6 +100,13 @@ final class MultiDatas4 extends Struct{
   external Pointer<Pointer<Double>> data2;
   external Pointer<Pointer<Double>> data3;
   external Pointer<Pointer<Double>> data4;
+}
+
+final class Point2D extends Struct{
+  @Double()
+  external double x;
+  @Double()
+  external double y;
 }
 
 // 定义DLL中的函数
@@ -284,8 +299,8 @@ typedef sigmoid__base = Pointer<Pointer<Double>> Function( int row,  int column,
 typedef softmax__base__ffi = Pointer<Pointer<Double>> Function( Int32 row,  Int32 column,  Pointer<Pointer<Double>>  data,  Int32 dim,  Double mask_nan,  Double mask_inf,  Double mask_neginf);
 typedef softmax__base = Pointer<Pointer<Double>> Function( int row,  int column,  Pointer<Pointer<Double>>  data,  int dim,  double mask_nan,  double mask_inf,  double mask_neginf);
 
-typedef shuffle__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data);
-typedef shuffle__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data);
+typedef shuffle__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data, Int32 seed, Bool use);
+typedef shuffle__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data, int seed, bool use);
 
 typedef sortNoReturned__base__ffi = Void Function( Int32 row,  Int32 column, Pointer<Pointer<Double>>  data,  Bool reverse,  Int32 dim,  Double mask_nan);
 typedef sortNoReturned__base = void Function( int row,  int column, Pointer<Pointer<Double>>  data,  bool reverse,  int dim,  double mask_nan);
@@ -488,6 +503,145 @@ typedef diffC__base  = Pointer<Pointer<Double>> Function(int row, int column, Po
 typedef get_range__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 dim);
 typedef get_range__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int dim);
 
+typedef cumsum__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 dim, Bool flatten);
+typedef cumsum__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data, int dim, bool flatten);
+
+typedef sgn__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data);
+typedef sgn__base  = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>> data);
+
+typedef exponential__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double scale, Int32 seed, Bool use);
+typedef exponential__base  = Pointer<Pointer<Double>> Function(int row, int column, double scale, int seed, bool use);
+
+typedef gamma__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double shape, Double scale, Int32 seed, Bool use);
+typedef gamma__base  = Pointer<Pointer<Double>> Function(int row, int column, double shape, double scale, int seed, bool use);
+
+typedef binomial__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Int32 n, Double p, Int32 seed, Bool use);
+typedef binomial__base  = Pointer<Pointer<Double>> Function(int row, int column, int n, double p, int seed, bool use);
+
+typedef chisquare__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Int32 k, Int32 seed, Bool use);
+typedef chisquare__base  = Pointer<Pointer<Double>> Function(int row, int column, int k, int seed, bool use);
+
+typedef tdis__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Int32 k, Int32 seed, Bool use);
+typedef tdis__base  = Pointer<Pointer<Double>> Function(int row, int column, int k, int seed, bool use);
+
+typedef fdis__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Int32 k1, Int32 k2, Int32 seed, Bool use);
+typedef fdis__base  = Pointer<Pointer<Double>> Function(int row, int column, int k1, int k2, int seed, bool use);
+
+typedef geometric__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double p, Int32 seed, Bool use);
+typedef geometric__base  = Pointer<Pointer<Double>> Function(int row, int column, double p, int seed, bool use);
+
+typedef nbinomial__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Int32 n, Double p, Int32 seed, Bool use);
+typedef nbinomial__base  = Pointer<Pointer<Double>> Function(int row, int column, int n, double p, int seed, bool use);
+
+typedef lognormal__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double mu, Double sigma, Int32 seed, Bool use);
+typedef lognormal__base  = Pointer<Pointer<Double>> Function(int row, int column, double mu, double sigma, int seed, bool use);
+
+typedef cauchydis__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double base, Double gamma, Int32 seed, Bool use);
+typedef cauchydis__base  = Pointer<Pointer<Double>> Function(int row, int column, double base, double gamma, int seed, bool use);
+
+typedef multinomial__base__ffi = Pointer<Pointer<Double>> Function(Pointer<Double> p, Int32 len, Int32 n, Int32 size, Int32 seed, Bool use);
+typedef multinomial__base  = Pointer<Pointer<Double>> Function(Pointer<Double> p, int len, int n, int size, int seed, bool use);
+
+typedef beta__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double a, Double b, Int32 seed, Bool use);
+typedef beta__base  = Pointer<Pointer<Double>> Function(int row, int column, double a, double b, int seed, bool use);
+
+typedef wiener_process__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double t, Int32 seed, Bool use);
+typedef wiener_process__base  = Pointer<Pointer<Double>> Function(int row, int column, double t, int seed, bool use);
+
+typedef wiener_process_stage__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double t1, Double t2, Double base, Int32 seed, Bool use);
+typedef wiener_process_stage__base  = Pointer<Pointer<Double>> Function(int row, int column, double t1, double t2, double base, int seed, bool use);
+
+typedef dirichlet__base__ffi = Pointer<Pointer<Double>> Function(Pointer<Double> alpha, Int32 len, Int32 size, Int32 seed, Bool use);
+typedef dirichlet__base  = Pointer<Pointer<Double>> Function(Pointer<Double> alpha, int len, int size, int seed, bool use);
+
+typedef laplacedis__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double mu, Double b, Int32 seed, Bool use);
+typedef laplacedis__base  = Pointer<Pointer<Double>> Function(int row, int column, double mu, double b, int seed, bool use);
+
+typedef gumbel__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double mu, Double beta, Bool left, Int32 seed, Bool use);
+typedef gumbel__base  = Pointer<Pointer<Double>> Function(int row, int column, double mu, double beta, bool left, int seed, bool use);
+
+typedef hypergeometric__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Int32 expected, Int32 unexpected, Int32 n, Int32 seed, Bool use);
+typedef hypergeometric__base  = Pointer<Pointer<Double>> Function(int row, int column, int expected, int unexpected, int n, int seed, bool use);
+
+typedef logseries__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double p, Int32 seed, Bool use);
+typedef logseries__base  = Pointer<Pointer<Double>> Function(int row, int column, double p, int seed, bool use);
+
+typedef weibull__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double lambda, Double k, Int32 seed, Bool use);
+typedef weibull__base  = Pointer<Pointer<Double>> Function(int row, int column, double lambda, double k, int seed, bool use);
+
+typedef triangular__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double left, Double middle, Double right, Int32 seed, Bool use);
+typedef triangular__base  = Pointer<Pointer<Double>> Function(int row, int column, double left, double middle, double right, int seed, bool use);
+
+typedef power_law__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double xmin, Double alpha, Int32 seed, Bool use);
+typedef power_law__base  = Pointer<Pointer<Double>> Function(int row, int column, double xmin, double alpha, int seed, bool use);
+
+typedef rayleigh__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double sigma, Int32 seed, Bool use);
+typedef rayleigh__base  = Pointer<Pointer<Double>> Function(int row, int column, double sigma, int seed, bool use);
+
+typedef stabledis__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double alpha, Double beta, Double gamma, Double delta, Int32 seed, Bool use);
+typedef stabledis__base  = Pointer<Pointer<Double>> Function(int row, int column, double alpha, double beta, double gamma, double delta, int seed, bool use);
+
+typedef pareto__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double xmin, Double alpha, Int32 seed, Bool use);
+typedef pareto__base  = Pointer<Pointer<Double>> Function(int row, int column, double xmin, double alpha, int seed, bool use);
+
+typedef rice__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double v, Double sigma, Int32 seed, Bool use);
+typedef rice__base  = Pointer<Pointer<Double>> Function(int row, int column, double v, double sigma, int seed, bool use);
+
+typedef wald__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Double mu, Double sigma, Int32 seed, Bool use);
+typedef wald__base  = Pointer<Pointer<Double>> Function(int row, int column, double mu, double sigma, int seed, bool use);
+
+typedef ellipse_edge__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double a, Double b, Int32 seed, Bool use, Double bias);
+typedef ellipse_edge__base  = Pointer<Pointer<Double>> Function(int size, double a, double b, int seed, bool use, double bias);
+
+typedef ellipse_area__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double a, Double b, Int32 seed, Bool use, Double bias);
+typedef ellipse_area__base  = Pointer<Pointer<Double>> Function(int size, double a, double b, int seed, bool use, double bias);
+
+typedef freeOp__base__ffi = Void Function(Pointer<Void> data);
+typedef freeOp__base = void Function(Pointer<Void> data);
+
+typedef circle_edge__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double r, Int32 seed, Bool use, Double bias);
+typedef circle_edge__base  = Pointer<Pointer<Double>> Function(int size, double r, int seed, bool use, double bias);
+
+typedef circle_area__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double r, Int32 seed, Bool use, Double bias);
+typedef circle_area__base  = Pointer<Pointer<Double>> Function(int size, double r, int seed, bool use, double bias);
+
+typedef line__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Point2D start, Point2D end, Int32 seed, Bool use, Double bias);
+typedef line__base  = Pointer<Pointer<Double>> Function(int size, Point2D start, Point2D end, int seed, bool use, double bias);
+
+typedef triangle_edge__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Point2D a, Point2D b, Point2D c, Int32 seed, Bool use, Double bias);
+typedef triangle_edge__base  = Pointer<Pointer<Double>> Function(int size, Point2D a, Point2D b, Point2D c, int seed, bool use, double bias);
+
+typedef triangle_area__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Point2D a, Point2D b, Point2D c, Int32 seed, Bool use, Double bias);
+typedef triangle_area__base  = Pointer<Pointer<Double>> Function(int size, Point2D a, Point2D b, Point2D c, int seed, bool use, double bias);
+
+typedef quadrilateral_edge__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Point2D a, Point2D b, Point2D c, Point2D d, Int32 seed, Bool use, Double bias);
+typedef quadrilateral_edge__base = Pointer<Pointer<Double>> Function(int size, Point2D a, Point2D b, Point2D c, Point2D d, int seed, bool use, double bias);
+
+typedef quadrilateral_area__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Point2D a, Point2D b, Point2D c, Point2D d, Int32 seed, Bool use, Double bias);
+typedef quadrilateral_area__base = Pointer<Pointer<Double>> Function(int size, Point2D a, Point2D b, Point2D c, Point2D d, int seed, bool use, double bias);
+
+typedef heart_edge__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double x, Int32 seed, Bool use, Double bias);
+typedef heart_edge__base = Pointer<Pointer<Double>> Function(int size, double x, int seed, bool use, double bias);
+
+typedef heart_area__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double x, Int32 seed, Bool use, Double bias);
+typedef heart_area__base = Pointer<Pointer<Double>> Function(int size, double x, int seed, bool use, double bias);
+
+typedef curve__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Double x1, Double x2, Pointer<NativeFunction<Double Function(Double)>> func, Int32 seed, Bool use, Double bias);
+typedef curve__base = Pointer<Pointer<Double>> Function(int size, double x1, double x2, Pointer<NativeFunction<Double Function(Double)>> func, int seed, bool use, double bias);
+
+typedef bezier__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, Point2D start, Point2D end, Point2D ctrl, Int32 seed, Bool use, Double bias);
+typedef bezier__base = Pointer<Pointer<Double>> Function(int size, Point2D start, Point2D end, Point2D ctrl, int seed, bool use, double bias);
+
+typedef xytoPoint2D__base__ffi = Point2D Function(Double x, Double y);
+typedef xytoPoint2D__base = Point2D Function(double x, double y);
+
+typedef shake__base__ffi = Void Function(Int32 row, Int32 column, Pointer<Pointer<Double>> data, Int32 seed, Bool use, Double bias);
+typedef shake__base = void Function(int row, int column, Pointer<Pointer<Double>> data, int seed, bool use, double bias);
+
+typedef coord_func = Pointer<NativeFunction<Double Function(Double, Pointer<Void>)>>;
+typedef custom_curve__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, coord_func x_func, coord_func y_func, Pointer<Void> params, Double theta_start, Double theta_step, Int32 seed, Bool use, Double bias);
+typedef custom_curve__base = Pointer<Pointer<Double>> Function(int size, coord_func x_func, coord_func y_func, Pointer<Void> params, double theta_start, double theta_step, int seed, bool use, double bias);
+
 late final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 late final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
 late final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
@@ -619,6 +773,52 @@ late final cover__base matply__cover = dylib.lookupFunction<cover__base__ffi, co
 late final stretch__base matply__stretch = dylib.lookupFunction<stretch__base__ffi, stretch__base>('stretch');
 late final diffC__base matply__diffC = dylib.lookupFunction<diffC__base__ffi, diffC__base>('diffC');
 late final get_range__base matply__get_range = dylib.lookupFunction<get_range__base__ffi, get_range__base>('get_range');
+late final cumsum__base matply__cumsum = dylib.lookupFunction<cumsum__base__ffi, cumsum__base>('cumsum');
+late final sgn__base matply__sgn = dylib.lookupFunction<sgn__base__ffi, sgn__base>('sgn');
+late final exponential__base matply__exponential = dylib.lookupFunction<exponential__base__ffi, exponential__base>('exponential');
+late final gamma__base matply__gamma_ = dylib.lookupFunction<gamma__base__ffi, gamma__base>('gamma_');
+late final binomial__base matply__binomial = dylib.lookupFunction<binomial__base__ffi, binomial__base>('binomial');
+late final chisquare__base matply__chisquare = dylib.lookupFunction<chisquare__base__ffi, chisquare__base>('chisquare');
+late final tdis__base matply__tdis = dylib.lookupFunction<tdis__base__ffi, tdis__base>('tdis');
+late final fdis__base matply__fdis = dylib.lookupFunction<fdis__base__ffi, fdis__base>('fdis');
+late final geometric__base matply__geometric = dylib.lookupFunction<geometric__base__ffi, geometric__base>('geometric');
+late final nbinomial__base matply__nbinomial = dylib.lookupFunction<nbinomial__base__ffi, nbinomial__base>('nbinomial');
+late final lognormal__base matply__lognormal = dylib.lookupFunction<lognormal__base__ffi, lognormal__base>('lognormal');
+late final cauchydis__base matply__cauchydis = dylib.lookupFunction<cauchydis__base__ffi, cauchydis__base>('cauchydis');
+late final multinomial__base matply__multinomial = dylib.lookupFunction<multinomial__base__ffi, multinomial__base>('multinomial');
+late final beta__base matply__beta = dylib.lookupFunction<beta__base__ffi, beta__base>('beta');
+late final wiener_process__base matply__wiener_process = dylib.lookupFunction<wiener_process__base__ffi, wiener_process__base>('wiener_process');
+late final wiener_process_stage__base matply__wiener_process_stage = dylib.lookupFunction<wiener_process_stage__base__ffi, wiener_process_stage__base>('wiener_process_stage');
+late final dirichlet__base matply__dirichlet = dylib.lookupFunction<dirichlet__base__ffi, dirichlet__base>('dirichlet');
+late final laplacedis__base matply__laplacedis = dylib.lookupFunction<laplacedis__base__ffi, laplacedis__base>('laplacedis');
+late final gumbel__base matply__gumbel = dylib.lookupFunction<gumbel__base__ffi, gumbel__base>('gumbel');
+late final hypergeometric__base matply__hypergeometric = dylib.lookupFunction<hypergeometric__base__ffi, hypergeometric__base>('hypergeometric');
+late final logseries__base matply__logseries = dylib.lookupFunction<logseries__base__ffi, logseries__base>('logseries');
+late final weibull__base matply__weibull = dylib.lookupFunction<weibull__base__ffi, weibull__base>('weibull');
+late final triangular__base matply__triangular = dylib.lookupFunction<triangular__base__ffi, triangular__base>('triangular');
+late final power_law__base matply__power_law = dylib.lookupFunction<power_law__base__ffi, power_law__base>('power_law');
+late final rayleigh__base matply__rayleigh = dylib.lookupFunction<rayleigh__base__ffi, rayleigh__base>('rayleigh');
+late final stabledis__base matply__stabledis = dylib.lookupFunction<stabledis__base__ffi, stabledis__base>('stabledis');
+late final pareto__base matply__pareto= dylib.lookupFunction<pareto__base__ffi, pareto__base>('pareto');
+late final rice__base matply__rice = dylib.lookupFunction<rice__base__ffi, rice__base>('rice');
+late final wald__base matply__wald = dylib.lookupFunction<wald__base__ffi, wald__base>('wald');
+late final ellipse_edge__base matply__ellipse_edge = dylib.lookupFunction<ellipse_edge__base__ffi, ellipse_edge__base>('ellipse_edge');
+late final ellipse_area__base matply__ellipse_area = dylib.lookupFunction<ellipse_area__base__ffi, ellipse_area__base>('ellipse_area');
+late final freeOp__base matply__freeOp = dylib.lookupFunction<freeOp__base__ffi, freeOp__base>('freeOp');
+late final circle_edge__base matply__circle_edge = dylib.lookupFunction<circle_edge__base__ffi, circle_edge__base>('circle_edge');
+late final circle_area__base matply__circle_area = dylib.lookupFunction<circle_area__base__ffi, circle_area__base>('circle_area');
+late final line__base matply__line = dylib.lookupFunction<line__base__ffi, line__base>('line');
+late final triangle_edge__base matply__triangle_edge = dylib.lookupFunction<triangle_edge__base__ffi, triangle_edge__base>('triangle_edge');
+late final triangle_area__base matply__triangle_area = dylib.lookupFunction<triangle_area__base__ffi, triangle_area__base>('triangle_area');
+late final quadrilateral_edge__base matply__quadrilateral_edge = dylib.lookupFunction<quadrilateral_edge__base__ffi, quadrilateral_edge__base>('quadrilateral_edge');
+late final quadrilateral_area__base matply__quadrilateral_area = dylib.lookupFunction<quadrilateral_area__base__ffi, quadrilateral_area__base>('quadrilateral_area');
+late final heart_edge__base matply__heart_edge = dylib.lookupFunction<heart_edge__base__ffi, heart_edge__base>('heart_edge');
+late final heart_area__base matply__heart_area = dylib.lookupFunction<heart_area__base__ffi, heart_area__base>('heart_area');
+late final curve__base matply__curve = dylib.lookupFunction<curve__base__ffi, curve__base>('curve');
+late final bezier__base matply__bezier = dylib.lookupFunction<bezier__base__ffi, bezier__base>('bezier');
+late final xytoPoint2D__base matply__xytoPoint2D = dylib.lookupFunction<xytoPoint2D__base__ffi, xytoPoint2D__base>('xytoPoint2D');
+late final shake__base matply__shake = dylib.lookupFunction<shake__base__ffi, shake__base>('shake');
+late final custom_curve__base matply__custom_curve = dylib.lookupFunction<custom_curve__base__ffi, custom_curve__base>('custom_curve');
 
 dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
   try {
@@ -704,3 +904,5 @@ late final random_choices__base matply_random_choices = dylib.lookupFunction<ran
 typedef perfect_choices__base__ffi = Pointer<Double> Function(Pointer<Double> arr, Pointer<Double> p, Int32 len, Int32 times, Bool back, Int32 method);
 typedef perfect_choices__base = Pointer<Double> Function(Pointer<Double> arr, Pointer<Double> p, int len, int times, bool back, int method);
 late final perfect_choices__base matply_perfect_choices = dylib.lookupFunction<perfect_choices__base__ffi, perfect_choices__base>('perfect_choices');
+
+

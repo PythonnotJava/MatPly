@@ -147,5 +147,64 @@ extension Visualization on MatrixType{
         return hist;
     }
   }
+  
+  String toMarkdownTable<T>({
+    List<Object>? rls,
+    List<Object>? cls,
+    String rowLack = 'row',
+    String colLack = 'col',
+    int? format
+  }) {
 
+    var [row, column] = this.shape;
+    // 使用提供的标签或默认标签，并补充缺失的标签
+    rls = rls ?? List.generate(row, (index) => index, growable: true);
+    cls = cls ?? List.generate(column, (index) => index, growable: true);
+
+    // 如果行标签长度不足，补充缺失的标签
+    if (rls.length < row) {
+      rls = List<Object>.from(rls)..addAll(List.generate(row - rls.length, (index) => '$rowLack$index'));
+    }
+
+    // 如果列标签长度不足，补充缺失的标签
+    if (cls.length < column) {
+      cls = List<Object>.from(cls)..addAll(List.generate(column - cls.length, (index) => '$colLack$index'));
+    }
+
+    // 构建表头
+    StringBuffer buffer = StringBuffer();
+    buffer.write('|   |');
+    for (var label in cls) {
+      buffer.write(' $label |');
+    }
+    buffer.writeln();
+
+    // 构建分隔行
+    buffer.write('|---|');
+    for (int i = 0; i < column; i++) {
+      buffer.write('---|');
+    }
+    buffer.writeln();
+
+    // 构建数据行
+    if (format == null) {
+      for (int r = 0; r < row; r++) {
+        buffer.write('| ${rls[r]} |');
+        for (int c = 0; c < column; c++) {
+          buffer.write(' ${this.at(r, c) ?? ''} |');
+        }
+        buffer.writeln();
+      }
+    }else{
+      assert (format >=0);
+      for (int r = 0; r < row; r++) {
+        buffer.write('| ${rls[r]} |');
+        for (int c = 0; c < column; c++) {
+          buffer.write(' ${this.at(r, c).toStringAsFixed(format) ?? ''} |');
+        }
+        buffer.writeln();
+      }
+    }
+    return buffer.toString();
+  }
 }

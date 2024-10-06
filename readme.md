@@ -12,7 +12,7 @@
 ## 💡什么是MatPly？
 > MatPly是使用C语言实现并被转换为多个语言版本的矩阵操作库  
 > MatPly的运行机制如下：
-> ![procsee](doc/API/Dart/src/process.png)
+> ![procsee](process.png)
 
 ## 💻平台支持
 <pre>
@@ -28,10 +28,6 @@
 
 ## 🔗pub仓库
 > [https://pub.dev/packages/matply](https://pub.dev/packages/matply)
-
-## 案例地址
-> [https://github.com/PythonnotJava/MatPly_demo](https://github.com/PythonnotJava/MatPly_demo)
-> [https://github.com/PythonnotJava/MatPly_demo/releases/download/V1.0.9/mp.zip](https://github.com/PythonnotJava/MatPly_demo/releases/download/V1.0.9/mp.zip)
 
 ## ⚠️Warning
 <p style="text-indent: 20pt;font-weight: lighter">

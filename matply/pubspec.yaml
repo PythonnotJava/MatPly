@@ -15,7 +15,7 @@ dependencies:
 
 topics:
   - ffi
-  - Matrix
+  - matrix
 
 platforms:
   windows:

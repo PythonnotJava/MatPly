@@ -24,7 +24,7 @@ extension RandomExtension on math.Random{
     if (p == null && times == null && back == null && method == null){
       Pointer<Double> op = oneListToArray(arr);
       double value = matply_random_choice(op, len);
-      malloc.free(op);
+      freeOp(op);
       return value;
     }else if(p == null && times != null && back != null){
       assert(times >= 0);
@@ -32,8 +32,8 @@ extension RandomExtension on math.Random{
       Pointer<Double> op1 = oneListToArray(arr);
       Pointer<Double> op2 = matply_random_choices(op1, len, times, back);
       List<double> value = op2.asTypedList(len).toList();
-      malloc.free(op1);
-      matply__freeOp(op2.cast<Void>());
+      freeOp(op1);
+      freeOp(op2);
       return value;
     }else if(p != null && times != null && back != null && method != null){
       assert(times >= 0 && p.length == len);
@@ -42,12 +42,13 @@ extension RandomExtension on math.Random{
       Pointer<Double> op2 = oneListToArray(p);
       Pointer<Double> op3 = matply_perfect_choices(op1, op2, len, times, back, method);
       List<double> value = op3.asTypedList(len).toList();
-      malloc.free(op1);
-      malloc.free(op2);
-      matply__freeOp(op3.cast<Void>());
+      freeOp(op1);
+      freeOp(op2);
+      freeOp(op3);
       return value;
-    }else
+    }else {
       throw UnsupportedError('Confusing parameter matching');
+    }
   }
 }
 
@@ -55,28 +56,48 @@ extension ProbStat on MatrixType{
   void shuffle({int? seed}) => matply__shuffle(shape[0], shape[1], self.ref.data, seed ?? 0, seed != null);
 
   Object __variance_std({bool sample = false, required bool std, int dim = -1}){
+    Pointer<Double> op;
+    Object target;
     switch(dim){
       case 0:
-        return matply__variance(shape[0], shape[1], self.ref.data, sample, 0, std).asTypedList(shape[0]).toList();
+        op = matply__variance(shape[0], shape[1], self.ref.data, sample, 0, std);
+        target = op.asTypedList(shape[0]).toList();
+        break;
       case 1:
-        return matply__variance(shape[0], shape[1], self.ref.data, sample, 1, std).asTypedList(shape[1]).toList();
+        op = matply__variance(shape[0], shape[1], self.ref.data, sample, 1, std);
+        target = op.asTypedList(shape[1]).toList();
+        break;
       default:
-        return matply__variance(shape[0], shape[1], self.ref.data, sample, -1, std).value;
+        op = matply__variance(shape[0], shape[1], self.ref.data, sample, -1, std);
+        target = op.value;
+        break;
     }
+    freeOp(op);
+    return target;
   }
 
   Object std({bool sample = false, int dim = -1}) => __variance_std(dim: dim, sample: sample, std: true);
   Object variance({bool sample = false, int dim = -1}) => __variance_std(dim: dim, sample: sample, std: false);
 
   Object median({int dim = -1}){
+    Pointer<Double> op;
+    Object target;
     switch (dim){
       case 0:
-        return matply__median(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]).toList();
+        op = matply__median(shape[0], shape[1], self.ref.data, 0);
+        target = op.asTypedList(shape[0]).toList();
+        break;
       case 1:
-        return matply__median(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]).toList();
+        op = matply__median(shape[0], shape[1], self.ref.data, 1);
+        target = op.asTypedList(shape[1]).toList();
+        break;
       default:
-        return matply__median(shape[0], shape[1], self.ref.data, -1).value;
+        op = matply__median(shape[0], shape[1], self.ref.data, -1);
+        target = op.value;
+        break;
     }
+    freeOp(op);
+    return target;
   }
 
   Object mode({int dim  = -1}){
@@ -157,18 +178,27 @@ extension ProbStat on MatrixType{
 
   Object covariance({required MatrixType other, bool sample = false, int dim = -1}){
     if (hasSameShape(other)){
+      Pointer<Double> op;
+      Object target;
       switch(dim){
         case 0:
-           return matply__covariance(
-               shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 0).asTypedList(shape[0]).toList();
+          op = matply__covariance(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 0);
+          target = op.asTypedList(shape[0]).toList();
+          break;
         case 1:
-          return matply__covariance(
-              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 1).asTypedList(shape[1]).toList();
+          op = matply__covariance(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 1);
+          target = op.asTypedList(shape[1]).toList();
+          break;
         default:
-          return matply__covariance(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, -1).value;
+          op = matply__covariance(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, -1);
+          target = op.value;
+          break;
       }
-    }else
+      freeOp(op);
+      return target;
+    }else {
       throw different_shape;
+    }
   }
 
   MatrixType cov({MatrixType? other, bool sample = false}){
@@ -188,33 +218,52 @@ extension ProbStat on MatrixType{
 
   Object pearsonCoef({required MatrixType other, bool sample = false, int dim = -1}){
     if (hasSameShape(other)){
+      Pointer<Double> op;
+      Object target;
       switch(dim){
         case 0:
-          return matply__pearsonCoef(
-              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 0).asTypedList(shape[0]).toList();
+          op = matply__pearsonCoef(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 0);
+          target = op.asTypedList(shape[0]).toList();
+          break;
         case 1:
-          return matply__pearsonCoef(
-              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 1).asTypedList(shape[1]).toList();
+          op = matply__pearsonCoef(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, 1);
+          target = op.asTypedList(shape[1]).toList();
+          break;
         default:
-          return matply__pearsonCoef(
-              shape[0], shape[1], self.ref.data, other.self.ref.data, sample, -1).value;
+          op = matply__pearsonCoef(shape[0], shape[1], self.ref.data, other.self.ref.data, sample, -1);
+          target = op.value;
+          break;
       }
-    }else
+      freeOp(op);
+      return target;
+    }else {
       throw different_shape;
+    }
   }
 
   /// 在几个评分标准中，传入的矩阵参数表示真实数据，而本身表示预测数据
   Object __MSE({required MatrixType rea, bool rmse = false, int dim = -1}){
-    if (!hasSameShape(rea))
+    if (!hasSameShape(rea)) {
       throw different_shape;
+    }
+    Pointer<Double> op;
+    Object target;
     switch(dim){
       case 0:
-        return matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0, rmse).asTypedList(shape[0]).toList();
+        op = matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0, rmse);
+        target = op.asTypedList(shape[0]).toList();
+        break;
       case 1:
-        return matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1, rmse).asTypedList(shape[1]).toList();
+        op = matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1, rmse);
+        target = op.asTypedList(shape[1]).toList();
+        break;
       default:
-        return matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1, rmse).value;
+        op = matply__MSE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1, rmse);
+        target = op.value;
+        break;
     }
+    freeOp(op);
+    return target;
   }
 
   Object MSE({required MatrixType rea, int dim = -1}) => __MSE(rea: rea, rmse: false, dim: dim);
@@ -222,56 +271,97 @@ extension ProbStat on MatrixType{
 
   Object MAE({required MatrixType rea, int dim = -1}){
     if (hasSameShape(rea)){
+      Pointer<Double> op;
+      Object target;
       switch(dim){
         case 0:
-          return matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+          op = matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0);
+          target = op.asTypedList(shape[0]).toList();
+          break;
         case 1:
-          return matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+          op = matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1);
+          target = op.asTypedList(shape[1]).toList();
+          break;
         default:
-          return matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+          op = matply__MAE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1);
+          target = op.value;
+          break;
       }
-    }else
+      freeOp(op);
+      return target;
+    }else {
       throw different_shape;
+    }
   }
 
   Object MAPE({required MatrixType rea, int dim = -1}){
     if (hasSameShape(rea)){
+      Pointer<Double> op;
+      Object target;
       switch(dim) {
         case 0:
-          return matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+          op = matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0);
+          target = op.asTypedList(shape[0]).toList();
+          break;
         case 1:
-          return matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+          op = matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1);
+          target = op.asTypedList(shape[1]).toList();
+          break;
         default:
-          return matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+          op = matply__MAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1);
+          target = op.value;
+          break;
       }
+      freeOp(op);
+      return target;
     }else
       throw different_shape;
   }
 
   Object R2({required MatrixType rea, int dim = -1}){
     if (hasSameShape(rea)){
+      Pointer<Double> op;
+      Object target;
       switch(dim) {
         case 0:
-          return matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+          op = matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0);
+          target = op.asTypedList(shape[0]).toList();
+          break;
         case 1:
-          return matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+          op = matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1);
+          target = op.asTypedList(shape[1]).toList();
+          break;
         default:
-          return matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+          op = matply__R2(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1);
+          target = op.value;
+          break;
       }
+      freeOp(op);
+      return target;
     }else
       throw different_shape;
   }
 
   Object SMAPE({required MatrixType rea, int dim = -1}){
     if (hasSameShape(rea)){
+      Pointer<Double> op;
+      Object target;
       switch(dim) {
         case 0:
-          return matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0).asTypedList(shape[0]).toList();
+          op = matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 0);
+          target = op.asTypedList(shape[0]).toList();
+          break;
         case 1:
-          return matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1).asTypedList(shape[1]).toList();
+          op = matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, 1);
+          target = op.asTypedList(shape[1]).toList();
+          break;
         default:
-          return matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1).value;
+          op = matply__SMAPE(shape[0], shape[1], self.ref.data, rea.self.ref.data, -1);
+          target = op.value;
+          break;
       }
+      freeOp(op);
+      return target;
     }else
       throw different_shape;
   }
@@ -294,12 +384,12 @@ extension ProbStat on MatrixType{
         if (back == false && times <= column){
           Pointer<Double> op = oneListToArray(commonp);
           var mt = MatrixType.__fromDataPointer(matply__choice2(row, column, self.ref.data, op, times, false, method), newShape);
-          malloc.free(op);
+          freeOp(op);
           return mt;
         }else if(back == true){
           Pointer<Double> op = oneListToArray(commonp);
           var mt = MatrixType.__fromDataPointer(matply__choice2(row, column, self.ref.data, op, times, true, method), newShape);
-          malloc.free(op);
+          freeOp(op);
           return mt;
         }else{
           throw "The number of times must be no more than column when setting not back";

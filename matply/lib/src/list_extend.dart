@@ -24,8 +24,7 @@ extension ListExtensions<T extends num> on List<T> {
     assert(row > 0 && column > 0);
     if (length == column * row) {
       var op = getOnePointer();
-      MatrixType mt = MatrixType.__fromDataPointer(
-          matply__oneTotwoArray(op, row, column), [row, column]);
+      MatrixType mt = MatrixType.__fromDataPointer(matply__oneTotwoArray(op, row, column), [row, column]);
       malloc.free(op);
       return mt;
     } else {
@@ -41,8 +40,7 @@ extension TwoDimListExtensions<T extends num> on List<List<T>> {
   List<int> get shape => [row, column];
 
   /// Convert the 2D list to a 2D list of doubles
-  List<List<double>> get toDoubleList =>
-      List.generate(row, (i) => this[i].toDoubleList);
+  List<List<double>> get toDoubleList => List.generate(row, (i) => this[i].toDoubleList);
 
   /// Get a pointer to the data in the 2D list
   Pointer<Pointer<Double>> getTwoPointer() {

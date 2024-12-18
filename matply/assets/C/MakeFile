@@ -1,0 +1,83 @@
+# 编译器
+CC = gcc
+
+# 源文件列表
+SRCS = matply.c \
+       mp_omp.c \
+       mp_auxiliary.c \
+       mp_base.c \
+       mp_cfg.c \
+       mp_geometry.c \
+       mp_linalg.c \
+       mp_manage.c \
+       mp_point2d.c \
+       mp_random.c
+
+# 库名称
+LIBNAME = matply
+
+# 输出目录
+BUILD_DIR = ..
+
+# 默认操作系统检测
+ifeq ($(OS),Windows_NT)
+    TARGET_OS = Windows
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        TARGET_OS = Linux
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        TARGET_OS = macOS
+    endif
+endif
+
+# 根据操作系统设置共享库扩展名和编译选项
+ifeq ($(TARGET_OS),Linux)
+    SHARED_EXT = so
+    CFLAGS = -fPIC -Wall -Wextra -fopenmp -Wno-unused-variable -Wno-unused-parameter
+    LDFLAGS = -shared -fopenmp
+    LIB_PREFIX = lib
+endif
+
+ifeq ($(TARGET_OS), macOS)
+    SHARED_EXT = dylib
+    CFLAGS = -fPIC -Wall -Wextra -fopenmp -Wno-unused-variable -Wno-unused-parameter
+    LDFLAGS = -dynamiclib -fopenmp
+    LIB_PREFIX = lib
+endif
+
+ifeq ($(TARGET_OS),Windows)
+    SHARED_EXT = dll
+    CFLAGS = -Wall -Wextra -fopenmp -Wno-unused-variable -Wno-unused-parameter
+    LDFLAGS = -shared -fopenmp
+    LIB_PREFIX =
+endif
+
+# 启用多线程编译
+MAKEFLAGS += -j$(shell nproc || sysctl -n hw.ncpu || echo 1)
+
+# 静默模式
+.SILENT:
+
+# 默认目标
+all: $(BUILD_DIR) $(BUILD_DIR)/$(LIB_PREFIX)$(LIBNAME).$(SHARED_EXT)
+
+# 创建构建目录
+$(BUILD_DIR):
+	mkdir -p $@
+
+# 链接生成动态库 (将动态库生成到 BUILD_DIR)
+$(BUILD_DIR)/$(LIB_PREFIX)$(LIBNAME).$(SHARED_EXT): $(SRCS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+# 清理生成的文件
+clean:
+ifeq ($(TARGET_OS),Windows)
+	del /Q $(BUILD_DIR)\*
+	rmdir /Q $(BUILD_DIR)
+else
+	rm -rf $(BUILD_DIR)
+endif
+
+.PHONY: all clean

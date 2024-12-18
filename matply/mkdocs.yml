@@ -1,0 +1,30 @@
+site_name: MatPly Docs
+site_url: https://github.com/PythonnotJava/MatPly
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - Guide:
+      - 指南: Guide/getting-started.md
+      - 计划: Guide/plan.md
+      - omp设计: Guide/omp_design.md
+  - API Reference:
+      - Dart API:
+          - Dart版本的实现: API/Dart/index.md
+          - 全局设置: API/Dart/global_methods.md
+          - 构造函数: API/Dart/constructor.md
+          - 重载操作: API/Dart/operators.md
+          - 属性: API/Dart/properties.md
+          - 方法: API/Dart/methods.md
+          - 几何模拟: API/Dart/extension_geometry.md
+          - CSV拓展: API/Dart/extension_csv.md
+
+# mkdocs build

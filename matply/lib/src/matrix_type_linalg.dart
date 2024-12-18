@@ -197,25 +197,45 @@ extension Linalg on MatrixType{
         case -1:
           return matply__norm_inf(shape[0], shape[1], self.ref.data);
         case 0:
+          Pointer<Double> op;
+          Object target;
           switch (dim){
             case 0:
-              return matply__norm_zero(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]).toList();
+              op = matply__norm_zero(shape[0], shape[1], self.ref.data, 0);
+              target = op.asTypedList(shape[0]).toList();
+              break;
             case 1:
-              return matply__norm_zero(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]).toList();
+              op = matply__norm_zero(shape[0], shape[1], self.ref.data, 1);
+              target = op.asTypedList(shape[1]).toList();
+              break;
             default:
-              return matply__norm_zero(shape[0], shape[1], self.ref.data, -1).value.toInt();
+              op = matply__norm_zero(shape[0], shape[1], self.ref.data, -1);
+              target = op.value.toInt();
+              break;
           }
+          freeOp(op);
+          return target;
         case 1:
           return matply__norm_one(shape[0], shape[1], self.ref.data);
         default:
+          Pointer<Double> op;
+          Object target;
           switch (dim){
             case 0:
-              return matply__norm(shape[0], shape[1], self.ref.data, n, 0).asTypedList(shape[0]).toList();
+              op = matply__norm(shape[0], shape[1], self.ref.data, n, 0);
+              target = op.asTypedList(shape[0]).toList();
+              break;
             case 1:
-              return matply__norm(shape[0], shape[1], self.ref.data, n, 1).asTypedList(shape[1]).toList();
+              op = matply__norm(shape[0], shape[1], self.ref.data, n, 1);
+              target = op.asTypedList(shape[1]).toList();
+              break;
             default:
-              return matply__norm(shape[0], shape[1], self.ref.data, n, -1).value;
+              op = matply__norm(shape[0], shape[1], self.ref.data, n, -1);
+              target = op.value;
+              break;
           }
+          freeOp(op);
+          return target;
       }
     }
   }

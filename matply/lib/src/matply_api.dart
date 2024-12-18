@@ -4,16 +4,14 @@ String __login_platform(){
  if (Platform.isWindows) {
       return 'matply.dll';
     } else if (Platform.isLinux || Platform.isAndroid) {
-      return 'matply.so';
+      return 'libmatply.so';
     } else
       throw UnsupportedError('This platform is not supported');
 }
 
 late final String platform = __login_platform();
 
-// late final dylib = DynamicLibrary.open(path.join(Directory.current.path, '../', platform));
-
-const VERSION = '1.0.9';
+const VERSION = '1.1.0';
 
 String pubCacheDir = path.join(
     Platform.environment['LOCALAPPDATA']!,
@@ -21,10 +19,11 @@ String pubCacheDir = path.join(
     'Cache',
     'hosted',
     'pub.dev',
-    'matply-$VERSION'
-);  // 查找pub下载cache路径，如果每个人不一样，可以通过设置pubCacheDir即可
+    'matply-$VERSION',
+    'assets'
+);  // 会出现依赖找不到的问题，需要查找pub下载cache路径，如果每个人不一样，可以通过设置pubCacheDir即可
 
-late final dylib = DynamicLibrary.open(path.join(pubCacheDir, 'lib/src/C', platform));
+late final dylib = DynamicLibrary.open(path.join(pubCacheDir, platform));
 
 late final Pointer<Double> _Pi = dylib.lookup('PI').cast<Double>();
 late final Pointer<Double> _e = dylib.lookup('e').cast<Double>();
@@ -49,13 +48,14 @@ typedef get__round__base__ffi = Double Function();
 typedef get__round__base = double Function();
 late final get__round__base matply__get__round = dylib.lookupFunction<get__round__base__ffi, get__round__base>('get_round');
 
-typedef set_mult_rand__base__ffi = Void Function(Bool use);
-typedef set_mult_rand__base = void Function(bool use);
-late final set_mult_rand__base matply__set_mult_rand = dylib.lookupFunction<set_mult_rand__base__ffi, set_mult_rand__base>('set_mult_rand');
-
-typedef get_mult_rand__base__ffi = Bool Function();
-typedef get_mult_rand__base = bool Function();
-late final get_mult_rand__base matply__get_mult_rand = dylib.lookupFunction<get_mult_rand__base__ffi, get_mult_rand__base>('get_mult_rand');
+// Deleted from V1.10
+// typedef set_mult_rand__base__ffi = Void Function(Bool use);
+// typedef set_mult_rand__base = void Function(bool use);
+// late final set_mult_rand__base matply__set_mult_rand = dylib.lookupFunction<set_mult_rand__base__ffi, set_mult_rand__base>('set_mult_rand');
+// Deleted from V1.10
+// typedef get_mult_rand__base__ffi = Bool Function();
+// typedef get_mult_rand__base = bool Function();
+// late final get_mult_rand__base matply__get_mult_rand = dylib.lookupFunction<get_mult_rand__base__ffi, get_mult_rand__base>('get_mult_rand');
 
 // 定义与SpecialAttributes结构体对应的Dart结构体
 final class SpecialAttributes extends Struct {
@@ -642,6 +642,43 @@ typedef coord_func = Pointer<NativeFunction<Double Function(Double, Pointer<Void
 typedef custom_curve__base__ffi = Pointer<Pointer<Double>> Function(Int32 size, coord_func x_func, coord_func y_func, Pointer<Void> params, Double theta_start, Double theta_step, Int32 seed, Bool use, Double bias);
 typedef custom_curve__base = Pointer<Pointer<Double>> Function(int size, coord_func x_func, coord_func y_func, Pointer<Void> params, double theta_start, double theta_step, int seed, bool use, double bias);
 
+typedef testArray__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
+typedef testArray__base = Pointer<Pointer<Double>> Function(int row, int column);
+
+typedef testOmp__base__ffi = Void Function();
+typedef testOmp__base = void Function();
+
+typedef genTestdatas__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<NativeFunction<Double Function(Double, Double)>> func);
+typedef genTestdatas__base = Pointer<Pointer<Double>> Function(int row, int column, Pointer<NativeFunction<Double Function(Double, Double)>> func);
+
+typedef testSingleT__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<NativeFunction<Double Function(Int32, Int32)>> func);
+typedef testSingleT__base = Pointer<Pointer<Double>> Function(int row, int column, Pointer<NativeFunction<Double Function(Int32, Int32)>> func);
+
+typedef get_multp_shown__base__ffi = Bool Function();
+typedef get_multp_shown__base = bool Function();
+
+typedef confront__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column, Pointer<Pointer<Double>>, Pointer<Pointer<Double>>, Pointer<NativeFunction<Double Function(Double, Double)>> func);
+typedef confront__base = Pointer<Pointer<Double>> Function(int row, int column, Pointer<Pointer<Double>>, Pointer<Pointer<Double>>, Pointer<NativeFunction<Double Function(Double, Double)>> func);
+
+typedef testOmpCanRun__base__ffi = Void Function(
+    Int32 row,
+    Int32 column,
+    Pointer<Pointer<Double>> data,
+    Pointer<NativeFunction<Void Function(Int32, Int32, Pointer<Pointer<Double>> data)>> func
+);
+typedef testOmpCanRun__base = void Function(
+    int row,
+    int column,
+    Pointer<Pointer<Double>> data,
+    Pointer<NativeFunction<Void Function(Int32, Int32, Pointer<Pointer<Double>> data)>> func
+);
+
+typedef testOmpUniform__base__ffi = Pointer<Pointer<Double>> Function(Int32 row, Int32 column);
+typedef testOmpUniform__base = Pointer<Pointer<Double>> Function(int row, int column);
+
+typedef allocateOp__base__ffi = Pointer<Void> Function(Int32 len, Int32 mode);
+typedef allocateOp__base = Pointer<Void> Function(int len, int mode);
+
 late final __new__base matply__new__ = dylib.lookupFunction<__new__base__ffi, __new__base>('__new__');
 late final __init__base matply__init__ = dylib.lookupFunction<__init__base__ffi, __init__base>('__init__');
 late final VisibleMatrix__base matply__VisibleMatrix = dylib.lookupFunction<VisibleMatrix__base__ffi, VisibleMatrix__base>('VisibleMatrix');
@@ -819,46 +856,16 @@ late final bezier__base matply__bezier = dylib.lookupFunction<bezier__base__ffi,
 late final xytoPoint2D__base matply__xytoPoint2D = dylib.lookupFunction<xytoPoint2D__base__ffi, xytoPoint2D__base>('xytoPoint2D');
 late final shake__base matply__shake = dylib.lookupFunction<shake__base__ffi, shake__base>('shake');
 late final custom_curve__base matply__custom_curve = dylib.lookupFunction<custom_curve__base__ffi, custom_curve__base>('custom_curve');
-
-dynamic debugmatply_api<T>(T Function() func, [String info = 'Error Here']) {
-  try {
-    return func();
-  } catch (e) {
-    print('$info: ${e.toString()}');
-  }
-}
-
-// 测试一个一维数组指针
-void TestOneArrayPointer(int len, Pointer<Double> data){
-  for (int r = 0;r < len;r++)
-    print(data[r]);
-}
-
-// 测试一个二维数组指针
-void TestArrayPointer(int row, int column, Pointer<Pointer<Double>> data){
-  for (int r = 0;r < row;r++){
-    for (int c = 0;c < column;c ++){
-      print(data[r][c]);
-    }
-  }
-}
-
-// 一维列表转一维数组
-Pointer<Double> oneListToArray(List<double> data){
-  int len = data.length;
-  Pointer<Double> op = malloc.allocate<Double>(len * sizeOf<Double>());
-  for (int r = 0;r < len;r++)
-    op[r] = data[r];
-  return op;
-}
-
-Pointer<Int32> oneListToArrayInt32(List<int> data){
-  int len = data.length;
-  Pointer<Int32> op = malloc.allocate<Int32>(len * sizeOf<Int32>());
-  for (int r = 0;r < len;r++)
-    op[r] = data[r];
-  return op;
-}
+late final testArray__base matply__testArray = dylib.lookupFunction<testArray__base__ffi, testArray__base>('testArray');
+late final testOmp__base matply__testOmp = dylib.lookupFunction<testOmp__base__ffi, testOmp__base>('testOmp');
+late final genTestdatas__base matply__genTestdatas = dylib.lookupFunction<genTestdatas__base__ffi, genTestdatas__base>('genTestdatas');
+late final testSingleT__base matply__testSingleT = dylib.lookupFunction<testSingleT__base__ffi, testSingleT__base>('testSingleT');
+late final testOmpCanRun__base matply__testOmpCanRun = dylib.lookupFunction<testOmpCanRun__base__ffi, testOmpCanRun__base>('testOmpCanRun');
+late final testOmpUniform__base matply__testOmpUniform = dylib.lookupFunction<testOmpUniform__base__ffi, testOmpUniform__base>('testOmpUniform');
+late final double Function() matply__testOut = dylib.lookupFunction<Double Function(), double Function()>('testOut');
+late final allocateOp__base matply__allocateOp = dylib.lookupFunction<allocateOp__base__ffi, allocateOp__base>('allocateOp');
+late final get_multp_shown__base matply__get_multp_shown = dylib.lookupFunction<get_multp_shown__base__ffi, get_multp_shown__base>('get_multp_shown');
+late final confront__base matply__confront = dylib.lookupFunction<confront__base__ffi, confront__base>('confront');
 
 late final double Pi = _Pi.value;
 late final double e = _e.value;
@@ -872,25 +879,22 @@ late final double euler = _euler.value;  // 欧拉常数
 late final void Function(Pointer<Matrix> matrix) __initMp = dylib.lookupFunction<Void Function(Pointer<Matrix> matrix), void Function(Pointer<Matrix> matrix)>('initMp');
 late final void Function(Pointer<Matrix> matrix) Signal = dylib.lookupFunction<Void Function(Pointer<Matrix> matrix), void Function(Pointer<Matrix> matrix)>('addToMp');
 late final void Function(bool, bool) __freeMp = dylib.lookupFunction<Void Function(Bool, Bool), void Function(bool, bool)>('freeMp');
-late final int Function() getInstances = dylib.lookupFunction<Int32 Function(), int Function()>('getInstances');
-void initMp({Pointer<Matrix>? matrix}) => __initMp(matrix?? nullptr);
-void freeMp({bool visible = false, bool hex = true}) => __freeMp(visible, hex);
 
-/// simple-random-extension-for-dart
+/// 简易的随机数拓展
 typedef initialize_random_seed__base__ffi = Void Function();
-typedef initialize_random_seed__base  = void Function();
+typedef initialize_random_seed__base = void Function();
 late final initialize_random_seed__base matply_initialize_random_seed = dylib.lookupFunction<initialize_random_seed__base__ffi, initialize_random_seed__base>('initialize_random_seed');
 
 typedef random__base__ffi = Double Function();
-typedef random__base  = double Function();
+typedef random__base = double Function();
 late final random__base matply_random = dylib.lookupFunction<random__base__ffi, random__base>('random1');
 
 typedef randint__base__ffi = Int32 Function(Double lb, Double ub);
-typedef randint__base  = int Function(double lb, double ub);
+typedef randint__base = int Function(double lb, double ub);
 late final randint__base matply_randint = dylib.lookupFunction<randint__base__ffi, randint__base>('randint');
 
 typedef randdouble__base__ffi = Double Function(Double lb, Double ub);
-typedef randdouble__base  = double Function(double lb, double ub);
+typedef randdouble__base = double Function(double lb, double ub);
 late final randdouble__base matply_randdouble = dylib.lookupFunction<randdouble__base__ffi, randdouble__base>('randdouble');
 
 typedef random_choice__base__ffi = Double Function(Pointer<Double> arr, Int32 len);
@@ -905,4 +909,60 @@ typedef perfect_choices__base__ffi = Pointer<Double> Function(Pointer<Double> ar
 typedef perfect_choices__base = Pointer<Double> Function(Pointer<Double> arr, Pointer<Double> p, int len, int times, bool back, int method);
 late final perfect_choices__base matply_perfect_choices = dylib.lookupFunction<perfect_choices__base__ffi, perfect_choices__base>('perfect_choices');
 
+/// omp底层优化
+typedef set_max_thread_support__base__ffi = Void Function(Int32 n);
+typedef set_max_thread_support__base = void Function(int n);
+late final set_max_thread_support__base matply_set_max_thread_support = dylib.lookupFunction<set_max_thread_support__base__ffi, set_max_thread_support__base>('set_max_thread_support');
+
+typedef get_max_thread_support__base__ffi = Int32 Function();
+typedef get_max_thread_support__base = int Function();
+late final get_max_thread_support__base matply_get_max_thread_support = dylib.lookupFunction<get_max_thread_support__base__ffi, get_max_thread_support__base>('get_max_thread_support');
+
+typedef get_max_thread_sys__base__ffi = Int32 Function();
+typedef get_max_thread_sys__base = int Function();
+late final get_max_thread_sys__base matply_get_max_thread_sys = dylib.lookupFunction<get_max_thread_sys__base__ffi, get_max_thread_sys__base>('get_max_thread_sys');
+
+typedef set_simple_dvcst_value__base__ffi = Void Function(Int64 n);
+typedef set_simple_dvcst_value__base = void Function(int n);
+late final set_simple_dvcst_value__base matply_set_simple_dvcst_value = dylib.lookupFunction<set_simple_dvcst_value__base__ffi, set_simple_dvcst_value__base>('set_simple_dvcst_value');
+
+typedef get_simple_dvcst_value__base__ffi = Int64 Function();
+typedef get_simple_dvcst_value__base = int Function();
+late final get_simple_dvcst_value__base matply_get_simple_dvcst_value = dylib.lookupFunction<get_simple_dvcst_value__base__ffi, get_simple_dvcst_value__base>('get_simple_dvcst_value');
+
+typedef set_complex_dvcst_value__base__ffi = Void Function(Int64 n);
+typedef set_complex_dvcst_value__base = void Function(int n);
+late final set_complex_dvcst_value__base matply_set_complex_dvcst_value = dylib.lookupFunction<set_complex_dvcst_value__base__ffi, set_complex_dvcst_value__base>('set_complex_dvcst_value');
+
+typedef get_complex_dvcst_value__base__ffi = Int64 Function();
+typedef get_complex_dvcst_value__base = int Function();
+late final get_complex_dvcst_value__base matply_get_complex_dvcst_value = dylib.lookupFunction<get_complex_dvcst_value__base__ffi, get_complex_dvcst_value__base>('get_complex_dvcst_value');
+
+typedef get_time__base__ffi = Double Function();
+typedef get_time__base = double Function();
+late final get_time__base matply_get_time = dylib.lookupFunction<get_time__base__ffi, get_time__base>('get_time');
+
+typedef set_multp_shown__base__ffi = Void Function(Bool _isShowMultp);
+typedef set_multp_shown__base = void Function(bool _isShowMultp);
+late final set_multp_shown__base matply_set_multp_shown = dylib.lookupFunction<set_multp_shown__base__ffi, set_multp_shown__base>('set_multp_shown');
+
+typedef multp_msg__base__ffi = Void Function(Int64 dataCounts, Bool multThreads, Bool complex, Pointer<Utf8> name);
+typedef multp_msg__base = void Function(int dataCounts, bool multThreads, bool complex, Pointer<Utf8> name);
+late final multp_msg__base matply_multp_msg = dylib.lookupFunction<multp_msg__base__ffi, multp_msg__base>('multp_msg');
+
+typedef mixin_multp_msg__base__ffi = Void Function(Int64 dataCounts, Bool multThreads, Bool complex, Pointer<Utf8> name);
+typedef mixin_multp_msg__base = void Function(int dataCounts, bool multThreads, bool complex, Pointer<Utf8> name);
+late final mixin_multp_msg__base matply_mixin_multp_msg = dylib.lookupFunction<mixin_multp_msg__base__ffi, mixin_multp_msg__base>('mixin_multp_msg');
+
+typedef no_multp_msg__base__ffi = Void Function(Int64 dataCounts, Bool complex, Pointer<Utf8> name);
+typedef no_multp_msg__base = void Function(int dataCounts, bool complex, Pointer<Utf8> name);
+late final no_multp_msg__base matply_no_multp_msg = dylib.lookupFunction<no_multp_msg__base__ffi, no_multp_msg__base>('no_multp_msg');
+
+typedef set_simple_dvcst_value_force__base__ffi = Void Function(Int64 n);
+typedef set_simple_dvcst_value_force__base = void Function(int n);
+late final set_simple_dvcst_value__base matply_set_simple_dvcst_value_force = dylib.lookupFunction<set_simple_dvcst_value_force__base__ffi, set_simple_dvcst_value_force__base>('set_simple_dvcst_value_force');
+
+typedef set_complex_dvcst_value_force__base__ffi = Void Function(Int64 n);
+typedef set_complex_dvcst_value_force__base = void Function(int n);
+late final set_complex_dvcst_value_force__base matply_set_complex_dvcst_value_force = dylib.lookupFunction<set_complex_dvcst_value_force__base__ffi, set_complex_dvcst_value_force__base>('set_complex_dvcst_value_force');
 

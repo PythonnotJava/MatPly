@@ -5,13 +5,23 @@ late final _MtCppApi = MatrixCppApi.instance;
 extension MatplyTypeCppExtension on MatrixType{
   /// Random Module
   Object getMode({int dim = -1}){
+    Pointer<Double> op;
+    Object target;
     switch(dim){
       case 0:
-        return _MtCppApi.mode(shape[0], shape[1], self.ref.data, 0).asTypedList(shape[0]).toList();
+        op = _MtCppApi.mode(shape[0], shape[1], self.ref.data, 0);
+        target = op.asTypedList(shape[0]).toList();
+        break;
       case 1:
-        return _MtCppApi.mode(shape[0], shape[1], self.ref.data, 1).asTypedList(shape[1]).toList();
+        op = _MtCppApi.mode(shape[0], shape[1], self.ref.data, 1);
+        target = op.asTypedList(shape[1]).toList();
+        break;
       default:
-        return _MtCppApi.mode(shape[0], shape[1], self.ref.data, -1).value;
+        op = _MtCppApi.mode(shape[0], shape[1], self.ref.data, -1);
+        target = op.value;
+        break;
     }
+    freeOp(op);
+    return target;
   }
 }

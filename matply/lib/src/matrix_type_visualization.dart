@@ -191,7 +191,7 @@ extension Visualization on MatrixType{
       for (int r = 0; r < row; r++) {
         buffer.write('| ${rls[r]} |');
         for (int c = 0; c < column; c++) {
-          buffer.write(' ${this.at(r, c) ?? ''} |');
+          buffer.write(' ${this.at(r, c) ?? ' '} |');
         }
         buffer.writeln();
       }
@@ -200,7 +200,7 @@ extension Visualization on MatrixType{
       for (int r = 0; r < row; r++) {
         buffer.write('| ${rls[r]} |');
         for (int c = 0; c < column; c++) {
-          buffer.write(' ${this.at(r, c).toStringAsFixed(format) ?? ''} |');
+          buffer.write(' ${this.at(r, c).toStringAsFixed(format) ?? ' '} |');
         }
         buffer.writeln();
       }

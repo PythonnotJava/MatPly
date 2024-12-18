@@ -1,10 +1,11 @@
 name: matply
+description: "Dart Matrix realized by C Dll.Supports mathematical operations, linear algebra, probability theory and mathematical statistics, central difference, geometric simulation, etc."
 homepage: https://www.robot-shadow.cn/src/pkg/MatPly_Dart/site/
-description: "Dart Matrix realized by C Dll"
-
 repository: https://github.com/PythonnotJava/MatPly
+documentation: https://www.robot-shadow.cn/src/pkg/MatPly_Dart/site/
 
-version: 1.0.9
+version: 1.1.0
+
 environment:
   sdk: '>=3.1.0 <4.0.0'
 
@@ -12,7 +13,14 @@ dependencies:
   ffi: ^2.1.2
   path: ^1.9.0
 
+topics:
+  - ffi
+  - Matrix
+
 platforms:
   windows:
   android:
   linux:
+
+assets:
+  - assets/
